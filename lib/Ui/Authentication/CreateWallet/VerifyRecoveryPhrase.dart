@@ -21,12 +21,12 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
     return  Scaffold(
       bottomNavigationBar: InkWell(
         onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const VerifyRecoveryPhrase(),
-              )
-          );
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => const VerifyRecoveryPhrase(),
+          //     )
+          // );
         },
         child: Container(
           alignment: Alignment.center,
