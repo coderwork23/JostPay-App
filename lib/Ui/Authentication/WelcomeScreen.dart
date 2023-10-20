@@ -18,7 +18,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Scaffold(
       body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -137,14 +137,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 InkWell(
                   child: Container(
                     alignment: Alignment.center,
-                    height: 50,
+                    height: 45,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: MyColor.greenColor,
                     ),
                     child: const Text(
                       "Create a new wallet",
-                      style: MyStyle.tx20RWhite,
+                      style: MyStyle.tx18RWhite,
                     ),
                   ),
                 ),
@@ -153,7 +154,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 const InkWell(
                   child: Text(
                     "I've got a recovery pharse",
-                    style: MyStyle.tx20RWhite,
+                    style: MyStyle.tx18RWhite,
 
                   ),
                 ),

@@ -21,8 +21,8 @@ class MyStyle{
     color: MyColor.whiteColor,
   );
 
-  static const tx20RWhite  = TextStyle(
-    fontSize: 20,
+  static const tx18RWhite  = TextStyle(
+    fontSize: 18,
     fontFamily: 'NimbusSanLRegular',
     color: MyColor.mainWhiteColor,
   );
