@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/Ui/Authentication/CreateWallet/CreatePassword.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+
+import 'RecoveryPharseScreen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -135,14 +138,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 const SizedBox(height: 50),
 
                 InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreatePassword(),
+                        )
+                    );
+                  },
                   child: Container(
                     alignment: Alignment.center,
                     height: 45,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: MyColor.greenColor,
-                    ),
+                    decoration: MyStyle.buttonDecoration,
                     child: const Text(
                       "Create a new wallet",
                       style: MyStyle.tx18RWhite,
@@ -151,11 +159,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                const InkWell(
-                  child: Text(
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RecoveryPharseScreen(),
+                        )
+                    );
+                  },
+                  child: const Text(
                     "I've got a recovery pharse",
                     style: MyStyle.tx18RWhite,
-
                   ),
                 ),
               ],

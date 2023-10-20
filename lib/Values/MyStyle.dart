@@ -27,4 +27,15 @@ class MyStyle{
     color: MyColor.mainWhiteColor,
   );
 
+  static const tx18BWhite  = TextStyle(
+    fontSize: 18,
+    fontFamily: 'NimbusSanLBol',
+    color: MyColor.mainWhiteColor,
+  );
+
+  static BoxDecoration buttonDecoration = BoxDecoration(
+    borderRadius: BorderRadius.circular(10),
+    color: MyColor.greenColor,
+  );
+
 }

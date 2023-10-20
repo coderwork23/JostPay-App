@@ -51,6 +51,9 @@ class _MyAppState extends State<MyApp> {
           hoverColor: Colors.transparent,
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
+          appBarTheme: const AppBarTheme(
+            elevation: 0,
+          )
         ),
         home: const SplashScreen(),
       ),
