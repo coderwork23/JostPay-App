@@ -75,11 +75,11 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                 // subTitle
                 Text(
                   "Select each word in the order it was presented to you",
+                  textAlign: TextAlign.center,
                   style:MyStyle.tx22RWhite.copyWith(
                       fontSize: 18,
                       color: MyColor.grey01Color
                   ),
-                  textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 22),

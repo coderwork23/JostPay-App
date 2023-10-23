@@ -45,8 +45,8 @@ class _ConfirmPasswordState extends State<ConfirmPassword> {
               const SizedBox(height: 15),
               const Text(
                 "Re-enter your password",
-                style:MyStyle.tx22RWhite,
                 textAlign: TextAlign.center,
+                style:MyStyle.tx22RWhite,
               ),
               const SizedBox(height: 15),
 

@@ -46,6 +46,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/images/dashboard/
 
 
   fonts:
