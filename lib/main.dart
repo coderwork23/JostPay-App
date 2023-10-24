@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/SplashScreen.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,14 @@ import 'package:provider/provider.dart';
 import 'Provider/DashboardProvider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setPreferredOrientations(
+      [
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown
+      ]
+  );
   runApp(const MyApp());
 }
 
