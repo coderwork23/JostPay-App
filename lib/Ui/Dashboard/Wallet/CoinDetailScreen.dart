@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:provider/provider.dart';
+
+import 'ExchangeCoin/ExchangeScreen.dart';
+import 'ReceiveToken/ReceiveScreen.dart';
+import 'SendToken/SendCoinScreen.dart';
 
 
 class CoinDetailScreen extends StatefulWidget {
@@ -11,8 +17,35 @@ class CoinDetailScreen extends StatefulWidget {
 }
 
 class _CoinDetailScreenState extends State<CoinDetailScreen> {
+
+  showReceiveScreen(BuildContext context){
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: MyColor.darkGreyColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
+      ),
+      context: context,
+      builder: (context) {
+        return Container(
+            padding: const EdgeInsets.fromLTRB(20,22,20,10),
+            constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height/2,
+                maxHeight: MediaQuery.of(context).size.height*0.8
+            ),
+            child: const ReceiveScreen()
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dashProvider = Provider.of<DashboardProvider>(context);
+
     return  Scaffold(
       appBar: AppBar(
         backgroundColor: MyColor.darkGreyColor,
@@ -106,123 +139,159 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      children: [
-                        Container(
-                          height: 50,
-                          width: 50,
-                          padding: const EdgeInsets.all(13),
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                              color: MyColor.backgroundColor,
-                              shape: BoxShape.circle
+
+                    // send
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SendCoinScreen(),
+                          )
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 50,
+                            width: 50,
+                            padding: const EdgeInsets.all(13),
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                                color: MyColor.backgroundColor,
+                                shape: BoxShape.circle
+                            ),
+                            child: Image.asset(
+                              "assets/images/dashboard/send.png",
+                              height: 18,
+                              width: 18,
+                              color: MyColor.greenColor,
+                            ),
                           ),
-                          child: Image.asset(
-                            "assets/images/dashboard/send.png",
-                            height: 18,
-                            width: 18,
-                            color: MyColor.greenColor,
+                          const SizedBox(height: 5),
+                          Text(
+                            "Send",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 14,
+                                color: MyColor.whiteColor
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          "Send",
-                          style: MyStyle.tx18RWhite.copyWith(
-                              fontSize: 14,
-                              color: MyColor.whiteColor
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 16),
 
-                    Column(
-                      children: [
-                        Container(
-                          height: 50,
-                          width: 50,
-                          padding: const EdgeInsets.all(13),
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                              color: MyColor.backgroundColor,
-                              shape: BoxShape.circle
+                    // receive
+                    InkWell(
+                      onTap: () {
+                        showReceiveScreen(context);
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 50,
+                            width: 50,
+                            padding: const EdgeInsets.all(13),
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                                color: MyColor.backgroundColor,
+                                shape: BoxShape.circle
+                            ),
+                            child: Image.asset(
+                              "assets/images/dashboard/receive.png",
+                              height: 18,
+                              width: 18,
+                              color: MyColor.greenColor,
+                            ),
                           ),
-                          child: Image.asset(
-                            "assets/images/dashboard/receive.png",
-                            height: 18,
-                            width: 18,
-                            color: MyColor.greenColor,
+                          const SizedBox(height: 5),
+                          Text(
+                            "Receive",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 14,
+                                color: MyColor.whiteColor
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          "Receive",
-                          style: MyStyle.tx18RWhite.copyWith(
-                              fontSize: 14,
-                              color: MyColor.whiteColor
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 16),
 
-                    Column(
-                      children: [
-                        Container(
-                          height: 50,
-                          width: 50,
-                          padding: const EdgeInsets.all(13),
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                              color: MyColor.backgroundColor,
-                              shape: BoxShape.circle
+                    // withdraw
+                    InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                        dashProvider.changeBottomIndex(2);
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 50,
+                            width: 50,
+                            padding: const EdgeInsets.all(13),
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                                color: MyColor.backgroundColor,
+                                shape: BoxShape.circle
+                            ),
+                            child: Image.asset(
+                              "assets/images/dashboard/card.png",
+                              height: 18,
+                              width: 18,
+                              color: MyColor.greenColor,
+                            ),
                           ),
-                          child: Image.asset(
-                            "assets/images/dashboard/card.png",
-                            height: 18,
-                            width: 18,
-                            color: MyColor.greenColor,
+                          const SizedBox(height: 5),
+                          Text(
+                            "Withdraw",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 14,
+                                color: MyColor.whiteColor
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          "Withdraw",
-                          style: MyStyle.tx18RWhite.copyWith(
-                              fontSize: 14,
-                              color: MyColor.whiteColor
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 16),
 
-                    Column(
-                      children: [
-                        Container(
-                          height: 50,
-                          width: 50,
-                          padding: const EdgeInsets.all(13),
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                              color: MyColor.backgroundColor,
-                              shape: BoxShape.circle
+                    //Exchange
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ExchangeScreen(),
+                            )
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 50,
+                            width: 50,
+                            padding: const EdgeInsets.all(13),
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                                color: MyColor.backgroundColor,
+                                shape: BoxShape.circle
+                            ),
+                            child: Image.asset(
+                              "assets/images/dashboard/exchange.png",
+                              height: 18,
+                              width: 18,
+                              color: MyColor.greenColor,
+                            ),
                           ),
-                          child: Image.asset(
-                            "assets/images/dashboard/exchange.png",
-                            height: 18,
-                            width: 18,
-                            color: MyColor.greenColor,
+                          const SizedBox(height: 5),
+                          Text(
+                            "Exchange",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 14,
+                                color: MyColor.whiteColor
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          "Exchange",
-                          style: MyStyle.tx18RWhite.copyWith(
-                              fontSize: 14,
-                              color: MyColor.whiteColor
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

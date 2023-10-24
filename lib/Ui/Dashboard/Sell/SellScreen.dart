@@ -147,9 +147,7 @@ class _SellScreenState extends State<SellScreen> {
                 hintText: "Account Name",
                 isDense: false,
                 contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-
               ),
-
             ),
             const SizedBox(height: 20),
 

@@ -55,11 +55,8 @@ class _QrScannerPageState extends State<QrScannerPage> {
           ),
           Positioned(
             top: 50,
-            child: Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
