@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
@@ -37,7 +38,14 @@ class _SellScreenState extends State<SellScreen> {
         ),
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SellHistory(),
+                    )
+                );
+              },
               icon: const Icon(
                 Icons.history,
                 color: MyColor.mainWhiteColor,

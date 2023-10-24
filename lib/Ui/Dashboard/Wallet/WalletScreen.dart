@@ -8,6 +8,7 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 
 import 'CoinDetailScreen.dart';
+import 'ExchangeCoin/ExchangeScreen.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
@@ -256,33 +257,43 @@ class WalletScreen extends StatelessWidget {
               const SizedBox(width: 16),
 
               // Exchange
-              Column(
-                children: [
-                  Container(
-                    height: 50,
-                    width: 50,
-                    padding: const EdgeInsets.all(13),
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                        color: MyColor.backgroundColor,
-                        shape: BoxShape.circle
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ExchangeScreen(),
+                    )
+                  );
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      height: 50,
+                      width: 50,
+                      padding: const EdgeInsets.all(13),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                          color: MyColor.backgroundColor,
+                          shape: BoxShape.circle
+                      ),
+                      child: Image.asset(
+                        "assets/images/dashboard/exchange.png",
+                        height: 18,
+                        width: 18,
+                        color: MyColor.greenColor,
+                      ),
                     ),
-                    child: Image.asset(
-                      "assets/images/dashboard/exchange.png",
-                      height: 18,
-                      width: 18,
-                      color: MyColor.greenColor,
+                    const SizedBox(height: 5),
+                    Text(
+                      "Exchange",
+                      style: MyStyle.tx18RWhite.copyWith(
+                          fontSize: 14,
+                          color: MyColor.whiteColor
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    "Exchange",
-                    style: MyStyle.tx18RWhite.copyWith(
-                        fontSize: 14,
-                        color: MyColor.whiteColor
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
