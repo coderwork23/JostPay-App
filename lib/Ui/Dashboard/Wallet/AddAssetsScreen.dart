@@ -33,6 +33,19 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
             ),
           ),
           const SizedBox(height: 25),
+
+          // add assets text
+          Text(
+            "Add Asset",
+            style: MyStyle.tx28RGreen.copyWith(
+              color: MyColor.mainWhiteColor,
+              fontFamily: "NimbusSanLBol",
+              fontSize: 22
+            ),
+          ),
+          const SizedBox(height: 25),
+
+          //search filed
           TextFormField(
             controller: searchController,
             cursorColor: MyColor.greenColor,
@@ -64,6 +77,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
           ),
           const SizedBox(height: 25),
 
+          // coin list
           Expanded(
             child : ListView.builder(
               itemCount: 20,

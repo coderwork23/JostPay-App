@@ -3,6 +3,8 @@ import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/AddAssetsScreen.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
+import 'CoinDetailScreen.dart';
+
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
 
@@ -229,77 +231,87 @@ class WalletScreen extends StatelessWidget {
                    itemCount: 10,
                    padding: const EdgeInsets.fromLTRB(12,10,12,70),
                    itemBuilder: (context, index) {
-                     return Container(
-                       margin: const EdgeInsets.only(bottom: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
-                       decoration: BoxDecoration(
-                         borderRadius: BorderRadius.circular(15),
-                         color: MyColor.darkGreyColor
-                       ),
-                       child: Row(
-                         children: [
-                           Image.asset(
-                             "assets/images/bitcoin.png",
-                             height: 50,
-                             width: 50,
-                             fit: BoxFit.contain,
-                           ),
-                           const SizedBox(width: 12),
+                     return InkWell(
+                       onTap: () {
+                         Navigator.push(
+                           context,
+                           MaterialPageRoute(
+                             builder: (context) => const CoinDetailScreen(),
+                           )
+                         );
+                       },
+                       child: Container(
+                         margin: const EdgeInsets.only(bottom: 10),
+                         padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                         decoration: BoxDecoration(
+                           borderRadius: BorderRadius.circular(15),
+                           color: MyColor.darkGreyColor
+                         ),
+                         child: Row(
+                           children: [
+                             Image.asset(
+                               "assets/images/bitcoin.png",
+                               height: 50,
+                               width: 50,
+                               fit: BoxFit.contain,
+                             ),
+                             const SizedBox(width: 12),
 
-                           Expanded(
-                             child: Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
+                             Expanded(
+                               child: Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: [
+                                   const Text(
+                                     "Bitcoin",
+                                     style: MyStyle.tx18RWhite,
+                                   ),
+                                   const SizedBox(height: 5),
+                                   RichText(
+                                       text: TextSpan(
+                                           children: [
+                                             TextSpan(
+                                               text: "\$2345432 ",
+                                               style: MyStyle.tx18RWhite.copyWith(
+                                                   fontSize: 14,
+                                                   color: MyColor.grey01Color
+                                               ),
+                                             ),
+                                             TextSpan(
+                                                 text: "(-2.2%)",
+                                                 style:MyStyle.tx28RGreen.copyWith(
+                                                   fontSize: 12
+                                                 )
+                                             ),
+                                           ]
+                                       )
+                                   ),
+                                 ],
+                               )
+                             ),
+                             const SizedBox(width: 10),
+
+                             Column(
+                               crossAxisAlignment: CrossAxisAlignment.end,
                                children: [
-                                 const Text(
-                                   "Bitcoin",
-                                   style: MyStyle.tx18RWhite,
+                                 Text(
+                                   "0.0 BTC",
+                                   style: MyStyle.tx22RWhite.copyWith(
+                                     fontSize: 20,
+                                     color: MyColor.mainWhiteColor
+                                   ),
                                  ),
                                  const SizedBox(height: 5),
-                                 RichText(
-                                     text: TextSpan(
-                                         children: [
-                                           TextSpan(
-                                             text: "\$2345432 ",
-                                             style: MyStyle.tx18RWhite.copyWith(
-                                                 fontSize: 14,
-                                                 color: MyColor.grey01Color
-                                             ),
-                                           ),
-                                           TextSpan(
-                                               text: "(-2.2%)",
-                                               style:MyStyle.tx28RGreen.copyWith(
-                                                 fontSize: 12
-                                               )
-                                           ),
-                                         ]
-                                     )
+                                 Text(
+                                   "\$ 12",
+                                   style: MyStyle.tx18RWhite.copyWith(
+                                       fontSize: 15,
+                                       color: MyColor.grey01Color
+                                   ),
                                  ),
                                ],
-                             )
-                           ),
-                           const SizedBox(width: 10),
-
-                           Column(
-                             crossAxisAlignment: CrossAxisAlignment.end,
-                             children: [
-                               Text(
-                                 "0.0 BTC",
-                                 style: MyStyle.tx22RWhite.copyWith(
-                                   fontSize: 20,
-                                   color: MyColor.mainWhiteColor
-                                 ),
-                               ),
-                               const SizedBox(height: 5),
-                               Text(
-                                 "\$ 12",
-                                 style: MyStyle.tx18RWhite.copyWith(
-                                     fontSize: 15,
-                                     color: MyColor.grey01Color
-                                 ),
-                               ),
-                             ],
-                           ),
-                         ],
+                             ),
+                           ],
+                         ),
                        ),
                      );
                    },
