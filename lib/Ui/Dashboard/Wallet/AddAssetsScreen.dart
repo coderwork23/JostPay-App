@@ -70,13 +70,13 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
                       Image.asset(
                         "assets/images/bitcoin.png",
-                        height: 40,
-                        width: 40,
+                        height: 30,
+                        width: 30,
                         fit: BoxFit.contain,
                       ),
                       const SizedBox(width: 12),

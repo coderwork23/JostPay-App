@@ -72,6 +72,7 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
             child: Column(
               children: [
                 const SizedBox(height: 15),
+
                 // subTitle
                 Text(
                   "Select each word in the order it was presented to you",
@@ -81,8 +82,8 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                       color: MyColor.grey01Color
                   ),
                 ),
-
                 const SizedBox(height: 22),
+
                 //  Grid View Phrase
                 Container(
                   decoration: BoxDecoration(
@@ -139,27 +140,27 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       const Icon(
-                                          Icons.visibility_off,
-                                          color: MyColor.mainWhiteColor,
-                                        size: 40,
+                                        Icons.visibility_off,
+                                        color: MyColor.mainWhiteColor,
+                                        size: 35,
                                       ),
                                       const SizedBox(height: 20),
 
                                       Text(
-                                        'Tap to reveal you seed phrase',
+                                        'Tap to reveal you seed \nphrase',
                                         textAlign: TextAlign.center,
                                         style: MyStyle.tx28BYellow.copyWith(
-                                          color: MyColor.mainWhiteColor,
-                                          fontSize: 24
+                                            color: MyColor.mainWhiteColor,
+                                            fontSize: 21
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 12),
 
                                       Text(
                                         'Make sure no one is watching your screen',
                                         textAlign: TextAlign.center,
                                         style: MyStyle.tx22RWhite.copyWith(
-                                          fontSize: 16
+                                            fontSize: 15
                                         ),
                                       ),
 
@@ -175,8 +176,8 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 22),
+
                 // copy button
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
@@ -201,8 +202,8 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 22),
+
                 // do not shared
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 15),
