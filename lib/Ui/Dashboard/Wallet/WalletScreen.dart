@@ -1,9 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/AddAssetsScreen.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
+
+  showAddAsserts(BuildContext context){
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: MyColor.backgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
+      ),
+      context: context,
+      builder: (context) {
+        return Container(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height/2,
+            maxHeight: MediaQuery.of(context).size.height*0.8
+          ),
+            child: const AddAssetsScreen()
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +49,18 @@ class WalletScreen extends StatelessWidget {
                 ]
             )
         ),
-        actions: const [
-          Icon(
-            Icons.add,
-            color: MyColor.mainWhiteColor,
+        actions:  [
+          IconButton(
+            onPressed: () {
+              showAddAsserts(context);
+            },
+            icon: const Icon(
+              Icons.add,
+              color: MyColor.mainWhiteColor,
 
+            ),
           ),
-          SizedBox(width: 15),
+          const SizedBox(width: 15),
         ],
       ),
       body: Column(
