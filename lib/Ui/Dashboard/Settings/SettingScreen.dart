@@ -17,11 +17,15 @@ class _SettingScreenState extends State<SettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Settings",
-          style:MyStyle.tx22RWhite.copyWith(
-              fontSize: 26,
-            color: MyColor.mainWhiteColor
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Text(
+            "Settings",
+            style:MyStyle.tx22RWhite.copyWith(
+                fontSize: 24,
+              color: MyColor.mainWhiteColor
+            ),
           ),
         ),
 

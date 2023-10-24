@@ -37,19 +37,23 @@ class WalletScreen extends StatelessWidget {
       backgroundColor: MyColor.darkGreyColor,
       appBar: AppBar(
         backgroundColor: MyColor.darkGreyColor,
-        title: RichText(
-            text: const TextSpan(
-                children: [
-                  TextSpan(
-                      text: "Jost",
-                      style:MyStyle.tx28BYellow
-                  ),
-                  TextSpan(
-                      text: "Pay",
-                      style:MyStyle.tx28RGreen
-                  ),
-                ]
-            )
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: RichText(
+              text: const TextSpan(
+                  children: [
+                    TextSpan(
+                        text: "Jost",
+                        style:MyStyle.tx28BYellow
+                    ),
+                    TextSpan(
+                        text: "Pay",
+                        style:MyStyle.tx28RGreen
+                    ),
+                  ]
+              )
+          ),
         ),
         actions:  [
           IconButton(
