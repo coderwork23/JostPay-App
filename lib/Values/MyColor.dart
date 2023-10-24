@@ -4,6 +4,7 @@ class MyColor{
   static const Color transparentColor = Color(0x00000000);
   static const Color darkGreyColor = Color(0xFF31333C);
   static const Color lightGreyColor = Color(0xFFbec2c3);
+  static const Color textGreyColor = Color(0xFFb5babe);
   static const Color grey01Color = Color(0xFF83909a);
   static const Color darkGrey01Color = Color(0xFF2b2d35);
   static const Color boarderColor = Color(0xFF434953);

@@ -5,6 +5,7 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:custom_pin_screen/custom_pin_screen.dart';
 import 'package:pin_code_fields/pin_code_fields.dart' as pin;
+import '../Dashboard/DashboardScreen.dart';
 
 class RecoveryPharseScreen extends StatefulWidget {
   const RecoveryPharseScreen({super.key});
@@ -23,7 +24,6 @@ class _RecoveryPharseScreenState extends State<RecoveryPharseScreen> {
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-
 
     return Scaffold(
       appBar: AppBar(
@@ -211,6 +211,14 @@ class _RecoveryPharseScreenState extends State<RecoveryPharseScreen> {
                   const SizedBox(height: 40),
 
                   InkWell(
+                    onTap: () {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DashboardScreen(),
+                          ), (route) => false
+                      );
+                    },
                     child: Container(
                       alignment: Alignment.center,
                       height: 45,
@@ -230,5 +238,6 @@ class _RecoveryPharseScreenState extends State<RecoveryPharseScreen> {
         ),
       ),
     );
+
   }
 }
