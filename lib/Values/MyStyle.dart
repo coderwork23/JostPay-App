@@ -49,6 +49,24 @@ class MyStyle{
     filled: true,
     fillColor: MyColor.backgroundColor,
     border: InputBorder.none,
+    errorStyle: MyStyle.tx18RWhite.copyWith(
+      fontSize: 12,
+      color: MyColor.redColor
+    ),
+    errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(
+            color: MyColor.redColor,
+            width: 0.8
+        )
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: const BorderSide(
+            color: MyColor.redColor,
+            width: 0.8
+        )
+    ),
     hintStyle:MyStyle.tx22RWhite.copyWith(
         fontSize: 18,
         color: MyColor.whiteColor.withOpacity(0.7)

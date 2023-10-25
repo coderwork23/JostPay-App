@@ -4,8 +4,12 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
 import 'AccountRecoveryPhrase.dart';
 
+// ignore: must_be_immutable
 class SecureScreen extends StatefulWidget {
-  const SecureScreen({super.key});
+
+  List seedPhrase;
+  final bool isNew;
+  SecureScreen({super.key,required this.seedPhrase,required this.isNew});
 
   @override
   State<SecureScreen> createState() => _SecureScreenState();
@@ -95,7 +99,10 @@ class _SecureScreenState extends State<SecureScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AccountRecoveryPhrase(),
+                          builder: (context) => AccountRecoveryPhrase(
+                              isNew: widget.isNew,
+                              seedPhrase: widget.seedPhrase
+                          ),
                         )
                     );
                   }

@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
@@ -5,10 +7,7 @@ import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WalletScreen.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WalletScreen.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
-import 'package:platform_device_id/platform_device_id.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,10 +30,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
   getDeviceId() async {
 
-    deviceId = (await PlatformDeviceId.getDeviceId)!;
+    final deviceInfoPlugin = DeviceInfoPlugin();
+
+
+    if(Platform.isAndroid){
+      final  deviceInfo = await deviceInfoPlugin.androidInfo;
+      deviceId = deviceInfo.id;
+    }else{
+
+     final deviceInfo = await deviceInfoPlugin.iosInfo;
+     deviceId = deviceInfo.identifierForVendor!;
+    }
+
     sharedPreferences = await SharedPreferences.getInstance();
 
-    // print("object------>  $deviceId");
     setState(() {
       sharedPreferences.setString('deviceId', deviceId);
     });
@@ -121,7 +130,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }
       else{
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WalletScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
       }
 
     }
@@ -132,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }
       else{
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WalletScreen()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
       }
 
     }

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
+import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
-import 'package:custom_pin_screen/custom_pin_screen.dart';
-import 'package:pin_code_fields/pin_code_fields.dart' as pin;
-
-import 'ConfirmPassword.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'SecureScreen.dart';
 
 class CreatePassword extends StatefulWidget {
-  const CreatePassword({super.key});
+  final bool isNew;
+  const CreatePassword({super.key,required this.isNew});
 
   @override
   State<CreatePassword> createState() => _CreatePasswordState();
@@ -15,8 +18,80 @@ class CreatePassword extends StatefulWidget {
 
 class _CreatePasswordState extends State<CreatePassword> {
 
-  TextEditingController pinCodeController = TextEditingController();
+  late AccountProvider accountProvider;
+  late TokenProvider tokenProvider;
 
+  TextEditingController passController = TextEditingController();
+  TextEditingController rePassController = TextEditingController();
+
+  bool showPassword = true,showRePassword = true;
+  final formKey = GlobalKey<FormState>();
+
+  String deviceId = "",phraseLength = "12";
+  bool isLoading = false;
+
+  importAccount() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    deviceId = sharedPreferences.getString('deviceId')!;
+
+
+    var data = {
+      "name": "",
+      "device_id": deviceId,
+      "type": "new",
+      "password": widget.isNew ? "" : passController.text,
+      "words":12,
+      "mnemonic": ""
+    };
+
+    // print(jsonEncode(data));
+
+    await accountProvider.addAccount(data, widget.isNew ? '/createWallet' : '/initCreateWallet');
+    if (accountProvider.isSuccess == true) {
+
+      if(!widget.isNew) {
+        sharedPreferences = await SharedPreferences.getInstance();
+        sharedPreferences.setString('isLogin', 'false');
+        sharedPreferences.setInt('account', 1);
+        sharedPreferences.setString('password', passController.text);
+      }
+      var body = accountProvider.accountData;
+      String seedPhase = body/*['accounts']*/[0]['mnemonic'];
+
+      List seedPharse = seedPhase.trim().split(" ");
+
+      // ignore: use_build_context_synchronously
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SecureScreen(
+            seedPhrase: seedPharse,
+            isNew: widget.isNew,
+          ),
+        ),
+      );
+    } else {
+
+      setState(() {
+        isLoading = false;
+      });
+
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Account Create Error");
+    }
+  }
+
+
+  @override
+  void initState() {
+    accountProvider = Provider.of<AccountProvider>(context, listen: false);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: false);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +99,39 @@ class _CreatePasswordState extends State<CreatePassword> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
+    accountProvider = Provider.of<AccountProvider>(context, listen: true);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+
     return Scaffold(
+      bottomNavigationBar:  isLoading == true
+          ?
+      const SizedBox(
+          height:52,
+          child: Center(
+              child: CircularProgressIndicator(
+                color: MyColor.greenColor,
+              )
+          )
+      )
+          :
+      InkWell(
+        onTap: () {
+          if(formKey.currentState!.validate()) {
+            importAccount();
+          }
+        },
+        child: Container(
+          alignment: Alignment.center,
+          height: 45,
+          margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: MyStyle.buttonDecoration,
+          child:  const Text(
+              "Continue",
+              style: MyStyle.tx18BWhite
+          ),
+        ),
+      ),
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -38,106 +145,134 @@ class _CreatePasswordState extends State<CreatePassword> {
           ),
         ),
       ),
-      body: SafeArea(
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              const SizedBox(height: 15),
-              const Text(
-                "Create your password",
-                style:MyStyle.tx22RWhite,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 15),
-
-              Text(
-                "Lock your wallet on this device",
-                style:MyStyle.tx22RWhite.copyWith(
-                    fontSize: 18,
-                    color: MyColor.grey01Color
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                const SizedBox(height: 15),
+                const Text(
+                  "Create your password",
+                  style:MyStyle.tx22RWhite,
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
+                const SizedBox(height: 15),
+
+                Text(
+                  "Lock your wallet on this device",
+                  style:MyStyle.tx22RWhite.copyWith(
+                      fontSize: 18,
+                      color: MyColor.grey01Color
+                  ),
+                  textAlign: TextAlign.center,
+                ),
 
 
-              const SizedBox(height: 22),
+                const SizedBox(height: 22),
 
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
-                height: 40,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: pin.PinCodeTextField(
-                    appContext: context,
-                    pastedTextStyle: TextStyle(
-                      color: Colors.green.shade600,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    length: 6,
-                    obscureText: true,
-
-                    obscuringWidget:  Container(
-                      decoration: const BoxDecoration(
-                          color: MyColor.greenColor,
-                          shape: BoxShape.circle
+                TextFormField(
+                  controller: passController,
+                  obscureText: showPassword,
+                  validator: (value) {
+                    if(value!.isEmpty){
+                      return "Please enter login password";
+                    }else{
+                      return null;
+                    }
+                  },
+                  cursorColor: MyColor.greenColor,
+                  style: MyStyle.tx18RWhite,
+                  decoration: MyStyle.textInputDecoration.copyWith(
+                      hintText: "Passwords",
+                      isDense: false,
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 20,
+                          horizontal: 15
                       ),
-                    ),
-                    pinTheme:pin.PinTheme(
-                        shape: pin.PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(100),
-                        fieldHeight: 20,
-                        fieldWidth: 20,
-                        inactiveColor: MyColor.boarderColor,
-                        inactiveBorderWidth: 2,
-                        inactiveFillColor: MyColor.transparentColor
-                    ),
-                    cursorColor: MyColor.greenColor,
-                    animationDuration: const Duration(milliseconds: 300),
-                    enableActiveFill: true,
-                    controller: pinCodeController,
-                    keyboardType: TextInputType.number,
-
-                    onCompleted: (v) {
-                      debugPrint("Completed");
-                      Future.delayed(const Duration(milliseconds: 500),(){
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ConfirmPassword(),
-                            )
-                        );
-                      });
-                    },
-                    onChanged: (value) {
-                      debugPrint(value);
-
-                    },
-
+                      suffixIcon: showPassword
+                          ?
+                      IconButton(
+                          onPressed: (){
+                            setState(() {
+                              showPassword = false;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.visibility,
+                            color: MyColor.mainWhiteColor,
+                          )
+                      )
+                          :
+                      IconButton(
+                          onPressed: (){
+                            setState(() {
+                              showPassword = true;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.visibility_off,
+                            color: MyColor.mainWhiteColor,
+                          )
+                      )
                   ),
                 ),
-              ),
+                const SizedBox(height: 10),
 
-              const Spacer(),
 
-              CustomKeyBoard(
-                maxLength: 6,
-                pinTheme: PinTheme(
-                    keysColor: MyColor.mainWhiteColor
+                TextFormField(
+                  controller: rePassController,
+                  obscureText: showRePassword,
+                  cursorColor: MyColor.greenColor,
+                  style: MyStyle.tx18RWhite,
+                  validator: (value) {
+                    if(value!.isEmpty){
+                      return "Please enter confirm password.";
+                    }else if(value != passController.text){
+                      return "Confirm password is not matched.";
+                    }else{
+                      return null;
+                    }
+                  },
+                  decoration: MyStyle.textInputDecoration.copyWith(
+                      hintText: "Confirm Passwords",
+                      isDense: false,
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 20,
+                          horizontal: 15
+                      ),
+                      suffixIcon: showRePassword
+                          ?
+                      IconButton(
+                          onPressed: (){
+                            setState(() {
+                              showRePassword = false;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.visibility,
+                            color: MyColor.mainWhiteColor,
+                          )
+                      )
+                          :
+                      IconButton(
+                          onPressed: (){
+                            setState(() {
+                              showRePassword = true;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.visibility_off,
+                            color: MyColor.mainWhiteColor,
+                          )
+                      )
+                  ),
                 ),
-                onChanged: (p0) {
-                  setState(() {
-                    pinCodeController.text = p0;
-                  });
-                },
-                onCompleted: (p0) {
-                },
-              ),
 
-
-              const SizedBox(height: 30)
-            ],
+              ],
+            ),
           ),
         ),
       ),

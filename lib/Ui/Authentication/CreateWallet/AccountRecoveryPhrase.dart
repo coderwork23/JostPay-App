@@ -1,21 +1,52 @@
+import 'dart:math';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
-
 import 'VerifyRecoveryPhrase.dart';
+import 'package:clipboard/clipboard.dart';
 
-
+// ignore: must_be_immutable
 class AccountRecoveryPhrase extends StatefulWidget {
-  const AccountRecoveryPhrase({super.key});
+  List seedPhrase;
+  final bool isNew;
+
+  AccountRecoveryPhrase({
+    super.key,
+    required this.seedPhrase,
+    required this.isNew
+  });
 
   @override
   State<AccountRecoveryPhrase> createState() => _AccountRecoveryPhraseState();
 }
 
 class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
+
+  Future<void> secureScreen() async {
+    await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    secureScreen();
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    secureScreenOff();
+  }
+
+  Future<void> secureScreenOff() async {
+    await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+  }
 
 
   bool showPhrase = false;
@@ -28,12 +59,50 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
     return Scaffold(
       bottomNavigationBar: InkWell(
         onTap: () {
+
+          var seedPhase = widget.seedPhrase;
+
+          var random =  Random();
+          List randomFive = [];
+          for(int i=0;randomFive.length < 3 ;i++){
+
+            int index = random.nextInt(seedPhase.length);
+            String element = seedPhase[index];
+
+            var test = {
+              "id": index+1,
+              "name": element
+            };
+
+            //print(test);
+
+            int a = randomFive.indexWhere((element) => element['id'] == test['id']);
+            //  print("Index = $a");
+
+            if(a != -1){
+
+              //print(randomFive.toString());
+
+            }
+            else{
+              randomFive.add(test);
+            }
+          }
+
+          //print(randomFive);
+
+          Navigator.pop(context);
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const VerifyRecoveryPhrase(),
+                  builder: (context) => VerifyRecoveryPhrase(
+                    seedPhrase: widget.seedPhrase,
+                    selectedParse: randomFive,
+                    isNew:widget.isNew,
+                  )
               )
           );
+
         },
         child: Container(
           alignment: Alignment.center,
@@ -99,8 +168,9 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                         padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 10),
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemCount: 12,
+                        itemCount: widget.seedPhrase.length,
                         itemBuilder: (context, index) {
+                          var list = widget.seedPhrase[index];
                           return Container(
                             height: 50,
                             alignment: Alignment.center,
@@ -109,7 +179,7 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                               color: MyColor.backgroundColor
                             ),
                             child: Text(
-                              "${index+1} Check",
+                              "${index+1} $list",
                               textAlign: TextAlign.center,
                               style: MyStyle.tx18RWhite,
                             ),
@@ -179,27 +249,34 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                 const SizedBox(height: 22),
 
                 // copy button
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                  width: 120,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: MyColor.darkGreyColor,
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.copy,
-                        color: MyColor.mainWhiteColor,
-                      ),
-                      SizedBox(width: 15),
-                      Text(
-                        "Copy",
-                        style: MyStyle.tx18RWhite,
-                      )
-                    ],
+                InkWell(
+                  onTap: () {
+                    FlutterClipboard.copy(widget.seedPhrase.join(" ")).then((value) {
+                      Helper.dialogCall.showToast(context, "Copied");
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+                    width: 120,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: MyColor.darkGreyColor,
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.copy,
+                          color: MyColor.mainWhiteColor,
+                        ),
+                        SizedBox(width: 15),
+                        Text(
+                          "Copy",
+                          style: MyStyle.tx18RWhite,
+                        )
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 22),

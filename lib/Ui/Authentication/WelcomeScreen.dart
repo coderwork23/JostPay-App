@@ -142,7 +142,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const CreatePassword(),
+                          builder: (context) => const CreatePassword(isNew: false),
                         )
                     );
                   },
