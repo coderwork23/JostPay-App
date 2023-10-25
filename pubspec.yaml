@@ -28,6 +28,13 @@ dependencies:
   dotted_decoration: ^2.0.0
   flutter_switch: ^0.3.2
   mobile_scanner: ^3.5.0
+  http: ^1.1.0
+  path_provider: ^2.1.1
+  sqflite: ^2.3.0
+  flutter_windowmanager: ^0.2.0
+  shared_preferences: ^2.2.2
+  connectivity_plus: ^5.0.1
+  platform_device_id: ^1.0.1
 
 
 dev_dependencies:

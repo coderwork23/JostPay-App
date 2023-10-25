@@ -4,7 +4,11 @@ import 'package:jost_pay_wallet/Ui/Authentication/SplashScreen.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:provider/provider.dart';
 
+import 'Provider/Account_Provider.dart';
 import 'Provider/DashboardProvider.dart';
+import 'Provider/InternetProvider.dart';
+import 'Provider/Token_Provider.dart';
+import 'Provider/Transection_Provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +52,10 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => DashboardProvider()),
+        ChangeNotifierProvider(create: (context) => AccountProvider()),
+        ChangeNotifierProvider(create: (context) => InternetProvider()),
+        ChangeNotifierProvider(create: (context) => TokenProvider()),
+        ChangeNotifierProvider(create: (context) => TransectionProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:custom_pin_screen/custom_pin_screen.dart';
 import 'package:pin_code_fields/pin_code_fields.dart' as pin;
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../LocalDb/Local_Account_address.dart';
+import '../../Provider/Token_Provider.dart';
 import '../Dashboard/DashboardScreen.dart';
 
 class RecoveryPharseScreen extends StatefulWidget {
@@ -19,11 +28,169 @@ class _RecoveryPharseScreenState extends State<RecoveryPharseScreen> {
   TextEditingController phraseController = TextEditingController();
   TextEditingController pinCodeController = TextEditingController();
 
+  late AccountProvider accountProvider;
+  late TokenProvider tokenProvider;
+
+  Future<void> secureScreen() async {
+    await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+  }
+
+
+  Future<void> secureScreenOff() async {
+    await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+  }
+
+  @override
+  void initState() {
+    accountProvider = Provider.of<AccountProvider>(context, listen: false);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: false);
+
+    super.initState();
+
+    secureScreen();
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    secureScreenOff();
+  }
+
+  bool isLoading = false;
+
+  String deviceId = "";
+
+  importAccount() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    await DbNetwork.dbNetwork.getNetwork();
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    deviceId = sharedPreferences.getString('deviceId')!;
+    //print(deviceId);
+
+    var data = {
+      "name": "MainWallet",
+      "device_id": deviceId,
+      "type": "mnemonic",
+      "password": pinCodeController.text,
+      "mnemonic":  phraseController.text.trim(),
+    };
+
+    // print("initCreateWallet");
+    // print(jsonEncode(data));
+
+    await accountProvider.addAccount(data, '/initCreateWallet');
+    if (accountProvider.isSuccess == true) {
+      sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString('isLogin', 'true');
+      sharedPreferences.setInt('account', 1);
+      sharedPreferences.setString('password', pinCodeController.text);
+      //print(sharedPreferences.getString('isLogin'));
+
+      // print("accountProvider.accountData === > ${accountProvider.accountData.length}");
+      for(int i=0; i<accountProvider.accountData.length; i++){
+
+
+        for(int j=0; j<DbNetwork.dbNetwork.networkList.length; j++){
+
+          await DbAccountAddress.dbAccountAddress.createAccountAddress(
+              accountProvider.accountData[i]["id"],
+              accountProvider.accountData[i][DbNetwork.dbNetwork.networkList[j].publicKeyName],
+              accountProvider.accountData[i][DbNetwork.dbNetwork.networkList[j].privateKeyName],
+              DbNetwork.dbNetwork.networkList[j].publicKeyName,
+              DbNetwork.dbNetwork.networkList[j].privateKeyName,
+              DbNetwork.dbNetwork.networkList[j].id,
+              DbNetwork.dbNetwork.networkList[j].name
+          );
+
+        }
+
+        // print("create account db call");
+        await DBAccountProvider.dbAccountProvider.createAccount(
+            "${accountProvider.accountData[i]["id"]}",
+            accountProvider.accountData[i]["device_id"],
+            accountProvider.accountData[i]["name"],
+            accountProvider.accountData[i]["mnemonic"]
+        );
+
+      }
+
+      getAccount();
+
+    } else {
+
+      setState(() {
+        isLoading = false;
+      });
+
+      Fluttertoast.showToast(
+          msg: "Invalid Seed Phrase",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 15.0
+      );
+
+    }
+  }
+
+  getAccount() async {
+    await DBAccountProvider.dbAccountProvider.getAllAccount();
+    getToken();
+  }
+
+
+  // var currency;
+  getToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    // currency = sharedPreferences.getString("currency") ?? "USD";
+    //print("token =======> ");
+
+    await DBTokenProvider.dbTokenProvider.deleteAllToken();
+
+    for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
+
+      await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
+      var data = {};
+
+      for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+        //print("public address");
+        //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName);
+        //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress);
+        data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+
+      }
+      // data["convert"] = currency;
+      //print(json.encode(data));
+      await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
+
+    }
+
+    // ignore: use_build_context_synchronously
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => DashboardScreen()
+      ),(route) => false,
+    );
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+
+    accountProvider = Provider.of<AccountProvider>(context, listen: true);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
     return Scaffold(
       appBar: AppBar(
@@ -195,37 +362,48 @@ class _RecoveryPharseScreenState extends State<RecoveryPharseScreen> {
 
                 SizedBox(
                   height: 230,
-                  child: CustomKeyBoard(
-                    maxLength: 6,
-                    pinTheme: PinTheme(
-                        keysColor: MyColor.mainWhiteColor
-                    ),
-                    onChanged: (p0) {
-                      setState(() {
-                        pinCodeController.text = p0;
-                      });
-                    },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CustomKeyBoard(
+                        maxLength: 6,
+                        pinTheme: PinTheme(
+                            keysColor: MyColor.mainWhiteColor
+                        ),
+                        onChanged: (p0) {
+                          setState(() {
+                            pinCodeController.text = p0;
+                          });
+                        },
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 40),
 
                 InkWell(
                   onTap: () {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const DashboardScreen(),
-                        ), (route) => false
-                    );
+                    importAccount();
                   },
                   child: Container(
                     alignment: Alignment.center,
                     height: 45,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: MyStyle.buttonDecoration,
-                    child: const Text(
+                    decoration: phraseController.text.isNotEmpty || pinCodeController.text.isNotEmpty
+                        ?
+                    MyStyle.buttonDecoration
+                        :
+                    MyStyle.invalidDecoration,
+
+                    child: Text(
                       "Import wallet",
-                      style: MyStyle.tx18BWhite,
+                      style:  MyStyle.tx18BWhite.copyWith(
+                        color: phraseController.text.isNotEmpty || pinCodeController.text.isNotEmpty
+                            ?
+                        MyColor.mainWhiteColor
+                            :
+                        MyColor.mainWhiteColor.withOpacity(0.5)
+                      ),
                     ),
                   ),
                 ),

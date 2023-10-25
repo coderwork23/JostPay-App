@@ -38,6 +38,11 @@ class MyStyle{
     color: MyColor.greenColor,
   );
 
+  static BoxDecoration invalidDecoration = BoxDecoration(
+    borderRadius: BorderRadius.circular(10),
+    color: MyColor.greenColor.withOpacity(0.5),
+  );
+
 
   static InputDecoration textInputDecoration = InputDecoration(
     isDense: true,
