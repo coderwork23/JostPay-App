@@ -12,18 +12,18 @@ import 'package:custom_pin_screen/custom_pin_screen.dart';
 import 'package:pin_code_fields/pin_code_fields.dart' as pin;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../LocalDb/Local_Account_address.dart';
-import '../../Provider/Token_Provider.dart';
-import '../Dashboard/DashboardScreen.dart';
+import '../../../LocalDb/Local_Account_address.dart';
+import '../../../Provider/Token_Provider.dart';
+import '../../Dashboard/DashboardScreen.dart';
 
-class RecoveryPharseScreen extends StatefulWidget {
-  const RecoveryPharseScreen({super.key});
+class ImportWalletScreen extends StatefulWidget {
+  const ImportWalletScreen({super.key});
 
   @override
-  State<RecoveryPharseScreen> createState() => _RecoveryPharseScreenState();
+  State<ImportWalletScreen> createState() => _ImportWalletScreenState();
 }
 
-class _RecoveryPharseScreenState extends State<RecoveryPharseScreen> {
+class _ImportWalletScreenState extends State<ImportWalletScreen> {
 
   TextEditingController phraseController = TextEditingController();
   TextEditingController pinCodeController = TextEditingController();

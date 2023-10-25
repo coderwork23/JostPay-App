@@ -3,7 +3,7 @@ import 'package:jost_pay_wallet/Ui/Authentication/CreateWallet/CreatePassword.da
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
-import 'RecoveryPharseScreen.dart';
+import 'ImportWallet/ImportWalletScreen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -164,7 +164,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const RecoveryPharseScreen(),
+                          builder: (context) => const ImportWalletScreen(),
                         )
                     );
                   },
