@@ -11,6 +11,7 @@ import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../LocalDb/Local_Account_provider.dart';
@@ -234,6 +235,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   loginAccount() async {
 
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    deviceId = sharedPreferences.getString('deviceId')!;
+    print("object --> $deviceId");
     setState(() {
       errorText = "";
       isLoading = true;
@@ -365,10 +369,24 @@ class _LoginScreenState extends State<LoginScreen> {
 
   }
 
+  @override
+  void initState() {
+    accountProvider = Provider.of<AccountProvider>(context, listen: false);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: false);
 
+    super.initState();
+
+    Future.delayed(Duration.zero,(){
+      getDeviceId();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+
+    accountProvider = Provider.of<AccountProvider>(context, listen: true);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+
     return Scaffold(
       body: SafeArea(
         child: Center(
