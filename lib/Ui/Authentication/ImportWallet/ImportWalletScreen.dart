@@ -313,73 +313,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
 
                 const SizedBox(height: 22),
 
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  height: 40,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: pin.PinCodeTextField(
-                      appContext: context,
-                      pastedTextStyle: TextStyle(
-                        color: Colors.green.shade600,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      length: 6,
-                      obscureText: true,
 
-                      obscuringWidget:  Container(
-                        decoration: const BoxDecoration(
-                            color: MyColor.greenColor,
-                            shape: BoxShape.circle
-                        ),
-                      ),
-                      pinTheme:pin.PinTheme(
-                          shape: pin.PinCodeFieldShape.box,
-                          borderRadius: BorderRadius.circular(100),
-                          fieldHeight: 20,
-                          fieldWidth: 20,
-                          inactiveColor: MyColor.boarderColor,
-                          inactiveBorderWidth: 2,
-                          inactiveFillColor: MyColor.transparentColor
-                      ),
-                      cursorColor: MyColor.greenColor,
-                      animationDuration: const Duration(milliseconds: 300),
-                      enableActiveFill: true,
-                      controller: pinCodeController,
-                      keyboardType: TextInputType.number,
-
-                      onCompleted: (v) {
-                        debugPrint("Completed");
-                      },
-                      onChanged: (value) {
-                        debugPrint(value);
-
-                      },
-
-                    ),
-                  ),
-                ),
-
-                SizedBox(
-                  height: 230,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CustomKeyBoard(
-                        maxLength: 6,
-                        pinTheme: PinTheme(
-                            keysColor: MyColor.mainWhiteColor
-                        ),
-                        onChanged: (p0) {
-                          setState(() {
-                            pinCodeController.text = p0;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 40),
 
                 InkWell(
                   onTap: () {

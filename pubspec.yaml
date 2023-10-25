@@ -37,6 +37,10 @@ dependencies:
   device_info_plus: ^9.1.0
   mobile_device_identifier: ^0.0.2
 
+  # finger print
+  local_auth: ^2.1.6
+
+
 
 dev_dependencies:
   flutter_test:
