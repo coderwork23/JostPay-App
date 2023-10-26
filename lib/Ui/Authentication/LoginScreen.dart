@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/DashboardScreen.dart';
 import 'package:local_auth_ios/types/auth_messages_ios.dart';
@@ -195,28 +196,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   }
 
-  var currency = "";
   getToken() async {
-
-    // await DBTokenProvider.dbTokenProvider.deleteAllToken();
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    currency = sharedPreferences.getString("currency") ?? "USD";
+    DBTokenProvider.dbTokenProvider.deleteAccountToken(DBAccountProvider.dbAccountProvider.newAccountList[0].id);
 
     for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-
-      await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-
-      var data = {};
-
-      for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
-        data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
-      }
-
-      data["convert"] = currency;
-
-      await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
-
+      var data ={
+        "id":"1,2,74,328,825,1027,1839,1958"
+      };
+      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
     }
 
     // ignore: use_build_context_synchronously

@@ -6,6 +6,7 @@ import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:custom_pin_screen/custom_pin_screen.dart';
@@ -30,6 +31,9 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
 
   late AccountProvider accountProvider;
   late TokenProvider tokenProvider;
+
+  bool showPassword = true;
+  bool fingerBool = false;
 
   Future<void> secureScreen() async {
     await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
@@ -147,28 +151,35 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
 
   // var currency;
   getToken() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    // currency = sharedPreferences.getString("currency") ?? "USD";
-    //print("token =======> ");
-
-    await DBTokenProvider.dbTokenProvider.deleteAllToken();
+    // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    // // currency = sharedPreferences.getString("currency") ?? "USD";
+    // //print("token =======> ");
+    //
+    // await DBTokenProvider.dbTokenProvider.deleteAllToken();
+    //
+    // for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
+    //
+    //   await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
+    //   var data = {};
+    //
+    //   for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+    //     //print("public address");
+    //     //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName);
+    //     //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress);
+    //     data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+    //
+    //   }
+    //   // data["convert"] = currency;
+    //   //print(json.encode(data));
+    //   await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
+    //
+    // }
 
     for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-
-      await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-      var data = {};
-
-      for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
-        //print("public address");
-        //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName);
-        //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress);
-        data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
-
-      }
-      // data["convert"] = currency;
-      //print(json.encode(data));
-      await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
-
+      var data ={
+        "id":"1,2,74,328,825,1027,1839,1958"
+      };
+      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
     }
 
     // ignore: use_build_context_synchronously
@@ -193,6 +204,48 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
     return Scaffold(
+      bottomNavigationBar: isLoading == true
+          ?
+      const SizedBox(
+          height:52,
+          child: Center(
+              child: CircularProgressIndicator(
+                color: MyColor.greenColor,
+              )
+          )
+      )
+          :
+      InkWell(
+        onTap: () {
+          if(phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty) {
+            importAccount();
+          }else{
+            Helper.dialogCall.showToast(context, "Please provider all details");
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(15,0,15,15),
+          alignment: Alignment.center,
+          height: 45,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty
+              ?
+          MyStyle.buttonDecoration
+              :
+          MyStyle.invalidDecoration,
+
+          child: Text(
+            "Import wallet",
+            style:  MyStyle.tx18BWhite.copyWith(
+                color: phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty
+                    ?
+                MyColor.mainWhiteColor
+                    :
+                MyColor.mainWhiteColor.withOpacity(0.5)
+            ),
+          ),
+        ),
+      ),
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -302,46 +355,93 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
                 ),
 
                 const SizedBox(height: 22),
-                Text(
-                  "Enter App PassCode",
-                  style:MyStyle.tx22RWhite.copyWith(
-                      fontSize: 18,
-                      color: MyColor.grey01Color
-                  ),
-                  textAlign: TextAlign.center,
-                ),
 
+
+                TextFormField(
+                  controller: pinCodeController,
+                  obscureText: showPassword,
+                  validator: (value) {
+                    if(value!.isEmpty){
+                      return "Please enter login password";
+                    }else{
+                      return null;
+                    }
+                  },
+                  cursorColor: MyColor.greenColor,
+                  style: MyStyle.tx18RWhite,
+                  decoration: MyStyle.textInputDecoration.copyWith(
+                      hintText: "Passwords",
+                      isDense: false,
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 20,
+                          horizontal: 15
+                      ),
+                      suffixIcon: showPassword
+                          ?
+                      IconButton(
+                          onPressed: (){
+                            setState(() {
+                              showPassword = false;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.visibility,
+                            color: MyColor.mainWhiteColor,
+                          )
+                      )
+                          :
+                      IconButton(
+                          onPressed: (){
+                            setState(() {
+                              showPassword = true;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.visibility_off,
+                            color: MyColor.mainWhiteColor,
+                          )
+                      )
+                  ),
+                ),
                 const SizedBox(height: 22),
 
-
-
                 InkWell(
-                  onTap: () {
-                    importAccount();
+                  onTap: (){
+                    setState(() {
+                      fingerBool = !fingerBool;
+                    });
                   },
-                  child: Container(
-                    alignment: Alignment.center,
-                    height: 45,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: phraseController.text.isNotEmpty || pinCodeController.text.isNotEmpty
-                        ?
-                    MyStyle.buttonDecoration
-                        :
-                    MyStyle.invalidDecoration,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
 
-                    child: Text(
-                      "Import wallet",
-                      style:  MyStyle.tx18BWhite.copyWith(
-                        color: phraseController.text.isNotEmpty || pinCodeController.text.isNotEmpty
-                            ?
-                        MyColor.mainWhiteColor
-                            :
-                        MyColor.mainWhiteColor.withOpacity(0.5)
+                      Container(
+                        height: 24,
+                        width: 24,
+                        decoration: BoxDecoration(
+                            color: fingerBool ? MyColor.greenColor : Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              width: 1.5,
+                              color: fingerBool ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
+                            )
+                        ),
+                        child: fingerBool ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
                       ),
-                    ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Sign in with FaceID and Finger Print",
+                          style: MyStyle.tx18RWhite.copyWith(
+                            fontSize: 14,
+                              color: fingerBool ? MyColor.whiteColor : MyColor.greyColor
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 ),
-                const SizedBox(height: 30)
+                const SizedBox(height: 10),
               ],
             ),
           ),

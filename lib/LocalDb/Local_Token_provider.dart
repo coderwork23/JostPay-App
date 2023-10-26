@@ -42,7 +42,6 @@ class DBTokenProvider{
               'price REAL,'
               'percent_change_24h REAL,'
               'accountId TEXT,'
-              'isCustom INTEGER,'
               'explorer_url TEXT'
               ')');
         },
@@ -60,7 +59,7 @@ class DBTokenProvider{
     return res;
   }
 
-  updateToken(AccountTokenList newToken,tokenId,id,shortType) async{
+  updateToken(AccountTokenList newToken,tokenId,id) async{
     final db= await database;
     Map<String, dynamic> data = {
       "id": newToken.id,
@@ -80,8 +79,8 @@ class DBTokenProvider{
       "accountId": newToken.accountId,
     };
 
-    final res = await db!.update('Token', data, where: "id = ? AND accountId = ? ",whereArgs: [tokenId,id],/* conflictAlgorithm: ConflictAlgorithm.replace,*/);
-    getAccountToken(id,shortType);
+    final res = await db!.update('Token', data, where: "id = ? AND accountId = ? ",whereArgs: [tokenId,id]);
+    getAccountToken(id);
     return res;
   }
 
@@ -105,7 +104,7 @@ class DBTokenProvider{
   }
 
   List<AccountTokenList> tokenList = [];
-  getAccountToken(String accountId,sortType) async {
+  getAccountToken(String accountId) async {
 
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM Token Where accountId = '$accountId'");
@@ -114,24 +113,9 @@ class DBTokenProvider{
       return AccountTokenList.fromJson(
           c,
           accountId,
-          int.parse("${c['isCustom'] == null ?0 : c['isCustom'] }"),
       );
     }).toList();
     tokenList = list;
-
-     if(sortType == "Value"){
-       tokenList.sort((a, b) {
-         double aValue = (double.parse("${a.balance}") * double.parse("${a.price}"));
-         double bValue = (double.parse("${b.balance}") * double.parse("${b.price}"));
-         return bValue.compareTo(aValue);
-       });
-     }else if(sortType == "Name"){
-       tokenList.sort((a, b) {
-         return a.name.compareTo(b.name);
-       });
-    }else{
-       tokenList = list;
-     }
 
      // print("check this value this ${tokenList.length}");
     return list;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import '../LocalDb/Local_Token_provider.dart';
 import '../Models/AccountTokenModel.dart';
@@ -69,31 +70,65 @@ class TokenProvider with ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    await ApiHandler.post(data, url).then((responseData) async {
+    await ApiHandler.getCapWithParams(url,data).then((responseData) async {
 
         var value = json.decode(responseData.body);
         // print("get Token api :- $value");
-        if(responseData.statusCode == 200 && value["status"] == true){
 
+        if(responseData.statusCode == 200){
           allToken = value;
+          await DBTokenProvider.dbTokenProvider.getAccountToken(id);
+          List marketId = ["1","2","74","328","825","1027","1839","1958"];
+          List tokenID = ["8","29","28","0","-1","1","2","10"];
 
-          // await DBTokenProvider.dbTokenProvider.deleteAccountToken(id);
+
+          for(int i = 0; i<marketId.length; i++){
+
+            Map<String,dynamic> marketInfo = allToken['data'][marketId[i]];
 
 
-            await DBTokenProvider.dbTokenProvider.getAccountToken(id, "");
+            print("price --->  ${marketInfo['name']}");
+            await DbNetwork.dbNetwork.getNetworkBySymbol("${marketInfo['symbol']}");
 
-            (allToken["data"] as List).map((token) async {
-              var index = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-                return "${element.id}"== "${token["id"]}";
+            if(DbNetwork.dbNetwork.networkListBySymbol.isNotEmpty) {
+
+              await DbAccountAddress.dbAccountAddress.getPublicKey(id, DbNetwork.dbNetwork.networkListBySymbol.first.id);
+
+              AccountTokenList accountTokenList = AccountTokenList(
+                id: int.parse(marketId[i]),
+                token_id: int.parse(tokenID[i]),
+                accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
+                networkId: DbNetwork.dbNetwork.networkListBySymbol.isNotEmpty ? DbNetwork.dbNetwork.networkListBySymbol.first.id:0,
+                marketId:int.parse(marketId[i]),
+                name: marketInfo['name'],
+                type: "",
+                address: "",
+                symbol: marketInfo['symbol'],
+                decimals: 0,
+                logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/$marketId.png",
+                balance: "0",
+                networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
+                price: marketInfo['quote']['USD']['price'],
+                percentChange24H: marketInfo['quote']['USD']['percent_change_24h'],
+                accountId: id,
+                explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.name,
+              );
+
+              // print("${accountTokenList.toJson()}");
+
+              var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
+                return "${element.id}"== "${marketId[i]}";
               });
-              // print(index);
-              if(index != -1){
-                int isCustom = DBTokenProvider.dbTokenProvider.tokenList[index].isCustom;
-                await DBTokenProvider.dbTokenProvider.updateToken(AccountTokenList.fromJson(token,id,isCustom), token["id"],id,shortType);
+
+              if(tokenListIndex != -1){
+                await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId[i],id);
               }else{
-                await DBTokenProvider.dbTokenProvider.createToken(AccountTokenList.fromJson(token,id,0));
+                await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
               }
-            }).toList();
+
+            }
+
+          }
 
           // print(tokenNote);
 
@@ -312,37 +347,6 @@ class TokenProvider with ChangeNotifier {
 
       });
 
-  }
-
-  bool rcpLoaded = false;
-  getRCPUrl(data,url,context) async {
-    await ApiHandler.postRcp(data,url).then((responseData){
-
-      try {
-        // var value = json.decode(responseData.body);
-        // print(value);
-
-        if (responseData == true) {
-          rcpLoaded = true;
-          isLoading = false;
-          notifyListeners();
-        }
-        else {
-          isLoading = false;
-          rcpLoaded = false;
-          notifyListeners();
-          Navigator.pop(context);
-          print("=========== get getRCPUrl Api Error ==========");
-        }
-      }catch(e){
-        isLoading = false;
-        rcpLoaded = false;
-        Navigator.pop(context);
-        notifyListeners();
-
-        print("=========== get getRCPUrl Api Error ==========");
-      }
-    });
   }
 
 }

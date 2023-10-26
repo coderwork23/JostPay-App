@@ -1,17 +1,38 @@
+import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Models/NetworkModel.dart';
+import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
+import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/AddAssetsScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/ReceiveToken/ReceiveToken.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/SendToken/SendTokenList.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:provider/provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'CoinDetailScreen.dart';
 import 'ExchangeCoin/ExchangeScreen.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class WalletScreen extends StatelessWidget {
+class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
+
+  @override
+  State<WalletScreen> createState() => _WalletScreenState();
+}
+
+class _WalletScreenState extends State<WalletScreen> {
+
+  late AccountProvider accountProvider;
+  late TokenProvider tokenProvider;
 
   showAddAsserts(BuildContext context){
     showModalBottomSheet(
@@ -84,9 +105,233 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
+  late String deviceId;
+  String selectedAccountId = "",
+      selectedAccountName = "",
+      selectedAccountAddress = "",
+      selectedAccountPrivateAddress = "",cryChange = "";
+
+  bool isCalculating = false;
+  bool isLoaded = false;
+
+  @override
+  void initState() {
+    tokenProvider = Provider.of<TokenProvider>(context, listen: false);
+    accountProvider = Provider.of<AccountProvider>(context, listen: false);
+    super.initState();
+    selectedAccount();
+  }
+
+
+  double showTotalValue = 0.0;
+  var trxPrivateKey ="";
+
+  // get selected account
+  selectedAccount() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    setState(() {
+      isLoaded = false;
+      cryChange = sharedPreferences.getString('cryChange') ?? "";
+      selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+      selectedAccountName = sharedPreferences.getString('accountName') ?? "";
+      selectedAccountAddress = sharedPreferences.getString('accountAddress') ?? "";
+      selectedAccountPrivateAddress = sharedPreferences.getString('accountPrivateAddress') ?? "";
+      showTotalValue = sharedPreferences.getDouble('myBalance') ?? 0.00;
+    });
+
+
+    if(selectedAccountId == "") {
+      setState(() {
+        selectedAccountId = DBAccountProvider.dbAccountProvider.newAccountList[0].id;
+        selectedAccountName = DBAccountProvider.dbAccountProvider.newAccountList[0].name;
+
+        sharedPreferences.setString('accountId', selectedAccountId);
+        sharedPreferences.setString('accountName', selectedAccountName);
+
+      });
+    }
+
+    await DbAccountAddress.dbAccountAddress.getAccountAddress(selectedAccountId);
+    await DbNetwork.dbNetwork.getNetwork();
+
+    for(int i=0; i< DbAccountAddress.dbAccountAddress.allAccountAddress.length; i ++){
+
+      if(DbAccountAddress.dbAccountAddress.allAccountAddress[i].publicKeyName == "address"){
+
+        if(mounted) {
+          setState(() {
+            selectedAccountAddress = DbAccountAddress.dbAccountAddress.allAccountAddress[i].publicAddress;
+            selectedAccountPrivateAddress =
+                DbAccountAddress.dbAccountAddress.allAccountAddress[i].privateAddress;
+            sharedPreferences.setString('accountAddress', selectedAccountAddress);
+            sharedPreferences.setString('accountPrivateAddress', selectedAccountPrivateAddress);
+          });
+        }
+      }
+    }
+
+    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,9);
+
+    if(mounted) {
+      setState(() {
+        trxPrivateKey = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
+      });
+
+      getToken();
+    }
+  }
+
+
+  bool _showRefresh = false,isNeeded = false;
+
+  // getToken for coin market cap
+  getToken() async {
+    if (isNeeded == true) {
+
+      // await DBTokenProvider.dbTokenProvider.deleteAccountToken(selectedAccountId);
+      await DbAccountAddress.dbAccountAddress.getAccountAddress(selectedAccountId);
+
+      for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
+        var data ={
+          "id":"1,2,74,328,825,1027,1839,1958"
+        };
+        await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
+      }
+
+
+      if(mounted) {
+        setState(() {
+          isNeeded = false;
+        });
+      }
+    }
+
+    await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+
+
+    getSocketData();
+    if(mounted) {
+      setState(() {
+        _showRefresh = false;
+        isLoaded = true;
+      });
+    }
+  }
+
+
+  IO.Socket? socket;
+
+  // socket for get updated balance
+  getSocketData() async {
+    // print("Connecting socket");
+    socket = IO.io('http://${Utils.url}/', <String, dynamic>{
+      "secure": true,
+      "path":"/api/socket.io",
+      "rejectUnauthorized": false,
+      "transports":["websocket", "polling"],
+      "upgrade": false,
+    });
+
+    socket!.connect();
+
+    socket!.onConnect((_) {
+
+      socket!.on("getTokenBalance", (response) async {
+        print(json.encode(response));
+        if(mounted) {
+          if (response["status"] == true) {
+            if ("${response["data"]["balance"]}" != "0") {
+              if (response["data"]["balance"] != "null") {
+                await DBTokenProvider.dbTokenProvider.updateTokenBalance(
+                  '${response["data"]["balance"]}',
+                  '${response["data"]["id"]}',
+                );
+              }
+            }
+          }
+
+          await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+          setState(() {});
+          getAccountTotal();
+        }
+
+
+      });
+    });
+
+
+
+    for (int i = 0; i < DBTokenProvider.dbTokenProvider.tokenList.length; i++) {
+      List <NetworkList> networkList =  DbNetwork.dbNetwork.networkList.where((element) => element.id == DBTokenProvider.dbTokenProvider.tokenList[i].networkId).toList();
+      var data = {
+        "id": "${DBTokenProvider.dbTokenProvider.tokenList[i].id}",
+        "network_id": "${DBTokenProvider.dbTokenProvider.tokenList[i].networkId}",
+        "tokenAddress": DBTokenProvider.dbTokenProvider.tokenList[i].address,
+        "address": DBTokenProvider.dbTokenProvider.tokenList[i].accAddress,
+        "trxPrivateKey": "$trxPrivateKey",
+        "isCustomeRPC":false,
+        "network_url":networkList.isEmpty ? "" : networkList.first.url,
+      };
+
+      // print("socket emit ==>  $data");
+      socket!.emit("getTokenBalance", jsonEncode(data));
+    }
+
+  }
+
+
+  bool updatingValue = false;
+  double updatingTotalValue = 0.00;
+
+  // Calculate all amount
+  getAccountTotal() async {
+
+    if(mounted) {
+      setState(() {
+        showTotalValue = 0.0;
+      });
+    }
+
+    double valueUsd = 0.0;
+
+    for(int i =0; i<DBTokenProvider.dbTokenProvider.tokenList.length; i++){
+
+      // print("${DBTokenProvider.dbTokenProvider.tokenList[i].name} balance:- ${DBTokenProvider.dbTokenProvider.tokenList[i].balance} price:- ${DBTokenProvider.dbTokenProvider.tokenList[i].price}");
+
+
+
+      if (DBTokenProvider.dbTokenProvider.tokenList[i].balance == "" ||
+          DBTokenProvider.dbTokenProvider.tokenList[i].balance == "0" ||
+          DBTokenProvider.dbTokenProvider.tokenList[i].balance == null ||
+          DBTokenProvider.dbTokenProvider.tokenList[i].price == 0.0
+      ) {
+        valueUsd += 0;
+      }
+      else {
+        valueUsd += double.parse(DBTokenProvider.dbTokenProvider.tokenList[i].balance) * DBTokenProvider.dbTokenProvider.tokenList[i].price;
+      }
+
+    }
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    if(mounted) {
+      setState(() {
+        showTotalValue = valueUsd;
+        sharedPreferences.setDouble("myBalance", showTotalValue);
+        updatingValue = false;
+      });
+    }
+    // print("show Total Value === > $showTotalValue");
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
     final dashProvider = Provider.of<DashboardProvider>(context);
+    accountProvider = Provider.of<AccountProvider>(context, listen: true);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+
     return Scaffold(
       backgroundColor: MyColor.darkGreyColor,
       appBar: AppBar(
@@ -128,8 +373,9 @@ class WalletScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 25),
 
+          // Current Balance and wallet name
           Text(
-            "Current Balance - Main Wallet",
+            "Current Balance - $selectedAccountName",
             style: MyStyle.tx18RWhite.copyWith(
               fontSize: 14,
               color: MyColor.grey01Color
@@ -137,14 +383,28 @@ class WalletScreen extends StatelessWidget {
           ),
           const SizedBox(height: 15),
 
-          Text(
-            "0.0 USD",
-            style: MyStyle.tx22RWhite.copyWith(
-              fontSize: 35,
+          // total amount
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "~${ApiHandler.calculateLength("$showTotalValue")} ",
+                  style: MyStyle.tx22RWhite.copyWith(
+                    fontSize: 32,
+                  ),
+                ),
+                TextSpan(
+                  text: "USD",
+                  style: MyStyle.tx22RWhite.copyWith(
+                    fontSize: 22,
+                  ),
+                ),
+              ]
             ),
           ),
           const SizedBox(height: 18),
 
+          // send receive withdraw and exchange
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -299,6 +559,7 @@ class WalletScreen extends StatelessWidget {
           ),
           const SizedBox(height: 18),
 
+          // coin list
           Expanded(
              child: Container(
                padding: const EdgeInsets.only(top:12),
@@ -315,15 +576,64 @@ class WalletScreen extends StatelessWidget {
                    topRight: Radius.circular(40),
                  ),
                  child : ListView.builder(
-                   itemCount: 10,
+                   itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
                    padding: const EdgeInsets.fromLTRB(12,10,12,70),
                    itemBuilder: (context, index) {
+
+                     var list = DBTokenProvider.dbTokenProvider.tokenList[index];
+
+                     // print(list.marketId);
+                     double? tokenUsdPrice;
+
+                     if(DBTokenProvider.dbTokenProvider.tokenList[index].price == 0.0){
+                       tokenUsdPrice =  0.0;
+                     }
+                     else if (DBTokenProvider.dbTokenProvider.tokenList[index].price > 0.0){
+                       tokenUsdPrice = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
+                     }
+
                      return InkWell(
-                       onTap: () {
+                       onTap: () async {
+
+
+                         double selectTokenUSD;
+
+                         if(DBTokenProvider.dbTokenProvider.tokenList[index].price == null){
+                           selectTokenUSD = 0.0;
+                         }
+                         else{
+                           selectTokenUSD = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
+                         }
+
+
+                           await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,DBTokenProvider.dbTokenProvider.tokenList[index].networkId);
+                           selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+
+
+
+
+                         // ignore: use_build_context_synchronously
                          Navigator.push(
                            context,
                            MaterialPageRoute(
-                             builder: (context) => const CoinDetailScreen(),
+                             builder: (context) => CoinDetailScreen(
+                                 selectedAccountAddress: selectedAccountAddress,
+                                 tokenDecimal: "${DBTokenProvider.dbTokenProvider.tokenList[index].decimals}",
+                                 tokenId: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
+                                 tokenNetworkId: "${DBTokenProvider.dbTokenProvider.tokenList[index].networkId}",
+                                 tokenAddress: DBTokenProvider.dbTokenProvider.tokenList[index].address,
+                                 tokenName: DBTokenProvider.dbTokenProvider.tokenList[index].name,
+                                 tokenSymbol: DBTokenProvider.dbTokenProvider.tokenList[index].symbol,
+                                 tokenBalance: DBTokenProvider.dbTokenProvider.tokenList[index].balance,
+                                 tokenMarketId: "${DBTokenProvider.dbTokenProvider.tokenList[index].marketId}",
+                                 tokenType: DBTokenProvider.dbTokenProvider.tokenList[index].type,
+                                 tokenImage: DBTokenProvider.dbTokenProvider.tokenList[index].logo,
+                                 tokenUsdPrice: selectTokenUSD,
+                                 tokenFullPrice: DBTokenProvider.dbTokenProvider.tokenList[index].price,
+                                 tokenUpDown: DBTokenProvider.dbTokenProvider.tokenList[index].percentChange24H,
+                                 token_transection_Id: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
+                                 explorerUrl: DBTokenProvider.dbTokenProvider.tokenList[index].explorer_url,
+                             ),
                            )
                          );
                        },
@@ -336,37 +646,65 @@ class WalletScreen extends StatelessWidget {
                          ),
                          child: Row(
                            children: [
-                             Image.asset(
-                               "assets/images/bitcoin.png",
-                               height: 50,
-                               width: 50,
-                               fit: BoxFit.contain,
+
+                             // coin token
+                             ClipRRect(
+                               borderRadius: BorderRadius.circular(100),
+                               child: CachedNetworkImage(
+                                 height: 45,
+                                 width: 45,
+                                 fit: BoxFit.fill,
+                                 imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${list.marketId}.png",
+                                 placeholder: (context, url) => const Center(
+                                   child: CircularProgressIndicator(color: MyColor.greenColor),
+                                 ),
+                                 errorWidget: (context, url, error) =>
+                                     Container(
+                                       height: 45,
+                                       width: 45,
+                                       padding: const EdgeInsets.all(10),
+                                       decoration: BoxDecoration(
+                                         borderRadius: BorderRadius.circular(14),
+                                         color: MyColor.whiteColor,
+                                       ),
+                                       child: Image.asset(
+                                         "assets/images/bitcoin.png",
+                                       ),
+                                     ),
+                               ),
                              ),
+
                              const SizedBox(width: 12),
 
+                             // coin name and price and 24h
                              Expanded(
                                child: Column(
                                  crossAxisAlignment: CrossAxisAlignment.start,
                                  children: [
-                                   const Text(
-                                     "Bitcoin",
+                                   Text(
+                                     list.name,
                                      style: MyStyle.tx18RWhite,
                                    ),
-                                   const SizedBox(height: 5),
+                                   const SizedBox(height: 3),
                                    RichText(
                                        text: TextSpan(
                                            children: [
                                              TextSpan(
-                                               text: "\$2345432 ",
+                                               text: "\$${ApiHandler.calculateLength("${list.price}")} ",
                                                style: MyStyle.tx18RWhite.copyWith(
                                                    fontSize: 14,
                                                    color: MyColor.grey01Color
                                                ),
                                              ),
                                              TextSpan(
-                                                 text: "(-2.2%)",
+                                                 text: "(${list.percentChange24H.toStringAsFixed(2)}%)" ,
                                                  style:MyStyle.tx28RGreen.copyWith(
-                                                   fontSize: 12
+                                                   fontSize: 12,
+                                                   color: list.percentChange24H < 0
+                                                       ?
+                                                   MyColor.redColor
+                                                       :
+                                                   MyColor.greenColor
                                                  )
                                              ),
                                            ]
@@ -377,21 +715,31 @@ class WalletScreen extends StatelessWidget {
                              ),
                              const SizedBox(width: 10),
 
+                             // balance and coin price
                              Column(
                                crossAxisAlignment: CrossAxisAlignment.end,
                                children: [
                                  Text(
-                                   "0.0 BTC",
+                                   isCalculating == true
+                                       ?
+                                   "--"
+                                       :
+                                   DBTokenProvider.dbTokenProvider.tokenList[index].balance == "0"
+                                       ?
+                                   "${double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance).toStringAsFixed(2)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}"
+                                       :
+                                   "${ApiHandler.calculateLength3(DBTokenProvider.dbTokenProvider.tokenList[index].balance)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}",
+
                                    style: MyStyle.tx22RWhite.copyWith(
-                                     fontSize: 20,
+                                     fontSize: 16,
                                      color: MyColor.mainWhiteColor
                                    ),
                                  ),
-                                 const SizedBox(height: 5),
+                                 const SizedBox(height: 3),
                                  Text(
-                                   "\$ 12",
+                                   "\$ ${tokenUsdPrice!.toStringAsFixed(2)}",
                                    style: MyStyle.tx18RWhite.copyWith(
-                                       fontSize: 15,
+                                       fontSize: 14,
                                        color: MyColor.grey01Color
                                    ),
                                  ),
@@ -410,4 +758,5 @@ class WalletScreen extends StatelessWidget {
       ),
     );
   }
+
 }

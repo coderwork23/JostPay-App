@@ -1,9 +1,3 @@
-// To parse this JSON data, do
-//
-//     final accountToken = accountTokenFromJson(jsonString);
-
-import 'dart:convert';
-
 class AccountTokenList {
   AccountTokenList({
     required this.id,
@@ -23,7 +17,6 @@ class AccountTokenList {
     required this.percentChange24H,
     required this.accountId,
     required this.explorer_url,
-    required this.isCustom,
   });
 
   int id;
@@ -43,9 +36,8 @@ class AccountTokenList {
   double percentChange24H;
   String accountId;
   String explorer_url;
-  int isCustom;
 
-  factory AccountTokenList.fromJson(Map<String, dynamic> json,String accountId,int isCustom) => AccountTokenList(
+  factory AccountTokenList.fromJson(Map<String, dynamic> json,String accountId) => AccountTokenList(
     id: json["id"],
     token_id: json["token_id"],
     accAddress: json["acc_address"],
@@ -62,7 +54,6 @@ class AccountTokenList {
     price: json["price"] == null ? 0.0 : json["price"].toDouble(),
     percentChange24H: json["percent_change_24h"] == null ? 0.0 : json["percent_change_24h"].toDouble(),
     accountId : accountId,
-    isCustom : isCustom,
     explorer_url: json["explorer_url"]??"",
   );
 
@@ -83,7 +74,6 @@ class AccountTokenList {
     "network_name": networkName,
     "price": price,
     "percent_change_24h": percentChange24H,
-    "isCustom": isCustom,
     "accountId": accountId,
   };
 }

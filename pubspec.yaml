@@ -39,6 +39,9 @@ dependencies:
 
   # finger print
   local_auth: ^2.1.6
+  cached_network_image: ^3.3.0
+  socket_io_client: ^2.0.3+1
+  intl: ^0.18.1
 
 
 

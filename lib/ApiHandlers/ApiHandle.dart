@@ -50,25 +50,6 @@ class ApiHandler {
 
   }
 
-  static Future<dynamic> postRcp(body, url) async {
-
-
-    // print(body);
-
-    // print(Uri.parse("https://rpc.ankr.com/polygon"));
-    try {
-      await http.post(
-          Uri.parse("$url"),
-          // headers: _setHeadersPost(),
-          body: jsonEncode(body)
-      );
-      return true;
-
-    }catch(e){
-      return false;
-    }
-
-  }
 
 
   static Future<dynamic> get(url) async {
@@ -107,18 +88,6 @@ class ApiHandler {
   }
 
 
-  static Future<dynamic> getNewsParams(base, url, params) async {
-    //var baseUrl = Uri.https('pro-api.coinmarketcap.com','/v1/cryptocurrency/quotes/latest',params);
-      var baseUrl = Uri.https('$base', '$url', params);
-
-
-
-      http.Response response = await http.get(
-        baseUrl,
-      );
-
-      return response;
-  }
 
   static Future<dynamic> testPost(body, url) async {
 
@@ -139,22 +108,22 @@ class ApiHandler {
       return response;
   }
 
-  static Future<dynamic> getOnlineTrasection(base, url, params) async {
-      //var baseUrl = Uri.https('pro-api.coinmarketcap.com','/v1/cryptocurrency/quotes/latest',params);
-      var baseUrl = Uri.https('$base', '$url', params);
+  static Future<dynamic> getCapWithParams(url, params) async {
+    //var baseUrl = Uri.https('pro-api.coinmarketcap.com','/v1/cryptocurrency/quotes/latest',params);
+    var baseUrl = Uri.https('pro-api.coinmarketcap.com', '$url', params);
 
-      _setHeadersGet() => {
-            'Content-type': 'application/json',
-          };
+    _setHeadersGet() => {
+      'Content-type': 'application/json',
+      'X-CMC_PRO_API_KEY': Utils.marketCapKey
+    };
 
-      http.Response response = await http.get(
-        baseUrl,
-        headers: _setHeadersGet(),
-      );
+    http.Response response = await http.get(
+      baseUrl,
+      headers: _setHeadersGet(),
+    );
 
-      return response;
+    return response;
   }
-
 
   static String calculateLength(String value){
 

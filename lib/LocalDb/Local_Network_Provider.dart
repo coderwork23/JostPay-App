@@ -69,31 +69,36 @@ class DbNetwork{
   }
 
   List<NetworkList> networkList = [];
-  List<NetworkList> newNetworkList = [];
   getNetwork() async {
     networkList.clear();
-    newNetworkList.clear();
 
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM Network");
 
     List<NetworkList> list = res.map((c) {
-      // print(int.parse("${c["isCustom"]}"));
       return NetworkList.fromJson(c);
     }).toList();
     networkList = list;
 
-    if(list.isNotEmpty) {
-      int bnbIndex = list.indexWhere((e) => e.id == 2);
-      int ethIndex = list.indexWhere((e) => e.id == 1);
-      if(list[bnbIndex] != -1 || list[ethIndex] != -1) {
-        newNetworkList = [list[bnbIndex], list[ethIndex]];
-      }
-      newNetworkList.addAll(list.where((item) => item.id != 2 && item.id != 1));
 
-    }
   }
 
+
+  List<NetworkList> networkListBySymbol = [];
+  getNetworkBySymbol(String symbol) async {
+    networkList.clear();
+
+    print(symbol);
+    final db = await database;
+    final res = await db!.rawQuery('SELECT * FROM Network where symbol = "$symbol"');
+
+    List<NetworkList> list = res.map((c) {
+      return NetworkList.fromJson(c);
+    }).toList();
+    networkListBySymbol = list;
+
+
+  }
 
   deleteAllNetwork() async {
     final db = await database;
