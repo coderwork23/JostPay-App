@@ -165,22 +165,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    var width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: SafeArea(
           child: Center(
-            child:  RichText(
-                text: const TextSpan(
-                    children: [
-                      TextSpan(
-                          text: "Jost",
-                          style:MyStyle.tx28BYellow
-                      ),
-                      TextSpan(
-                          text: "Pay",
-                          style:MyStyle.tx28RGreen
-                      ),
-                    ]
-                )
+            child:   Image.asset(
+              "assets/images/splash_screen.png",
+              height: 40,
+              width: width * 0.4,
+              fit: BoxFit.contain,
             ),
           )
       ),

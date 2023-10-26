@@ -259,8 +259,8 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (context) => AlertDialog(
         backgroundColor:  MyColor.backgroundColor,
         title: Text(
-           "Are_you_sure",
-          style: MyStyle.tx18RWhite.copyWith(
+           "Are you sure",
+          style: MyStyle.tx18BWhite.copyWith(
             fontSize: 16
           )
         ),
@@ -271,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const Icon(Icons.warning_amber,size: 17,color: MyColor.yellowColor,),
             Flexible(
               child: Text(
-                  "Do_you_want_to_Delete_Your_All_Accounts",
+                  "Do you want to delete your all accounts",
                   style: MyStyle.tx18RWhite.copyWith(
                       fontSize: 14
                   )
@@ -374,6 +374,9 @@ class _LoginScreenState extends State<LoginScreen> {
     accountProvider = Provider.of<AccountProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -387,19 +390,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
 
                   // app image
-                  RichText(
-                      text: const TextSpan(
-                          children: [
-                            TextSpan(
-                                text: "Jost",
-                                style:MyStyle.tx28BYellow
-                            ),
-                            TextSpan(
-                                text: "Pay",
-                                style:MyStyle.tx28RGreen
-                            ),
-                          ]
-                      )
+                  Image.asset(
+                    "assets/images/splash_screen.png",
+                    height: 40,
+                    width: width * 0.4,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 15),
 

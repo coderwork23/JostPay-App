@@ -18,6 +18,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   
   @override
   Widget build(BuildContext context) {
+
+    var width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: SafeArea(
           child: Padding(
@@ -27,19 +30,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                RichText(
-                  text: const TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Jost",
-                        style:MyStyle.tx28BYellow
-                      ),
-                      TextSpan(
-                          text: "Pay",
-                          style:MyStyle.tx28RGreen
-                      ),
-                    ]
-                  )
+                Image.asset(
+                  "assets/images/splash_screen.png",
+                  height: 40,
+                  width: width * 0.4,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 12),
 
