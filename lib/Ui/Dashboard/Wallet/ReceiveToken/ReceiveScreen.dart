@@ -1,15 +1,57 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ReceiveScreen extends StatefulWidget {
-  const ReceiveScreen({super.key});
+  int networkId;
+  var networkName;
+  var networkSymbol;
+  ReceiveScreen({
+    super.key,
+    required this.networkId,
+    required this.networkName,
+    required this.networkSymbol
+  });
 
   @override
   State<ReceiveScreen> createState() => _ReceiveScreenState();
 }
 
 class _ReceiveScreenState extends State<ReceiveScreen> {
+
+  late String selectedAccountName = "",
+      selectedAccountAddress = "",selectedAccountId;
+  bool isLoaded = false;
+
+
+  @override
+  void initState() {
+    super.initState();
+    selectedAccount();
+  }
+
+  selectedAccount() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    selectedAccountName = sharedPreferences.getString('accountName') ?? "";
+
+
+    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,widget.networkId);
+    selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+
+    // await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,widget.networkId);
+
+    setState(() {
+      selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+      isLoaded = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return  Column(
@@ -29,7 +71,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
 
         // Select assets text
         Text(
-          "Receive ETH",
+          "Receive ${widget.networkSymbol}",
           style: MyStyle.tx28RGreen.copyWith(
               color: MyColor.mainWhiteColor,
               fontFamily: "NimbusSanLBol",
@@ -40,7 +82,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
 
         // warning message
         Text(
-          "Send only Ethereum (ETH) to this address. "
+          "Send only Ethereum (${widget.networkSymbol}) to this address. "
               "Sending any other coins may result in permanent loss.",
           textAlign: TextAlign.center,
           style:MyStyle.tx18RWhite.copyWith(
@@ -64,7 +106,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        "0x1BOBE8653CA24c8Cf54D056f116f696249a640",
+                        selectedAccountAddress,
                         textAlign: TextAlign.center,
                         style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
@@ -72,9 +114,16 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Icon(
-                      Icons.copy,
-                      color: MyColor.greenColor,
+                    InkWell(
+                      onTap: () {
+                        FlutterClipboard.copy(selectedAccountAddress).then((value) {
+                          Helper.dialogCall.showToast(context, "Copied");
+                        });
+                      },
+                      child : const Icon(
+                        Icons.copy,
+                        color: MyColor.greenColor,
+                      ),
                     ),
                   ],
                 ),
@@ -82,15 +131,20 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
             ),
             const SizedBox(width: 10),
 
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
-              decoration: const BoxDecoration(
-                color: MyColor.backgroundColor,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.share_outlined,
-                color: MyColor.greenColor,
+            InkWell(
+              onTap: () {
+                Share.share('${widget.networkSymbol} Address $selectedAccountAddress');
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
+                decoration: const BoxDecoration(
+                  color: MyColor.backgroundColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.share_outlined,
+                  color: MyColor.greenColor,
+                ),
               ),
             ),
           ],

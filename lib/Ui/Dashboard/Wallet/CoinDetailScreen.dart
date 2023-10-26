@@ -13,6 +13,7 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'ExchangeCoin/ExchangeScreen.dart';
 import 'ReceiveToken/ReceiveScreen.dart';
 import 'SendToken/SendCoinScreen.dart';
@@ -69,7 +70,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 minHeight: MediaQuery.of(context).size.height/2,
                 maxHeight: MediaQuery.of(context).size.height*0.8
             ),
-            child: const ReceiveScreen()
+            child: ReceiveScreen(
+              networkId: int.parse(widget.tokenNetworkId),
+              networkName: widget.tokenName,
+              networkSymbol: widget.tokenSymbol,
+            )
         );
       },
     );
@@ -525,98 +530,105 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     DateFormat('MMM dd, yyyy  hh:mm aa').format(time);
 
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: MyColor.darkGreyColor
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              // Transactions type icon
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: const BoxDecoration(
-                                  color: MyColor.darkGrey01Color,
-                                  shape: BoxShape.circle,
+                    return InkWell(
+                      onTap: () {
+                        launchUrl(
+                          Uri.parse(transectionProvider.transectionList[index].explorerUrl)
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: MyColor.darkGreyColor
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                // Transactions type icon
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: const BoxDecoration(
+                                    color: MyColor.darkGrey01Color,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Image.asset(
+                                    transectionProvider.transectionList[index].from.toLowerCase() == widget.selectedAccountAddress.toLowerCase()
+                                        ?
+                                    "assets/images/dashboard/send.png"
+                                        :
+                                    "assets/images/dashboard/receive.png",
+                                    height: 20,
+                                    width: 20,
+                                    fit: BoxFit.contain,
+                                    color: MyColor.greenColor,
+                                  ),
                                 ),
-                                child: Image.asset(
-                                  transectionProvider.transectionList[index].from.toLowerCase() == widget.selectedAccountAddress.toLowerCase()
-                                      ?
-                                  "assets/images/dashboard/send.png"
-                                      :
-                                  "assets/images/dashboard/receive.png",
-                                  height: 20,
-                                  width: 20,
-                                  fit: BoxFit.contain,
-                                  color: MyColor.greenColor,
+                                const SizedBox(width: 12),
+
+                                // coin name text
+                                Expanded(
+                                    child: Text(
+                                      widget.tokenName,
+                                      style: MyStyle.tx18RWhite,
+                                    )
                                 ),
-                              ),
-                              const SizedBox(width: 12),
+                                const SizedBox(width: 10),
 
-                              // coin name text
-                              Expanded(
-                                  child: Text(
-                                    "${widget.tokenName}",
-                                    style: MyStyle.tx18RWhite,
-                                  )
-                              ),
-                              const SizedBox(width: 10),
+                                // receive text
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "${ApiHandler.calculateLength("${transectionProvider.transectionList[index].value}")} ${widget.tokenSymbol}",
+                                      style: MyStyle.tx22RWhite.copyWith(
+                                          fontSize: 18,
+                                          color:  transectionProvider.transectionList[index].from.toLowerCase() == widget.selectedAccountAddress.toLowerCase()
+                                              ?
+                                          MyColor.redColor
+                                              :
+                                          MyColor.greenColor
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      "\$ ${ApiHandler.calculateLength("${(widget.tokenFullPrice * transectionProvider.transectionList[index].value)}")} ",
 
-                              // receive text
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    "${ApiHandler.calculateLength("${transectionProvider.transectionList[index].value}")} ${widget.tokenSymbol}",
-                                    style: MyStyle.tx22RWhite.copyWith(
-                                        fontSize: 18,
-                                        color:  transectionProvider.transectionList[index].from.toLowerCase() == widget.selectedAccountAddress.toLowerCase()
-                                            ?
-                                        MyColor.redColor
-                                            :
-                                        MyColor.greenColor
+                                      style: MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 15,
+                                          color: MyColor.grey01Color
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    "\$ ${ApiHandler.calculateLength("${(widget.tokenFullPrice * transectionProvider.transectionList[index].value)}")} ",
-
-                                    style: MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 15,
-                                        color: MyColor.grey01Color
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          RichText(
-                            text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Date: ",
-                                    style:MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 14,
-                                        color: MyColor.grey01Color
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: formattedDate,
-                                    style:MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 14,
-                                        color: MyColor.grey01Color
-                                    ),
-                                  )
-                                ]
+                                  ],
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 10),
+                            RichText(
+                              text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "Date: ",
+                                      style:MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 14,
+                                          color: MyColor.grey01Color
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: formattedDate,
+                                      style:MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 14,
+                                          color: MyColor.grey01Color
+                                      ),
+                                    )
+                                  ]
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

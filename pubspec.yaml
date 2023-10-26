@@ -37,11 +37,15 @@ dependencies:
   device_info_plus: ^9.1.0
   mobile_device_identifier: ^0.0.2
 
+  #Shared plus
+  share_plus: ^7.2.1
+
   # finger print
   local_auth: ^2.1.6
   cached_network_image: ^3.3.0
   socket_io_client: ^2.0.3+1
   intl: ^0.18.1
+  url_launcher: ^6.2.1
 
 
 

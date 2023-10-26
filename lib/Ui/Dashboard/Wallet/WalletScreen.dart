@@ -99,7 +99,7 @@ class _WalletScreenState extends State<WalletScreen> {
             minHeight: MediaQuery.of(context).size.height/2,
             maxHeight: MediaQuery.of(context).size.height*0.8
           ),
-            child: const ReceiveToken()
+            child: ReceiveToken()
         );
       },
     );

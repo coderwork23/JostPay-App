@@ -686,19 +686,19 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         sendNonce = "";
         sendTransactionFee = "";
 
-        fromAddressController.clear();
+        // fromAddressController.clear();
         toController.clear();
         sendTokenQuantity.clear();
 
-        sendTokenAddress = "";
-        sendTokenNetworkId = "";
-        sendTokenName = "";
-        sendTokenSymbol = "";
-        selectTokenMarketId = "";
-        sendTokenImage = "";
-        sendTokenBalance = "";
-        sendTokenId = "";
-        sendTokenUsd = "";
+        // sendTokenAddress = "";
+        // sendTokenNetworkId = "";
+        // sendTokenName = "";
+        // sendTokenSymbol = "";
+        // selectTokenMarketId = "";
+        // sendTokenImage = "";
+        // sendTokenBalance = "";
+        // sendTokenId = "";
+        // sendTokenUsd = "";
 
       });
 
