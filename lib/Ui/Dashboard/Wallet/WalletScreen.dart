@@ -109,7 +109,7 @@ class _WalletScreenState extends State<WalletScreen> {
   String selectedAccountId = "",
       selectedAccountName = "",
       selectedAccountAddress = "",
-      selectedAccountPrivateAddress = "",cryChange = "";
+      selectedAccountPrivateAddress = "";
 
   bool isCalculating = false;
   bool isLoaded = false;
@@ -132,7 +132,6 @@ class _WalletScreenState extends State<WalletScreen> {
 
     setState(() {
       isLoaded = false;
-      cryChange = sharedPreferences.getString('cryChange') ?? "";
       selectedAccountId = sharedPreferences.getString('accountId') ?? "";
       selectedAccountName = sharedPreferences.getString('accountName') ?? "";
       selectedAccountAddress = sharedPreferences.getString('accountAddress') ?? "";
@@ -238,7 +237,7 @@ class _WalletScreenState extends State<WalletScreen> {
     socket!.onConnect((_) {
 
       socket!.on("getTokenBalance", (response) async {
-        print(json.encode(response));
+        // print(json.encode(response));
         if(mounted) {
           if (response["status"] == true) {
             if ("${response["data"]["balance"]}" != "0") {
@@ -595,7 +594,6 @@ class _WalletScreenState extends State<WalletScreen> {
                      return InkWell(
                        onTap: () async {
 
-
                          double selectTokenUSD;
 
                          if(DBTokenProvider.dbTokenProvider.tokenList[index].price == null){
@@ -606,13 +604,10 @@ class _WalletScreenState extends State<WalletScreen> {
                          }
 
 
-                           await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,DBTokenProvider.dbTokenProvider.tokenList[index].networkId);
-                           selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                         await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,DBTokenProvider.dbTokenProvider.tokenList[index].networkId);
+                         selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
 
-
-
-
-                         // ignore: use_build_context_synchronously
+                           // ignore: use_build_context_synchronously
                          Navigator.push(
                            context,
                            MaterialPageRoute(
@@ -636,6 +631,7 @@ class _WalletScreenState extends State<WalletScreen> {
                              ),
                            )
                          );
+
                        },
                        child: Container(
                          margin: const EdgeInsets.only(bottom: 10),

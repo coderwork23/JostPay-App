@@ -48,7 +48,8 @@ class _QrScannerPageState extends State<QrScannerPage> {
                 final barcodes = capture.barcodes[0];
                 var result = barcodes;
                 if (result != null) {
-                  Navigator.pop(context, "${result.rawValue.toString()}");
+                  // print(result.rawValue.toString());
+                  Navigator.pop(context, result.rawValue.toString());
                 }
               }
             },

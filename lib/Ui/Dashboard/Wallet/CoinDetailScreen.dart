@@ -75,8 +75,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
-
-
   var height,width;
 
   late TransectionProvider transectionProvider;
@@ -307,7 +305,18 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const SendCoinScreen(),
+                            builder: (context) => SendCoinScreen(
+                                sendTokenAddress: widget.tokenAddress,
+                                sendTokenNetworkId: widget.tokenNetworkId,
+                                sendTokenName: widget.tokenName,
+                                sendTokenSymbol: widget.tokenSymbol,
+                                selectTokenMarketId: widget.tokenMarketId,
+                                sendTokenImage : widget.tokenImage,
+                                sendTokenBalance : widget.tokenBalance,
+                                sendTokenId : widget.tokenId,
+                                sendTokenUsd : "${widget.tokenFullPrice}",
+                                sendTokenDecimals:int.parse(widget.tokenDecimal)
+                            ),
                           )
                         );
                       },
