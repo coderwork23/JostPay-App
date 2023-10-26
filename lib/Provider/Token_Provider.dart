@@ -80,6 +80,7 @@ class TokenProvider with ChangeNotifier {
           await DBTokenProvider.dbTokenProvider.getAccountToken(id);
           List marketId = ["1","2","74","328","825","1027","1839","1958"];
           List tokenID = ["8","29","28","0","-1","1","2","10"];
+          List decimalsList = ["8","8","8","0","-1","18","18","6"];
 
 
           for(int i = 0; i<marketId.length; i++){
@@ -92,7 +93,10 @@ class TokenProvider with ChangeNotifier {
 
             if(DbNetwork.dbNetwork.networkListBySymbol.isNotEmpty) {
 
-              await DbAccountAddress.dbAccountAddress.getPublicKey(id, DbNetwork.dbNetwork.networkListBySymbol.first.id);
+              await DbAccountAddress.dbAccountAddress.getPublicKey(
+                  id,
+                  DbNetwork.dbNetwork.networkListBySymbol.first.id
+              );
 
               AccountTokenList accountTokenList = AccountTokenList(
                 id: int.parse(marketId[i]),
@@ -104,7 +108,7 @@ class TokenProvider with ChangeNotifier {
                 type: "",
                 address: "",
                 symbol: marketInfo['symbol'],
-                decimals: 0,
+                decimals: int.parse(decimalsList[i]),
                 logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/$marketId.png",
                 balance: "0",
                 networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
