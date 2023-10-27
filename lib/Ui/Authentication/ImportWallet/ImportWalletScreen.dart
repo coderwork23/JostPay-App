@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
@@ -18,7 +20,11 @@ import '../../../Provider/Token_Provider.dart';
 import '../../Dashboard/DashboardScreen.dart';
 
 class ImportWalletScreen extends StatefulWidget {
-  const ImportWalletScreen({super.key});
+  bool isNew;
+  ImportWalletScreen({
+    super.key,
+    required this.isNew
+  });
 
   @override
   State<ImportWalletScreen> createState() => _ImportWalletScreenState();
@@ -194,6 +200,97 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
     });
   }
 
+
+
+  TextEditingController nameController = TextEditingController();
+  newImportAccount() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    deviceId = sharedPreferences.getString('deviceId')!;
+    //print(deviceId);
+
+    var data = {
+      "name": nameController.text,
+      "device_id": deviceId,
+      "type": "mnemonic",
+      "password": "",
+      "mnemonic":  phraseController.text,
+    };
+
+    print(jsonEncode(data));
+
+    await accountProvider.addAccount(data, '/createWallet');
+    if (accountProvider.isSuccess == true) {
+
+      // print(accountProvider.accountData);
+      for(int j=0; j<DbNetwork.dbNetwork.networkList.length; j++){
+
+        await DbAccountAddress.dbAccountAddress.createAccountAddress(
+            accountProvider.accountData[0]["id"],
+            accountProvider.accountData[0][DbNetwork.dbNetwork.networkList[j].publicKeyName],
+            accountProvider.accountData[0][DbNetwork.dbNetwork.networkList[j].privateKeyName],
+            DbNetwork.dbNetwork.networkList[j].publicKeyName,
+            DbNetwork.dbNetwork.networkList[j].privateKeyName,
+            DbNetwork.dbNetwork.networkList[j].id,
+            DbNetwork.dbNetwork.networkList[j].name
+        );
+
+      }
+
+      await DBAccountProvider.dbAccountProvider.createAccount(
+          "${accountProvider.accountData[0]["id"]}",
+          accountProvider.accountData[0]["device_id"],
+          accountProvider.accountData[0]["name"],
+          accountProvider.accountData[0]["mnemonic"]
+      );
+
+      newAccount("${accountProvider.accountData[0]["id"]}");
+
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString('accountId', "${accountProvider.accountData[0]["id"]}");
+      sharedPreferences.setString('accountName', accountProvider.accountData[0]["name"]);
+
+
+    } else {
+
+      setState(() {
+        isLoading = false;
+      });
+
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Invalid Seed Phrase");
+
+    }
+  }
+
+  newAccount(String acId) async {
+    await DBAccountProvider.dbAccountProvider.getAllAccount();
+    newGetToken(acId);
+  }
+
+  newGetToken(String accountId) async {
+    await DbAccountAddress.dbAccountAddress.getAccountAddress(accountId);
+
+    for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
+      var data ={
+        "id":"1,2,74,328,825,1027,1839,1958"
+      };
+      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
+    }
+
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context,"refresh");
+    Navigator.pop(context,"refresh");
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -213,6 +310,40 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
                 color: MyColor.greenColor,
               )
           )
+      )
+          :
+      widget.isNew
+          ?
+      InkWell(
+        onTap: () {
+          if(phraseController.text.isNotEmpty && nameController.text.isNotEmpty) {
+            newImportAccount();
+          }else{
+            Helper.dialogCall.showToast(context, "Please provider all details");
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(15,0,15,15),
+          alignment: Alignment.center,
+          height: 45,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: phraseController.text.isNotEmpty && nameController.text.isNotEmpty
+              ?
+          MyStyle.buttonDecoration
+              :
+          MyStyle.invalidDecoration,
+
+          child: Text(
+            "Import wallet",
+            style:  MyStyle.tx18BWhite.copyWith(
+                color: phraseController.text.isNotEmpty && nameController.text.isNotEmpty
+                    ?
+                MyColor.mainWhiteColor
+                    :
+                MyColor.mainWhiteColor.withOpacity(0.4)
+            ),
+          ),
+        ),
       )
           :
       InkWell(
@@ -246,6 +377,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
           ),
         ),
       ),
+
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -258,10 +390,11 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
             size: 20,
           ),
         ),
-        title: Text(
+        title: const Text(
           "Import Wallet",
         ),
       ),
+
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15.0),
         child: SizedBox(
@@ -271,6 +404,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 22),
+
                 Text(
                   "Enter the 12 recovery phrase your wew given when you created your account",
                   style:MyStyle.tx22RWhite.copyWith(
@@ -279,8 +413,8 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-
                 const SizedBox(height: 22),
+
                 Container(
                   padding: const EdgeInsets.fromLTRB(18, 25, 18, 15),
                   decoration: BoxDecoration(
@@ -351,92 +485,124 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 22),
 
-
-                TextFormField(
-                  controller: pinCodeController,
-                  obscureText: showPassword,
-                  validator: (value) {
-                    if(value!.isEmpty){
-                      return "Please enter login password";
-                    }else{
-                      return null;
-                    }
-                  },
-                  cursorColor: MyColor.greenColor,
-                  style: MyStyle.tx18RWhite,
-                  decoration: MyStyle.textInputDecoration.copyWith(
-                      hintText: "Passwords",
-                      isDense: false,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 15
-                      ),
-                      suffixIcon: showPassword
-                          ?
-                      IconButton(
-                          onPressed: (){
-                            setState(() {
-                              showPassword = false;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: MyColor.mainWhiteColor,
-                          )
-                      )
-                          :
-                      IconButton(
-                          onPressed: (){
-                            setState(() {
-                              showPassword = true;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.visibility_off,
-                            color: MyColor.mainWhiteColor,
-                          )
-                      )
+                // Password TextFiled
+                Visibility(
+                  visible: !widget.isNew,
+                  child: TextFormField(
+                    controller: pinCodeController,
+                    obscureText: showPassword,
+                    validator: (value) {
+                      if(value!.isEmpty){
+                        return "Please enter login password";
+                      }else{
+                        return null;
+                      }
+                    },
+                    cursorColor: MyColor.greenColor,
+                    style: MyStyle.tx18RWhite,
+                    decoration: MyStyle.textInputDecoration.copyWith(
+                        hintText: "Passwords",
+                        isDense: false,
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 15
+                        ),
+                        suffixIcon: showPassword
+                            ?
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                showPassword = false;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.visibility,
+                              color: MyColor.mainWhiteColor,
+                            )
+                        )
+                            :
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                showPassword = true;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.visibility_off,
+                              color: MyColor.mainWhiteColor,
+                            )
+                        )
+                    ),
                   ),
                 ),
-                const SizedBox(height: 22),
+                SizedBox(height: widget.isNew ? 0 : 22),
 
-                InkWell(
-                  onTap: (){
-                    setState(() {
-                      fingerBool = !fingerBool;
-                    });
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-
-                      Container(
-                        height: 24,
-                        width: 24,
-                        decoration: BoxDecoration(
-                            color: fingerBool ? MyColor.greenColor : Colors.transparent,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              width: 1.5,
-                              color: fingerBool ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
-                            )
+                // Name TextFiled
+                Visibility(
+                  visible: widget.isNew,
+                  child: TextFormField(
+                    controller: nameController,
+                    validator: (value) {
+                      if(value!.isEmpty){
+                        return "Please enter wallet name";
+                      }else{
+                        return null;
+                      }
+                    },
+                    cursorColor: MyColor.greenColor,
+                    style: MyStyle.tx18RWhite,
+                    decoration: MyStyle.textInputDecoration.copyWith(
+                        hintText: "Wallet Name",
+                        isDense: false,
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 15
                         ),
-                        child: fingerBool ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "Sign in with FaceID and Finger Print",
-                          style: MyStyle.tx18RWhite.copyWith(
-                            fontSize: 14,
-                              color: fingerBool ? MyColor.whiteColor : MyColor.greyColor
+                    ),
+                  ),
+                ),
+                SizedBox(height: widget.isNew ? 0 : 10),
+
+                // FingerPrint
+                Visibility(
+                  visible: !widget.isNew,
+                  child: InkWell(
+                    onTap: (){
+                      setState(() {
+                        fingerBool = !fingerBool;
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+
+                        Container(
+                          height: 24,
+                          width: 24,
+                          decoration: BoxDecoration(
+                              color: fingerBool ? MyColor.greenColor : Colors.transparent,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                width: 1.5,
+                                color: fingerBool ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
+                              )
                           ),
+                          child: fingerBool ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
                         ),
-                      )
-                    ],
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Sign in with FaceID and Finger Print",
+                            style: MyStyle.tx18RWhite.copyWith(
+                              fontSize: 14,
+                                color: fingerBool ? MyColor.whiteColor : MyColor.greyColor
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),

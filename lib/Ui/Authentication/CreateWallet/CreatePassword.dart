@@ -22,6 +22,7 @@ class _CreatePasswordState extends State<CreatePassword> {
   late TokenProvider tokenProvider;
 
   TextEditingController passController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
   TextEditingController rePassController = TextEditingController();
 
   bool showPassword = true,showRePassword = true;
@@ -40,7 +41,7 @@ class _CreatePasswordState extends State<CreatePassword> {
 
 
     var data = {
-      "name": "",
+      "name": nameController.text.isEmpty ? "Main Wallet" : nameController.text,
       "device_id": deviceId,
       "type": "new",
       "password": widget.isNew ? "" : passController.text,
@@ -102,8 +103,9 @@ class _CreatePasswordState extends State<CreatePassword> {
     accountProvider = Provider.of<AccountProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
+    //rule garment lens cat engine observe weasel minimum furnace shoot light tube
     return Scaffold(
-      bottomNavigationBar:  isLoading == true
+      bottomNavigationBar: isLoading == true
           ?
       const SizedBox(
           height:52,
@@ -112,6 +114,37 @@ class _CreatePasswordState extends State<CreatePassword> {
                 color: MyColor.greenColor,
               )
           )
+      )
+          :
+      widget.isNew
+          ?
+      InkWell(
+        onTap: () {
+          if(nameController.text.isNotEmpty) {
+            importAccount();
+          }
+        },
+        child: Container(
+          alignment: Alignment.center,
+          height: 45,
+          margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: nameController.text.isEmpty
+              ?
+          MyStyle.invalidDecoration
+              :
+          MyStyle.buttonDecoration,
+          child: Text(
+              "Continue",
+              style: MyStyle.tx18BWhite.copyWith(
+                  color: nameController.text.isEmpty
+                      ?
+                  MyColor.mainWhiteColor.withOpacity(0.4)
+                      :
+                  MyColor.mainWhiteColor
+              )
+          ),
+        ),
       )
           :
       InkWell(
@@ -125,13 +158,25 @@ class _CreatePasswordState extends State<CreatePassword> {
           height: 45,
           margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
           padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: MyStyle.buttonDecoration,
-          child:  const Text(
+          decoration: nameController.text.isEmpty || passController.text.isEmpty || rePassController.text.isEmpty
+              ?
+          MyStyle.invalidDecoration
+              :
+          MyStyle.buttonDecoration,
+          child: Text(
               "Continue",
-              style: MyStyle.tx18BWhite
+              style: MyStyle.tx18BWhite.copyWith(
+                color: nameController.text.isEmpty || passController.text.isEmpty || rePassController.text.isEmpty
+                    ?
+                MyColor.mainWhiteColor.withOpacity(0.4)
+                    :
+                MyColor.mainWhiteColor
+              )
           ),
         ),
       ),
+
+
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -145,6 +190,7 @@ class _CreatePasswordState extends State<CreatePassword> {
           ),
         ),
       ),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -174,11 +220,10 @@ class _CreatePasswordState extends State<CreatePassword> {
                 const SizedBox(height: 22),
 
                 TextFormField(
-                  controller: passController,
-                  obscureText: showPassword,
+                  controller: nameController,
                   validator: (value) {
                     if(value!.isEmpty){
-                      return "Please enter login password";
+                      return "Please enter wallet name";
                     }else{
                       return null;
                     }
@@ -186,88 +231,118 @@ class _CreatePasswordState extends State<CreatePassword> {
                   cursorColor: MyColor.greenColor,
                   style: MyStyle.tx18RWhite,
                   decoration: MyStyle.textInputDecoration.copyWith(
-                      hintText: "Passwords",
+                      hintText: "Wallet Name",
                       isDense: false,
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 20,
                           horizontal: 15
                       ),
-                      suffixIcon: showPassword
-                          ?
-                      IconButton(
-                          onPressed: (){
-                            setState(() {
-                              showPassword = false;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: MyColor.mainWhiteColor,
-                          )
-                      )
-                          :
-                      IconButton(
-                          onPressed: (){
-                            setState(() {
-                              showPassword = true;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.visibility_off,
-                            color: MyColor.mainWhiteColor,
-                          )
-                      )
+
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                Visibility(
+                  visible: !widget.isNew,
+                  child: TextFormField(
+                    controller: passController,
+                    obscureText: showPassword,
+                    validator: (value) {
+                      if(value!.isEmpty){
+                        return "Please enter login password";
+                      }else{
+                        return null;
+                      }
+                    },
+                    cursorColor: MyColor.greenColor,
+                    style: MyStyle.tx18RWhite,
+                    decoration: MyStyle.textInputDecoration.copyWith(
+                        hintText: "Passwords",
+                        isDense: false,
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 15
+                        ),
+                        suffixIcon: showPassword
+                            ?
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                showPassword = false;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.visibility,
+                              color: MyColor.mainWhiteColor,
+                            )
+                        )
+                            :
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                showPassword = true;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.visibility_off,
+                              color: MyColor.mainWhiteColor,
+                            )
+                        )
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
 
 
-                TextFormField(
-                  controller: rePassController,
-                  obscureText: showRePassword,
-                  cursorColor: MyColor.greenColor,
-                  style: MyStyle.tx18RWhite,
-                  validator: (value) {
-                    if(value!.isEmpty){
-                      return "Please enter confirm password.";
-                    }else if(value != passController.text){
-                      return "Confirm password is not matched.";
-                    }else{
-                      return null;
-                    }
-                  },
-                  decoration: MyStyle.textInputDecoration.copyWith(
-                      hintText: "Confirm Passwords",
-                      isDense: false,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 15
-                      ),
-                      suffixIcon: showRePassword
-                          ?
-                      IconButton(
-                          onPressed: (){
-                            setState(() {
-                              showRePassword = false;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.visibility,
-                            color: MyColor.mainWhiteColor,
-                          )
-                      )
-                          :
-                      IconButton(
-                          onPressed: (){
-                            setState(() {
-                              showRePassword = true;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.visibility_off,
-                            color: MyColor.mainWhiteColor,
-                          )
-                      )
+                Visibility(
+                  visible: !widget.isNew,
+                  child: TextFormField(
+                    controller: rePassController,
+                    obscureText: showRePassword,
+                    cursorColor: MyColor.greenColor,
+                    style: MyStyle.tx18RWhite,
+                    validator: (value) {
+                      if(value!.isEmpty){
+                        return "Please enter confirm password.";
+                      }else if(value != passController.text){
+                        return "Confirm password is not matched.";
+                      }else{
+                        return null;
+                      }
+                    },
+                    decoration: MyStyle.textInputDecoration.copyWith(
+                        hintText: "Confirm Passwords",
+                        isDense: false,
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 15
+                        ),
+                        suffixIcon: showRePassword
+                            ?
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                showRePassword = false;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.visibility,
+                              color: MyColor.mainWhiteColor,
+                            )
+                        )
+                            :
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                showRePassword = true;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.visibility_off,
+                              color: MyColor.mainWhiteColor,
+                            )
+                        )
+                    ),
                   ),
                 ),
 

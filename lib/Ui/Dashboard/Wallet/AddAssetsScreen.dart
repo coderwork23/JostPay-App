@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Default_Token_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -26,11 +27,22 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var selectedAccountId = sharedPreferences.getString('accountId') ?? "";
     await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
-    toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, true);
+    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+    toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, false);
+
+    for(int i = 0; i< DBTokenProvider.dbTokenProvider.tokenList.length; i++){
+      var list = DBTokenProvider.dbTokenProvider.tokenList[i];
+      // print(list.name);
+      int index = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => element.id == list.id);
+      if(index != -1){
+        print(list.name);
+        toggleList[i] = true;
+      }
+    }
+
     isLoading = false;
     setState(() {});
   }
-
 
   @override
   void initState() {
@@ -119,7 +131,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
                 var list = DBTokenProvider.dbTokenProvider.tokenList[index];
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: 18),
                   child: Row(
                     children: [
                       ClipRRect(
@@ -150,9 +162,24 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
                       const SizedBox(width: 12),
 
                       Expanded(
-                        child: Text(
-                          list.name,
-                          style: MyStyle.tx18RWhite,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              list.name,
+                              style: MyStyle.tx18RWhite,
+                            ),
+                            Visibility(
+                              visible: list.type.isNotEmpty,
+                              child: Text(
+                                "type: ${list.type}",
+                                style:MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 13,
+                                    color: MyColor.grey01Color
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 12),

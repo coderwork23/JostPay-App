@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Default_Token_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
@@ -187,6 +188,8 @@ class _WalletScreenState extends State<WalletScreen> {
 
   // getToken for coin market cap
   getToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String? shareList = sharedPreferences.getString("defaultCoin");
     if (isNeeded == true) {
 
       // await DBTokenProvider.dbTokenProvider.deleteAccountToken(selectedAccountId);
@@ -199,15 +202,15 @@ class _WalletScreenState extends State<WalletScreen> {
         await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
       }
 
+
       if(mounted) {
         setState(() {
           isNeeded = false;
         });
       }
+    }else {
+      await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
     }
-
-    await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
-
 
     getSocketData();
     if(mounted) {
@@ -242,7 +245,7 @@ class _WalletScreenState extends State<WalletScreen> {
           if (response["status"] == true) {
             if ("${response["data"]["balance"]}" != "0") {
               if (response["data"]["balance"] != "null") {
-                await DBTokenProvider.dbTokenProvider.updateTokenBalance(
+                await DBDefaultTokenProvider.dbTokenProvider.updateTokenBalance(
                   '${response["data"]["balance"]}',
                   '${response["data"]["id"]}',
                 );
@@ -250,24 +253,24 @@ class _WalletScreenState extends State<WalletScreen> {
             }
           }
 
-          await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+
+          await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
           setState(() {});
           getAccountTotal();
         }
-
 
       });
     });
 
 
 
-    for (int i = 0; i < DBTokenProvider.dbTokenProvider.tokenList.length; i++) {
-      List <NetworkList> networkList =  DbNetwork.dbNetwork.networkList.where((element) => element.id == DBTokenProvider.dbTokenProvider.tokenList[i].networkId).toList();
+    for (int i = 0; i < DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length; i++) {
+      List <NetworkList> networkList =  DbNetwork.dbNetwork.networkList.where((element) => element.id == DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].networkId).toList();
       var data = {
-        "id": "${DBTokenProvider.dbTokenProvider.tokenList[i].id}",
-        "network_id": "${DBTokenProvider.dbTokenProvider.tokenList[i].networkId}",
-        "tokenAddress": DBTokenProvider.dbTokenProvider.tokenList[i].address,
-        "address": DBTokenProvider.dbTokenProvider.tokenList[i].accAddress,
+        "id": "${DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].id}",
+        "network_id": "${DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].networkId}",
+        "tokenAddress": DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].address,
+        "address": DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].accAddress,
         "trxPrivateKey": "$trxPrivateKey",
         "isCustomeRPC":false,
         "network_url":networkList.isEmpty ? "" : networkList.first.url,
@@ -294,21 +297,21 @@ class _WalletScreenState extends State<WalletScreen> {
 
     double valueUsd = 0.0;
 
-    for(int i =0; i<DBTokenProvider.dbTokenProvider.tokenList.length; i++){
+    for(int i =0; i<DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length; i++){
 
-      // print("${DBTokenProvider.dbTokenProvider.tokenList[i].name} balance:- ${DBTokenProvider.dbTokenProvider.tokenList[i].balance} price:- ${DBTokenProvider.dbTokenProvider.tokenList[i].price}");
+      // print("${DBDefaultTokenProvider.dbTokenProvider.tokenList[i].name} balance:- ${DBDefaultTokenProvider.dbTokenProvider.tokenList[i].balance} price:- ${DBDefaultTokenProvider.dbTokenProvider.tokenList[i].price}");
 
 
 
-      if (DBTokenProvider.dbTokenProvider.tokenList[i].balance == "" ||
-          DBTokenProvider.dbTokenProvider.tokenList[i].balance == "0" ||
-          DBTokenProvider.dbTokenProvider.tokenList[i].balance == null ||
-          DBTokenProvider.dbTokenProvider.tokenList[i].price == 0.0
+      if (DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].balance == "" ||
+          DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].balance == "0" ||
+          DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].balance == null ||
+          DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].price == 0.0
       ) {
         valueUsd += 0;
       }
       else {
-        valueUsd += double.parse(DBTokenProvider.dbTokenProvider.tokenList[i].balance) * DBTokenProvider.dbTokenProvider.tokenList[i].price;
+        valueUsd += double.parse(DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].balance) * DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[i].price;
       }
 
     }
@@ -333,7 +336,7 @@ class _WalletScreenState extends State<WalletScreen> {
     socket!.destroy();
     socket!.dispose();
 
-    if(DBTokenProvider.dbTokenProvider.tokenList.isNotEmpty){
+    if(DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.isNotEmpty){
       setState(() {
         updatingValue = true;
         updatingTotalValue = showTotalValue;
@@ -605,20 +608,20 @@ class _WalletScreenState extends State<WalletScreen> {
                    onRefresh: isCalculating == true ? doNothing : _getData,
                    refreshing: _showRefresh,
                    child: ListView.builder(
-                     itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
+                     itemCount: DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length,
                      padding: const EdgeInsets.fromLTRB(12,10,12,70),
                      itemBuilder: (context, index) {
 
-                       var list = DBTokenProvider.dbTokenProvider.tokenList[index];
+                       var list = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[index];
 
-                       // print(list.marketId);
+                       // print(list.toJson());
                        double? tokenUsdPrice;
 
-                       if(DBTokenProvider.dbTokenProvider.tokenList[index].price == 0.0){
+                       if(list.price == 0.0){
                          tokenUsdPrice =  0.0;
                        }
-                       else if (DBTokenProvider.dbTokenProvider.tokenList[index].price > 0.0){
-                         tokenUsdPrice = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
+                       else if (list.price > 0.0){
+                         tokenUsdPrice = double.parse(list.balance) * list.price;
                        }
 
                        return InkWell(
@@ -626,15 +629,15 @@ class _WalletScreenState extends State<WalletScreen> {
 
                            double selectTokenUSD;
 
-                           if(DBTokenProvider.dbTokenProvider.tokenList[index].price == null){
+                           if(list.price == null){
                              selectTokenUSD = 0.0;
                            }
                            else{
-                             selectTokenUSD = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
+                             selectTokenUSD = double.parse(list.balance) * list.price;
                            }
 
 
-                           await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,DBTokenProvider.dbTokenProvider.tokenList[index].networkId);
+                           await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,list.networkId);
                            selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
 
                              // ignore: use_build_context_synchronously
@@ -643,21 +646,21 @@ class _WalletScreenState extends State<WalletScreen> {
                              MaterialPageRoute(
                                builder: (context) => CoinDetailScreen(
                                    selectedAccountAddress: selectedAccountAddress,
-                                   tokenDecimal: "${DBTokenProvider.dbTokenProvider.tokenList[index].decimals}",
-                                   tokenId: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
-                                   tokenNetworkId: "${DBTokenProvider.dbTokenProvider.tokenList[index].networkId}",
-                                   tokenAddress: DBTokenProvider.dbTokenProvider.tokenList[index].address,
-                                   tokenName: DBTokenProvider.dbTokenProvider.tokenList[index].name,
-                                   tokenSymbol: DBTokenProvider.dbTokenProvider.tokenList[index].symbol,
-                                   tokenBalance: DBTokenProvider.dbTokenProvider.tokenList[index].balance,
-                                   tokenMarketId: "${DBTokenProvider.dbTokenProvider.tokenList[index].marketId}",
-                                   tokenType: DBTokenProvider.dbTokenProvider.tokenList[index].type,
-                                   tokenImage: DBTokenProvider.dbTokenProvider.tokenList[index].logo,
+                                   tokenDecimal: "${list.decimals}",
+                                   tokenId: "${list.token_id}",
+                                   tokenNetworkId: "${list.networkId}",
+                                   tokenAddress: list.address,
+                                   tokenName: list.name,
+                                   tokenSymbol: list.symbol,
+                                   tokenBalance: list.balance,
+                                   tokenMarketId: "${list.marketId}",
+                                   tokenType: list.type,
+                                   tokenImage: list.logo,
                                    tokenUsdPrice: selectTokenUSD,
-                                   tokenFullPrice: DBTokenProvider.dbTokenProvider.tokenList[index].price,
-                                   tokenUpDown: DBTokenProvider.dbTokenProvider.tokenList[index].percentChange24H,
-                                   token_transection_Id: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
-                                   explorerUrl: DBTokenProvider.dbTokenProvider.tokenList[index].explorer_url,
+                                   tokenFullPrice: list.price,
+                                   tokenUpDown: list.percentChange24H,
+                                   token_transection_Id: "${list.token_id}",
+                                   explorerUrl: list.explorer_url,
                                ),
                              )
                            );
@@ -750,11 +753,11 @@ class _WalletScreenState extends State<WalletScreen> {
                                          ?
                                      "--"
                                          :
-                                     DBTokenProvider.dbTokenProvider.tokenList[index].balance == "0"
+                                     list.balance == "0"
                                          ?
-                                     "${double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance).toStringAsFixed(2)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}"
+                                     "${double.parse(list.balance).toStringAsFixed(2)} ${list.symbol}"
                                          :
-                                     "${ApiHandler.calculateLength3(DBTokenProvider.dbTokenProvider.tokenList[index].balance)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}",
+                                     "${ApiHandler.calculateLength3(list.balance)} ${list.symbol}",
 
                                      style: MyStyle.tx22RWhite.copyWith(
                                        fontSize: 16,

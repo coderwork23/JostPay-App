@@ -350,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // ignore: use_build_context_synchronously
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => const WelcomeScreen()
+        context, MaterialPageRoute(builder: (context) => WelcomeScreen(isNew: false)
     )
     );
 

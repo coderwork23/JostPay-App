@@ -129,11 +129,21 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if(isLogin == "true"){
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const LoginScreen()
+          )
+        );
       }
       else{
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>  WelcomeScreen(isNew: false,)
+          )
+        );
       }
 
     }
@@ -141,11 +151,21 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if(isLogin == "true"){
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const LoginScreen()
+          )
+        );
       }
       else{
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>  WelcomeScreen(isNew: false,)
+          )
+        );
       }
 
     }

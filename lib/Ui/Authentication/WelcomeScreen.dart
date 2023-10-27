@@ -6,7 +6,11 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'ImportWallet/ImportWalletScreen.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key});
+  bool isNew;
+  WelcomeScreen({
+    super.key,
+    required this.isNew
+  });
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -141,7 +145,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const CreatePassword(isNew: false),
+                          builder: (context) => CreatePassword(isNew: widget.isNew),
                         )
                     );
                   },
@@ -164,7 +168,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ImportWalletScreen(),
+                          builder: (context) => ImportWalletScreen(isNew: widget.isNew),
                         )
                     );
                   },

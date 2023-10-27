@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SecurityScreen extends StatefulWidget {
   const SecurityScreen({super.key});
@@ -19,6 +20,19 @@ class _SecurityScreenState extends State<SecurityScreen> {
   TextEditingController newPassController = TextEditingController();
   TextEditingController reNewPassController = TextEditingController();
 
+
+  getData()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      fingerPrint = sharedPreferences.getBool('fingerOn') ?? false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
 
   @override
   Widget build(BuildContext context) {

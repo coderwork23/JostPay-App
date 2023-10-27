@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
+import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
@@ -12,6 +14,18 @@ class WalletsScreen extends StatefulWidget {
 }
 
 class _WalletsScreenState extends State<WalletsScreen> {
+
+  getAllAccount()async{
+    await DBAccountProvider.dbAccountProvider.getAllAccount();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAllAccount();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,27 +41,42 @@ class _WalletsScreenState extends State<WalletsScreen> {
             size: 20,
           ),
         ),
-        title: Text(
+        title: const Text(
           "Wallets",
           // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
           // textAlign: TextAlign.center,
         ),
         actions: [
-          Image.asset(
-            "assets/images/dashboard/add.png",
-            height: 25,
-            width: 25,
-            fit: BoxFit.contain,
-            color: MyColor.mainWhiteColor,
+          InkWell(
+            onTap: () {
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) => WelcomeScreen(
+              //         isNew: true,
+              //       ),
+              //     )
+              // );
+            },
+            child: Image.asset(
+              "assets/images/dashboard/add.png",
+              height: 25,
+              width: 25,
+              fit: BoxFit.contain,
+              color: MyColor.mainWhiteColor,
+            ),
           ),
           const SizedBox(width: 20),
         ],
       ),
       body: ListView.builder(
-        itemCount: 1,
+        itemCount: DBAccountProvider.dbAccountProvider.newAccountList.length,
         shrinkWrap: true,
         padding: const EdgeInsets.fromLTRB(15,20,15,10),
         itemBuilder: (context, index) {
+
+          var list = DBAccountProvider.dbAccountProvider.newAccountList[index];
+
           return InkWell(
             onTap: () {
               Navigator.push(
@@ -58,6 +87,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
               );
             },
             child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
@@ -88,7 +118,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Main Wallet",
+                          list.name,
                           style:MyStyle.tx18RWhite.copyWith(
                             fontSize: 20,
                           ),

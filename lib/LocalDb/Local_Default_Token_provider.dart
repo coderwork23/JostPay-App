@@ -4,12 +4,12 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-class DBTokenProvider{
+class DBDefaultTokenProvider{
 
   static Database? _database;
-  static final DBTokenProvider dbTokenProvider = DBTokenProvider._();
+  static final DBDefaultTokenProvider dbTokenProvider = DBDefaultTokenProvider._();
 
-  DBTokenProvider._();
+  DBDefaultTokenProvider._();
 
   Future<Database?> get database async {
     if (_database != null) return _database;
@@ -21,11 +21,11 @@ class DBTokenProvider{
 
   initDB() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentDirectory.path, 'token_manager.db');
+    final path = join(documentDirectory.path, 'defaultToken_manager.db');
 
     return await openDatabase(path, version: 3, onOpen: (db) {},
         onCreate: (Database db, int version) async {
-          await db.execute('CREATE TABLE Token('
+          await db.execute('CREATE TABLE DefaultToken('
               'id INTEGER,'
               'token_id INTEGER,'
               'acc_address TEXT,'
@@ -54,12 +54,16 @@ class DBTokenProvider{
 
   createToken(AccountTokenList newToken) async{
     final db= await database;
-    final res = await db!.insert('Token', newToken.toJson());
+    final res = await db!.insert('DefaultToken', newToken.toJson());
     // print("data add here $res");
     return res;
   }
 
-  updateToken(AccountTokenList newToken,tokenId,id) async{
+  updateToken(AccountTokenList newToken,id,acId) async{
+
+    print("token id :---> ${id}");
+    print("token name :---> ${newToken.name}");
+
     final db= await database;
     Map<String, dynamic> data = {
       "id": newToken.id,
@@ -79,51 +83,50 @@ class DBTokenProvider{
       "accountId": newToken.accountId,
     };
 
-    final res = await db!.update('Token', data, where: "id = ? AND accountId = ? ",whereArgs: [tokenId,id]);
-    getAccountToken(id);
+    final res = await db!.update('DefaultToken', data, where: "id = ? AND accountId = ? ",whereArgs: [id,acId]);
+    print("update res --->  $res");
+    getAccountToken(acId);
     return res;
   }
 
-    getTokenById(acId,id) async {
-    print("object $id");
-    final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM Token Where accountId = '$acId' AND id='$id'");
-    print("res ---> $res");
-    return res.isEmpty ? null :res[0];
-  }
+
+
 
   Future<int> deleteAllToken() async {
     final db = await database;
-    final res = await db!.rawDelete('DELETE FROM Token');
+    final res = await db!.rawDelete('DELETE FROM DefaultToken');
     return res;
   }
 
   Future<int> deleteToken(String id) async {
     final db = await database;
-    final res = await db!.rawDelete("DELETE FROM Token Where id = $id");
+    final res = await db!.rawDelete("DELETE FROM DefaultToken Where id = $id");
     return res;
   }
 
   Future<int> deleteAccountToken(String accountId) async {
     final db = await database;
-    final res = await db!.rawDelete("DELETE FROM Token Where accountId = '$accountId'");
+    final res = await db!.rawDelete("DELETE FROM DefaultToken Where accountId = '$accountId'");
     return res;
   }
 
-  List<AccountTokenList> tokenList = [];
+  List<AccountTokenList> tokenDefaultList = [];
   getAccountToken(String accountId) async {
-
+    tokenDefaultList.clear();
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM Token Where accountId = '$accountId'");
+    final res = await db!.rawQuery("SELECT * FROM DefaultToken Where accountId = '$accountId'");
 
+    // print("getAccountToken ${res.length}");
     List<AccountTokenList> list = res.map((c) {
+      print("c ---> $c");
+
       return AccountTokenList.fromJson(
           c,
           accountId,
       );
     }).toList();
-    tokenList = list;
-    tokenList.sort((a, b) {
+    tokenDefaultList = list;
+    tokenDefaultList.sort((a, b) {
       var aValue = a.name;
       var bValue = b.name;
       return aValue.compareTo(bValue);
@@ -140,7 +143,7 @@ class DBTokenProvider{
     List<AccountTokenList> list;
 
     final db = await database;
-    final res = await db!.rawUpdate("UPDATE Token SET price = $live_price, percent_change_24h = $gain_loss WHERE market_id = '$id'");
+    final res = await db!.rawUpdate("UPDATE DefaultToken SET price = $live_price, percent_change_24h = $gain_loss WHERE market_id = '$id'");
 
     //getAccountToken(address,btcAddress,solAddress,dotAddress);
 
@@ -150,7 +153,7 @@ class DBTokenProvider{
   updateTokenBalance(String balance,String id) async {
 
     final db = await database;
-    final res = await db!.rawUpdate("UPDATE Token SET balance = $balance WHERE id = '$id'");
+    final res = await db!.rawUpdate("UPDATE DefaultToken SET balance = $balance WHERE id = '$id'");
 
     //getAccountToken(address,btcAddress,solAddress,dotAddress);
 
@@ -159,7 +162,7 @@ class DBTokenProvider{
 
   getTokenUsdPrice (id) async{
     final db = await database;
-    final res = await db!.rawQuery("SELECT price FROM Token Where token_id = '$id'");
+    final res = await db!.rawQuery("SELECT price FROM DefaultToken Where token_id = '$id'");
     return res;
   }
 

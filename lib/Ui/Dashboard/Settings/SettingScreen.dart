@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Security/SecurityScreen.dart';
 import 'WalletConnect/WalletConnectScreen.dart';
 import 'WalletsPages/WalletsScreen.dart';
@@ -13,13 +14,30 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+
+  String selectedAccountName = "";
+
+  getWalletName()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      selectedAccountName = sharedPreferences.getString('accountName') ?? "";
+    });
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    getWalletName();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
+        title: const Padding(
+          padding: EdgeInsets.only(top: 4.0),
           child: Text(
             "Settings",
             // style:MyStyle.tx22RWhite.copyWith(
@@ -85,7 +103,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     const SizedBox(width: 10),
 
                     Text(
-                      "Main Wallet",
+                      selectedAccountName,
                       style:MyStyle.tx18RWhite.copyWith(
                         fontSize: 18,
                         color: MyColor.grey01Color
