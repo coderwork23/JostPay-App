@@ -241,7 +241,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
                     ?
                 MyColor.mainWhiteColor
                     :
-                MyColor.mainWhiteColor.withOpacity(0.5)
+                MyColor.mainWhiteColor.withOpacity(0.4)
             ),
           ),
         ),

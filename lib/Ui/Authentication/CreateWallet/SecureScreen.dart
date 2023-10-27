@@ -109,13 +109,11 @@ class _SecureScreenState extends State<SecureScreen> {
                   alignment: Alignment.center,
                   height: 45,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: MyStyle.buttonDecoration.copyWith(
-                    color: term ? MyColor.greenColor : MyColor.greenColor.withOpacity(0.6)
-                  ),
+                  decoration:term ? MyStyle.buttonDecoration : MyStyle.invalidDecoration,
                   child:  Text(
                     "Get Started",
                     style: MyStyle.tx18BWhite.copyWith(
-                      color: term ? MyColor.mainWhiteColor : MyColor.mainWhiteColor.withOpacity(0.6)
+                      color: term ? MyColor.mainWhiteColor : MyColor.mainWhiteColor.withOpacity(0.4)
                     ),
                   ),
                 ),

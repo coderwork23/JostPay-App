@@ -40,7 +40,7 @@ class MyStyle{
 
   static BoxDecoration invalidDecoration = BoxDecoration(
     borderRadius: BorderRadius.circular(10),
-    color: MyColor.greenColor.withOpacity(0.5),
+    color: MyColor.boarderColor,
   );
 
 

@@ -844,7 +844,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                     || double.parse(sendTokenQuantity.text) < 0.00
                     || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
                     ?
-                MyColor.mainWhiteColor.withOpacity(0.6)
+                MyColor.mainWhiteColor.withOpacity(0.4)
                     :
                 MyColor.mainWhiteColor
             ),
@@ -898,7 +898,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                     || double.parse(sendTokenQuantity.text) < 0.00
                     || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
                     ?
-                MyColor.mainWhiteColor.withOpacity(0.6)
+                MyColor.mainWhiteColor.withOpacity(0.4)
                     :
                 MyColor.mainWhiteColor
             ),
