@@ -36,8 +36,6 @@ class _SecureScreenState extends State<SecureScreen> {
         ),
         title: Text(
           "Secure your wallet",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 18),
-          textAlign: TextAlign.center,
         ),
       ),
       body: SafeArea(

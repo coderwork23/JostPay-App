@@ -22,10 +22,10 @@ class _SettingScreenState extends State<SettingScreen> {
           padding: const EdgeInsets.only(top: 4.0),
           child: Text(
             "Settings",
-            style:MyStyle.tx22RWhite.copyWith(
-                fontSize: 24,
-              color: MyColor.mainWhiteColor
-            ),
+            // style:MyStyle.tx22RWhite.copyWith(
+            //     fontSize: 24,
+            //   color: MyColor.mainWhiteColor
+            // ),
           ),
         ),
 

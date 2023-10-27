@@ -30,10 +30,6 @@ class _SellScreenState extends State<SellScreen> {
           padding: const EdgeInsets.only(top: 4.0),
           child: Text(
             "Withdraw",
-            style:MyStyle.tx22RWhite.copyWith(
-                fontSize: 24,
-                color: MyColor.mainWhiteColor
-            ),
           ),
         ),
         actions: [

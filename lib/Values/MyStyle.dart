@@ -88,4 +88,47 @@ class MyStyle{
     )
   );
 
+  static InputDecoration textInputDecoration2 = InputDecoration(
+      isDense: true,
+      border: InputBorder.none,
+      errorStyle: MyStyle.tx18RWhite.copyWith(
+          fontSize: 12,
+          color: MyColor.redColor
+      ),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(
+              color: MyColor.redColor,
+              width: 0.8
+          )
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(
+              color: MyColor.redColor,
+              width: 0.8
+          )
+      ),
+      hintStyle:MyStyle.tx22RWhite.copyWith(
+          fontSize: 18,
+          color: MyColor.whiteColor.withOpacity(0.7)
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(
+              color: MyColor.boarderColor,
+              width: 0.8
+          )
+      ),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(
+              color: MyColor.boarderColor,
+              width: 0.8
+          )
+      )
+  );
+
+
 }

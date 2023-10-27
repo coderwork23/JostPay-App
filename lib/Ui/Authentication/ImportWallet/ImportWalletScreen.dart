@@ -260,8 +260,6 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
         ),
         title: Text(
           "Import Wallet",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 18),
-          textAlign: TextAlign.center,
         ),
       ),
       body: Padding(

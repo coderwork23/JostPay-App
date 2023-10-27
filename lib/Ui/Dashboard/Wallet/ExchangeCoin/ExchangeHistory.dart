@@ -27,8 +27,8 @@ class _ExchangeHistoryState extends State<ExchangeHistory> {
         ),
         title: Text(
           "History",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          textAlign: TextAlign.center,
+          // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
+          // textAlign: TextAlign.center,
         ),
       ),
       body: Center(

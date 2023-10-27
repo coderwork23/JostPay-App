@@ -61,8 +61,8 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
         ),
         title: Text(
           "Exchange",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          textAlign: TextAlign.center,
+          // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
+          // textAlign: TextAlign.center,
         ),
         actions: [
           IconButton(

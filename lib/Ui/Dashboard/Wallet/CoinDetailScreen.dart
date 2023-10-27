@@ -522,8 +522,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     DateTime.fromMillisecondsSinceEpoch(
                         int.parse(transectionDetails.timeStamp) * 1000);
 
-                    String formattedDate =
-                    DateFormat('MMM dd, yyyy  hh:mm aa').format(time);
+                    String formattedDate = DateFormat('MMM dd, yyyy').format(time);
+                    String formattedTime = DateFormat('hh:mm aa').format(time);
 
 
                     return InkWell(
@@ -546,7 +546,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                               children: [
                                 // Transactions type icon
                                 Container(
-                                  padding: const EdgeInsets.all(12),
+                                  padding: const EdgeInsets.all(10),
                                   decoration: const BoxDecoration(
                                     color: MyColor.darkGrey01Color,
                                     shape: BoxShape.circle,
@@ -557,8 +557,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                     "assets/images/dashboard/send.png"
                                         :
                                     "assets/images/dashboard/receive.png",
-                                    height: 20,
-                                    width: 20,
+                                    height: 17,
+                                    width: 17,
                                     fit: BoxFit.contain,
                                     color: MyColor.greenColor,
                                   ),
@@ -575,21 +575,73 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                 const SizedBox(width: 10),
 
                                 // receive text
+                                Text(
+                                  "${ApiHandler.calculateLength("${transectionProvider.transectionList[index].value}")} ${widget.tokenSymbol}",
+                                  style: MyStyle.tx22RWhite.copyWith(
+                                      fontSize: 16,
+                                      color:  transectionProvider.transectionList[index].from.toLowerCase() == widget.selectedAccountAddress.toLowerCase()
+                                          ?
+                                      MyColor.redColor
+                                          :
+                                      MyColor.greenColor
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: "Date: ",
+                                                style:MyStyle.tx18RWhite.copyWith(
+                                                    fontSize: 14,
+                                                    color: MyColor.grey01Color
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: formattedDate,
+                                                style:MyStyle.tx18RWhite.copyWith(
+                                                    fontSize: 14,
+                                                    color: MyColor.grey01Color
+                                                ),
+                                              )
+                                            ]
+                                        ),
+                                      ),
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: "Time: ",
+                                                style:MyStyle.tx18RWhite.copyWith(
+                                                    fontSize: 14,
+                                                    color: MyColor.grey01Color
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: formattedTime,
+                                                style:MyStyle.tx18RWhite.copyWith(
+                                                    fontSize: 14,
+                                                    color: MyColor.grey01Color
+                                                ),
+                                              )
+                                            ]
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      "${ApiHandler.calculateLength("${transectionProvider.transectionList[index].value}")} ${widget.tokenSymbol}",
-                                      style: MyStyle.tx22RWhite.copyWith(
-                                          fontSize: 18,
-                                          color:  transectionProvider.transectionList[index].from.toLowerCase() == widget.selectedAccountAddress.toLowerCase()
-                                              ?
-                                          MyColor.redColor
-                                              :
-                                          MyColor.greenColor
-                                      ),
-                                    ),
-                                    const SizedBox(height: 5),
                                     Text(
                                       "\$ ${ApiHandler.calculateLength("${(widget.tokenFullPrice * transectionProvider.transectionList[index].value)}")} ",
 
@@ -598,30 +650,31 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                           color: MyColor.grey01Color
                                       ),
                                     ),
+                                    RichText(
+                                      textAlign: TextAlign.end,
+                                      text: TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text: "Status: ",
+                                              style:MyStyle.tx18RWhite.copyWith(
+                                                  fontSize: 14,
+                                                  color: MyColor.grey01Color
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: transectionProvider.transectionList[index].status,
+                                              style:MyStyle.tx18RWhite.copyWith(
+                                                  fontSize: 14,
+                                                  color:transectionProvider.transectionList[index].status == "Success" ? MyColor.greenColor: MyColor.redColor
+
+                                              ),
+                                            )
+                                          ]
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 10),
-                            RichText(
-                              text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Date: ",
-                                      style:MyStyle.tx18RWhite.copyWith(
-                                          fontSize: 14,
-                                          color: MyColor.grey01Color
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: formattedDate,
-                                      style:MyStyle.tx18RWhite.copyWith(
-                                          fontSize: 14,
-                                          color: MyColor.grey01Color
-                                      ),
-                                    )
-                                  ]
-                              ),
                             ),
                           ],
                         ),

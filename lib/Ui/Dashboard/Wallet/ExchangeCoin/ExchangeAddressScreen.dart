@@ -57,8 +57,8 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
         ),
         title: Text(
           "Enter ETH address",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          textAlign: TextAlign.center,
+          // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
+          // textAlign: TextAlign.center,
         ),
 
       ),

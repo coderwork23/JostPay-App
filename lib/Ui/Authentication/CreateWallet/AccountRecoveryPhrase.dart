@@ -130,8 +130,7 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
         ),
         title: Text(
           "Account Recovery Phrase",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 18),
-          textAlign: TextAlign.center,
+
         ),
       ),
       body: SafeArea(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/SplashScreen.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
+import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 
 import 'Provider/Account_Provider.dart';
@@ -70,6 +71,7 @@ class _MyAppState extends State<MyApp> {
           highlightColor: Colors.transparent,
           appBarTheme: const AppBarTheme(
             elevation: 0,
+            titleTextStyle: MyStyle.tx18BWhite
           )
         ),
         home: const SplashScreen(),

@@ -72,9 +72,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       sendTokenSymbol = "",
       selectTokenMarketId = "",
       sendTokenImage = "",
-      sendTokenBalance = "",
+      sendTokenBalance = "0",
       sendTokenId = "",
-      sendTokenUsd = "",
+      sendTokenUsd = "0",
       tokenType = ""; int sendTokenDecimals = 0;
 
   String networkSymbol = "";
@@ -863,126 +863,112 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         ),
         title: Text(
           "Sent ${widget.sendTokenSymbol}",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          textAlign: TextAlign.center,
         ),
       ),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // Account Name
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: MyColor.darkGreyColor
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            const SizedBox(height: 20),
 
 
-                  TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: sendTokenQuantity,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
-                    ],
-                    cursorColor: MyColor.greenColor,
-                    style: MyStyle.tx18RWhite,
-                    decoration: MyStyle.textInputDecoration.copyWith(
-                        hintText: "Enter quantity",
-                        isDense: false,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                    ),
-
-                  ),
-                  const SizedBox(height: 15),
-
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      "From",
-                      style: MyStyle.tx18BWhite,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: MyColor.backgroundColor,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Text(
-                      fromAddressController.text,
-                      style: MyStyle.tx18RWhite,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-
-
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      "To",
-                      style: MyStyle.tx18BWhite,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: toController,
-                    cursorColor: MyColor.greenColor,
-                    style: MyStyle.tx18RWhite,
-                    decoration: MyStyle.textInputDecoration.copyWith(
-                      hintText: "Recipient Address",
-                      isDense: false,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                      suffixIcon: SizedBox(
-                        width: 90,
-                        child: Row(
-                          children: [
-                            IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.copy,
-                                  color: MyColor.greenColor,
-                                )
-                            ),
-                            InkWell(
-                              onTap: () async {
-                                final value = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const QrScannerPage()
-                                    )
-                                );
-
-                                setState(() {
-                                  toController.text = value;
-                                });
-                              },
-                              child: Image.asset(
-                                "assets/images/dashboard/scan.png",
-                                height: 25,
-                                width: 25,
-                                color: MyColor.greenColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ),
-
-                  ),
-                ],
+           // to address
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                "Recipient Address",
+                style: MyStyle.tx18RWhite.copyWith(
+                  fontSize: 16
+                ),
               ),
             ),
+            const SizedBox(height: 8),
+
+
+            TextFormField(
+              keyboardType: TextInputType.number,
+              controller: toController,
+              cursorColor: MyColor.greenColor,
+              style: MyStyle.tx18RWhite,
+              decoration: MyStyle.textInputDecoration2.copyWith(
+                suffixIcon: SizedBox(
+                  width: 90,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.copy,
+                            color: MyColor.greenColor,
+                          )
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          final value = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const QrScannerPage()
+                              )
+                          );
+
+                          setState(() {
+                            toController.text = value;
+                          });
+                        },
+                        child: Image.asset(
+                          "assets/images/dashboard/scan.png",
+                          height: 25,
+                          width: 25,
+                          color: MyColor.greenColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                "Amount",
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 16
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Amount
+            TextFormField(
+              keyboardType: TextInputType.number,
+              controller: sendTokenQuantity,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
+              ],
+              cursorColor: MyColor.greenColor,
+              style: MyStyle.tx18RWhite,
+              decoration: MyStyle.textInputDecoration2.copyWith(
+                isDense: false,
+                contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+              ),
+
+            ),
+            const SizedBox(height: 8),
+
+
+            //Available Balance
+            Text(
+              "Available: ${ApiHandler.calculateLength("${double.parse(sendTokenBalance) }")} $sendTokenSymbol",
+              style:MyStyle.tx18RWhite.copyWith(
+                  fontSize: 14,
+                  color: MyColor.grey01Color
+              ),
+            ),
+            // const SizedBox(height: 30),
           ],
         ),
       ),

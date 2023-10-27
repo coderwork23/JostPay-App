@@ -27,8 +27,6 @@ class _SellHistoryState extends State<SellHistory> {
           ),
           title: Text(
             "History",
-            style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-            textAlign: TextAlign.center,
           ),
         ),
         body: Center(

@@ -27,8 +27,6 @@ class _WalletConnectScreenState extends State<WalletConnectScreen> {
         ),
         title: Text(
           "WalletConnect",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          textAlign: TextAlign.center,
         ),
       ),
       body: Padding(

@@ -29,8 +29,8 @@ class _WalletsScreenState extends State<WalletsScreen> {
         ),
         title: Text(
           "Wallets",
-          style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          textAlign: TextAlign.center,
+          // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
+          // textAlign: TextAlign.center,
         ),
         actions: [
           Image.asset(
