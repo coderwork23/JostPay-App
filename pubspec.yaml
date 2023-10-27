@@ -48,6 +48,7 @@ dependencies:
   url_launcher: ^6.2.1
   declarative_refresh_indicator: ^0.1.0
   qr_flutter: ^4.1.0
+  web3dart: ^2.7.1
 
 
 

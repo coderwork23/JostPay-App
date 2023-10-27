@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
@@ -14,7 +15,8 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:web3dart/web3dart.dart';
 import 'QrScannerPage.dart';
 
 // ignore: must_be_immutable
@@ -720,6 +722,61 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     }
   }
 
+  Web3Client? _web3client;
+  getWeb3NetWorkFees()async{
+
+    setState((){
+      isLoading = true;
+    });
+
+    _web3client = Web3Client(
+      networkList[0].url,
+      http.Client(),
+    );
+
+    // print(rpcUrl);
+
+    setState((){
+      isLoading = true;
+    });
+
+
+    //print(EtherAmount.inWei(BigInt.from(1)));
+
+    var estimateGas = await _web3client!.estimateGas(
+        sender:EthereumAddress.fromHex(fromAddressController.text),
+        to: EthereumAddress.fromHex(toController.text),
+        value: EtherAmount.inWei(BigInt.from(double.parse(sendTokenBalance)))
+    );
+    var getGasPrice = await _web3client!.getGasPrice();
+
+    //print("estimateGas === > ${"${estimateGas}"}");
+    //print("getGasPrice === > ${"${getGasPrice.getInWei}"}");
+
+    var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}")) / BigInt.from(10).pow(18);
+    //print(value);
+
+    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value * 2);
+
+    //print(tokenBalance);
+
+
+    if(tokenBalance > 0){
+      setState((){
+        sendTokenQuantity = TextEditingController(text: "$tokenBalance");
+        isLoading = false;
+      });
+    }else{
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
+    }
+
+    setState((){
+      isLoading = false;
+    });
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -772,9 +829,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                   || double.parse(sendTokenQuantity.text) < 0.00
                   || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
                   ?
-              MyColor.greenColor
+              MyColor.boarderColor
                   :
-              MyColor.greenColor.withOpacity(0.6)
+              MyColor.greenColor
           ),
           child:  Text(
             "Next",
@@ -787,9 +844,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                     || double.parse(sendTokenQuantity.text) < 0.00
                     || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
                     ?
-                MyColor.mainWhiteColor
-                    :
                 MyColor.mainWhiteColor.withOpacity(0.6)
+                    :
+                MyColor.mainWhiteColor
             ),
           ),
         ),
@@ -826,7 +883,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                   || double.parse(sendTokenQuantity.text) < 0.00
                   || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
                   ?
-              MyColor.greenColor.withOpacity(0.6)
+              MyColor.boarderColor
                   :
                MyColor.greenColor
           ),
@@ -888,7 +945,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
 
             TextFormField(
-              keyboardType: TextInputType.number,
               controller: toController,
               cursorColor: MyColor.greenColor,
               style: MyStyle.tx18RWhite,
@@ -896,14 +952,26 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                 suffixIcon: SizedBox(
                   width: 90,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.copy,
-                            color: MyColor.greenColor,
-                          )
+                      InkWell(
+                          onTap: () {
+                            FlutterClipboard.paste().then((value){
+                                toController.text = value;
+                            });
+                          },
+                          child: Center(
+                            child: Text(
+                              "Past",
+                              textAlign: TextAlign.center,
+                              style: MyStyle.tx18BWhite.copyWith(
+                                  fontSize: 14,
+                                  color: MyColor.greenColor
+                              ),
+                            ),
+                          ),
                       ),
+                      const SizedBox(width: 8),
                       InkWell(
                         onTap: () async {
                           final value = await Navigator.push(
@@ -924,6 +992,8 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                           color: MyColor.greenColor,
                         ),
                       ),
+                      const SizedBox(width: 8),
+
                     ],
                   ),
                 )
@@ -954,7 +1024,53 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
               decoration: MyStyle.textInputDecoration2.copyWith(
                 isDense: false,
                 contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+                suffixIcon: InkWell(
+                  onTap: () {
+                    if(networkList[0].isEVM == 1){
+
+                      if(toController.text != "") {
+                        setState((){
+                          FocusScope.of(context).unfocus();
+                          // maxButtonCall = true;
+                        });
+                        // addressValidator();
+                        getWeb3NetWorkFees();
+                      }
+                      else{
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+
+                    }
+                    else {
+
+                      double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
+
+                      //print(tokenBalance.toStringAsFixed(3));
+                      setState(() {
+                        sendTokenQuantity = TextEditingController(
+                            text: tokenBalance.toStringAsFixed(3)
+                        );
+                      });
+                    }
+                  },
+                  child: SizedBox(
+                    width: 60,
+                    child: Center(
+                      child: Text(
+                        "Max",
+                        textAlign: TextAlign.center,
+                        style: MyStyle.tx18BWhite.copyWith(
+                          fontSize: 14,
+                          color: MyColor.greenColor
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               ),
+
 
             ),
             const SizedBox(height: 8),
