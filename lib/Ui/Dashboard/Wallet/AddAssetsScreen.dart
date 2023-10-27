@@ -1,7 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AddAssetsScreen extends StatefulWidget {
@@ -13,8 +16,29 @@ class AddAssetsScreen extends StatefulWidget {
 
 class _AddAssetsScreenState extends State<AddAssetsScreen> {
 
+
+
   TextEditingController searchController = TextEditingController();
-  List toggleList = List.filled(20, false);
+  List toggleList = [];
+  bool isLoading = true;
+
+  getCoin() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+    toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, true);
+    isLoading = false;
+    setState(() {});
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    getCoin();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return  Padding(
@@ -79,25 +103,55 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
 
           // coin list
           Expanded(
-            child : ListView.builder(
-              itemCount: 20,
+            child : isLoading
+                ?
+            const Center(
+                child: CircularProgressIndicator(
+                  color: MyColor.greenColor,
+                )
+            )
+                :
+            ListView.builder(
+              itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
+
+                var list = DBTokenProvider.dbTokenProvider.tokenList[index];
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
-                      Image.asset(
-                        "assets/images/bitcoin.png",
-                        height: 30,
-                        width: 30,
-                        fit: BoxFit.contain,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: CachedNetworkImage(
+                          height: 35,
+                          width: 35,
+                          fit: BoxFit.fill,
+                          imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${list.marketId}.png",
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(color: MyColor.greenColor),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              Container(
+                                height: 35,
+                                width: 35,
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: MyColor.whiteColor,
+                                ),
+                                child: Image.asset(
+                                  "assets/images/bitcoin.png",
+                                ),
+                              ),
+                        ),
                       ),
                       const SizedBox(width: 12),
 
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          "Bitcoin",
+                          list.name,
                           style: MyStyle.tx18RWhite,
                         ),
                       ),
