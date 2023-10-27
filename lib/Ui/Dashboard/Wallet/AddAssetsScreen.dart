@@ -9,7 +9,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AddAssetsScreen extends StatefulWidget {
-  const AddAssetsScreen({super.key});
+  String selectedAccountId;
+  AddAssetsScreen({
+    super.key,
+    required this.selectedAccountId
+  });
 
   @override
   State<AddAssetsScreen> createState() => _AddAssetsScreenState();
@@ -194,7 +198,16 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
                         activeColor: MyColor.greenColor,
                         value: toggleList[index],
                         showOnOff: false,
-                        onToggle: (val) {
+                        onToggle: (val) async{
+
+                          if(val) {
+                            await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
+                          }else{
+                            await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
+                                list.id,widget.selectedAccountId
+                            );
+
+                          }
                           setState(() {
                             toggleList[index] = val;
                           });

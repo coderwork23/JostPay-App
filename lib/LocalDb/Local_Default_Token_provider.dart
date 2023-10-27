@@ -89,18 +89,15 @@ class DBDefaultTokenProvider{
     return res;
   }
 
-
-
-
   Future<int> deleteAllToken() async {
     final db = await database;
     final res = await db!.rawDelete('DELETE FROM DefaultToken');
     return res;
   }
 
-  Future<int> deleteToken(String id) async {
+  Future<int> deleteToken(int id,String acId) async {
     final db = await database;
-    final res = await db!.rawDelete("DELETE FROM DefaultToken Where id = $id");
+    final res = await db!.rawDelete("DELETE FROM DefaultToken Where id = $id AND accountId = '$acId'");
     return res;
   }
 

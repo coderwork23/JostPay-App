@@ -36,7 +36,7 @@ class _WalletScreenState extends State<WalletScreen> {
   late AccountProvider accountProvider;
   late TokenProvider tokenProvider;
 
-  showAddAsserts(BuildContext context){
+  showAddAsserts(BuildContext context,selectedAccountId){
     showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: MyColor.backgroundColor,
@@ -53,10 +53,13 @@ class _WalletScreenState extends State<WalletScreen> {
             minHeight: MediaQuery.of(context).size.height/2,
             maxHeight: MediaQuery.of(context).size.height*0.8
           ),
-            child: const AddAssetsScreen()
+            child: AddAssetsScreen(selectedAccountId:selectedAccountId)
         );
       },
-    );
+    ).whenComplete(() async {
+      await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+      setState(() {});
+    });
   }
 
   showSendTokenList(BuildContext context){
@@ -382,7 +385,7 @@ class _WalletScreenState extends State<WalletScreen> {
         actions:  [
           IconButton(
             onPressed: () {
-              showAddAsserts(context);
+              showAddAsserts(context,selectedAccountId);
             },
             icon: Image.asset(
               "assets/images/dashboard/add.png",
