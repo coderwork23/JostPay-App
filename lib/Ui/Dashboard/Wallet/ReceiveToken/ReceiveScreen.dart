@@ -4,18 +4,20 @@ import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// ignore: must_be_immutable
 class ReceiveScreen extends StatefulWidget {
   int networkId;
-  var networkName;
-  var networkSymbol;
+  var tokenName;
+  var tokenSymbol;
   ReceiveScreen({
     super.key,
     required this.networkId,
-    required this.networkName,
-    required this.networkSymbol
+    required this.tokenName,
+    required this.tokenSymbol
   });
 
   @override
@@ -71,7 +73,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
 
         // Select assets text
         Text(
-          "Receive ${widget.networkSymbol}",
+          "Receive ${widget.tokenSymbol}",
           style: MyStyle.tx28RGreen.copyWith(
               color: MyColor.mainWhiteColor,
               fontFamily: "NimbusSanLBol",
@@ -82,7 +84,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
 
         // warning message
         Text(
-          "Send only Ethereum (${widget.networkSymbol}) to this address. "
+          "Send only ${widget.tokenName} (${widget.tokenSymbol}) to this address. "
               "Sending any other coins may result in permanent loss.",
           textAlign: TextAlign.center,
           style:MyStyle.tx18RWhite.copyWith(
@@ -90,7 +92,34 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
               color: MyColor.grey01Color
           ),
         ),
+        const SizedBox(height: 25),
 
+        // qr image
+        Container(
+          padding: const EdgeInsets.all(15),
+          width: 160,
+          height: 160,
+          decoration: BoxDecoration(
+              color: MyColor.backgroundColor,
+              borderRadius: BorderRadius.circular(10)
+          ),
+          child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+            child: QrImageView(
+              data: selectedAccountAddress,
+              eyeStyle: const QrEyeStyle(
+                color: MyColor.mainWhiteColor,
+                eyeShape: QrEyeShape.square
+              ),
+              dataModuleStyle: const QrDataModuleStyle(
+                  color: MyColor.mainWhiteColor,
+                  dataModuleShape:  QrDataModuleShape.square
+              ),
+              //embeddedImage: AssetImage('assets/icons/logo.png'),
+              version: QrVersions.auto,
+            ),
+          ),
+        ),
         const SizedBox(height: 25),
 
         Row(
@@ -133,7 +162,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
 
             InkWell(
               onTap: () {
-                Share.share('${widget.networkSymbol} Address $selectedAccountAddress');
+                Share.share('${widget.tokenSymbol} Address $selectedAccountAddress');
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
@@ -148,7 +177,8 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
               ),
             ),
           ],
-        )
+        ),
+        const SizedBox(height: 20),
 
       ],
     );

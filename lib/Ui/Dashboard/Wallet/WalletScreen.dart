@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:declarative_refresh_indicator/declarative_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
@@ -198,7 +199,6 @@ class _WalletScreenState extends State<WalletScreen> {
         await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
       }
 
-
       if(mounted) {
         setState(() {
           isNeeded = false;
@@ -324,33 +324,56 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
 
+  Future<void> _getData() async {
+    setState(() {
+      updatingValue = false;
+    });
+
+    socket!.close();
+    socket!.destroy();
+    socket!.dispose();
+
+    if(DBTokenProvider.dbTokenProvider.tokenList.isNotEmpty){
+      setState(() {
+        updatingValue = true;
+        updatingTotalValue = showTotalValue;
+      });
+    }
+
+    setState(() {
+      _showRefresh = true;
+      isNeeded = true;
+      getToken();
+    });
+  }
+
+  doNothing(){}
+
   @override
   Widget build(BuildContext context) {
 
     final dashProvider = Provider.of<DashboardProvider>(context);
+
     accountProvider = Provider.of<AccountProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+
+    var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: MyColor.darkGreyColor,
       appBar: AppBar(
         backgroundColor: MyColor.darkGreyColor,
         automaticallyImplyLeading: false,
+        leadingWidth: 0,
+        titleSpacing: 0,
         title: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: RichText(
-              text: const TextSpan(
-                  children: [
-                    TextSpan(
-                        text: "Jost",
-                        style:MyStyle.tx28BYellow
-                    ),
-                    TextSpan(
-                        text: "Pay",
-                        style:MyStyle.tx28RGreen
-                    ),
-                  ]
-              )
+          padding: const EdgeInsets.only(top: 4.0,bottom: 4),
+          child:  Image.asset(
+            "assets/images/splash_screen.png",
+            height: 35,
+            width: width * 0.4,
+            fit: BoxFit.contain,
           ),
         ),
         actions:  [
@@ -358,10 +381,12 @@ class _WalletScreenState extends State<WalletScreen> {
             onPressed: () {
               showAddAsserts(context);
             },
-            icon: const Icon(
-              Icons.add,
+            icon: Image.asset(
+              "assets/images/dashboard/add.png",
+              height: 25,
+              width: 25,
               color: MyColor.mainWhiteColor,
-
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(width: 15),
@@ -574,178 +599,184 @@ class _WalletScreenState extends State<WalletScreen> {
                    topLeft: Radius.circular(40),
                    topRight: Radius.circular(40),
                  ),
-                 child : ListView.builder(
-                   itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
-                   padding: const EdgeInsets.fromLTRB(12,10,12,70),
-                   itemBuilder: (context, index) {
+                 child : DeclarativeRefreshIndicator(
+                   color: MyColor.greenColor,
+                   backgroundColor: MyColor.mainWhiteColor,
+                   onRefresh: isCalculating == true ? doNothing : _getData,
+                   refreshing: _showRefresh,
+                   child: ListView.builder(
+                     itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
+                     padding: const EdgeInsets.fromLTRB(12,10,12,70),
+                     itemBuilder: (context, index) {
 
-                     var list = DBTokenProvider.dbTokenProvider.tokenList[index];
+                       var list = DBTokenProvider.dbTokenProvider.tokenList[index];
 
-                     // print(list.marketId);
-                     double? tokenUsdPrice;
+                       // print(list.marketId);
+                       double? tokenUsdPrice;
 
-                     if(DBTokenProvider.dbTokenProvider.tokenList[index].price == 0.0){
-                       tokenUsdPrice =  0.0;
-                     }
-                     else if (DBTokenProvider.dbTokenProvider.tokenList[index].price > 0.0){
-                       tokenUsdPrice = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
-                     }
+                       if(DBTokenProvider.dbTokenProvider.tokenList[index].price == 0.0){
+                         tokenUsdPrice =  0.0;
+                       }
+                       else if (DBTokenProvider.dbTokenProvider.tokenList[index].price > 0.0){
+                         tokenUsdPrice = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
+                       }
 
-                     return InkWell(
-                       onTap: () async {
+                       return InkWell(
+                         onTap: () async {
 
-                         double selectTokenUSD;
+                           double selectTokenUSD;
 
-                         if(DBTokenProvider.dbTokenProvider.tokenList[index].price == null){
-                           selectTokenUSD = 0.0;
-                         }
-                         else{
-                           selectTokenUSD = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
-                         }
+                           if(DBTokenProvider.dbTokenProvider.tokenList[index].price == null){
+                             selectTokenUSD = 0.0;
+                           }
+                           else{
+                             selectTokenUSD = double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance) * DBTokenProvider.dbTokenProvider.tokenList[index].price;
+                           }
 
 
-                         await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,DBTokenProvider.dbTokenProvider.tokenList[index].networkId);
-                         selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                           await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,DBTokenProvider.dbTokenProvider.tokenList[index].networkId);
+                           selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
 
-                           // ignore: use_build_context_synchronously
-                         Navigator.push(
-                           context,
-                           MaterialPageRoute(
-                             builder: (context) => CoinDetailScreen(
-                                 selectedAccountAddress: selectedAccountAddress,
-                                 tokenDecimal: "${DBTokenProvider.dbTokenProvider.tokenList[index].decimals}",
-                                 tokenId: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
-                                 tokenNetworkId: "${DBTokenProvider.dbTokenProvider.tokenList[index].networkId}",
-                                 tokenAddress: DBTokenProvider.dbTokenProvider.tokenList[index].address,
-                                 tokenName: DBTokenProvider.dbTokenProvider.tokenList[index].name,
-                                 tokenSymbol: DBTokenProvider.dbTokenProvider.tokenList[index].symbol,
-                                 tokenBalance: DBTokenProvider.dbTokenProvider.tokenList[index].balance,
-                                 tokenMarketId: "${DBTokenProvider.dbTokenProvider.tokenList[index].marketId}",
-                                 tokenType: DBTokenProvider.dbTokenProvider.tokenList[index].type,
-                                 tokenImage: DBTokenProvider.dbTokenProvider.tokenList[index].logo,
-                                 tokenUsdPrice: selectTokenUSD,
-                                 tokenFullPrice: DBTokenProvider.dbTokenProvider.tokenList[index].price,
-                                 tokenUpDown: DBTokenProvider.dbTokenProvider.tokenList[index].percentChange24H,
-                                 token_transection_Id: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
-                                 explorerUrl: DBTokenProvider.dbTokenProvider.tokenList[index].explorer_url,
-                             ),
-                           )
-                         );
-
-                       },
-                       child: Container(
-                         margin: const EdgeInsets.only(bottom: 10),
-                         padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
-                         decoration: BoxDecoration(
-                           borderRadius: BorderRadius.circular(15),
-                           color: MyColor.darkGreyColor
-                         ),
-                         child: Row(
-                           children: [
-
-                             // coin token
-                             ClipRRect(
-                               borderRadius: BorderRadius.circular(100),
-                               child: CachedNetworkImage(
-                                 height: 45,
-                                 width: 45,
-                                 fit: BoxFit.fill,
-                                 imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${list.marketId}.png",
-                                 placeholder: (context, url) => const Center(
-                                   child: CircularProgressIndicator(color: MyColor.greenColor),
-                                 ),
-                                 errorWidget: (context, url, error) =>
-                                     Container(
-                                       height: 45,
-                                       width: 45,
-                                       padding: const EdgeInsets.all(10),
-                                       decoration: BoxDecoration(
-                                         borderRadius: BorderRadius.circular(14),
-                                         color: MyColor.whiteColor,
-                                       ),
-                                       child: Image.asset(
-                                         "assets/images/bitcoin.png",
-                                       ),
-                                     ),
+                             // ignore: use_build_context_synchronously
+                           Navigator.push(
+                             context,
+                             MaterialPageRoute(
+                               builder: (context) => CoinDetailScreen(
+                                   selectedAccountAddress: selectedAccountAddress,
+                                   tokenDecimal: "${DBTokenProvider.dbTokenProvider.tokenList[index].decimals}",
+                                   tokenId: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
+                                   tokenNetworkId: "${DBTokenProvider.dbTokenProvider.tokenList[index].networkId}",
+                                   tokenAddress: DBTokenProvider.dbTokenProvider.tokenList[index].address,
+                                   tokenName: DBTokenProvider.dbTokenProvider.tokenList[index].name,
+                                   tokenSymbol: DBTokenProvider.dbTokenProvider.tokenList[index].symbol,
+                                   tokenBalance: DBTokenProvider.dbTokenProvider.tokenList[index].balance,
+                                   tokenMarketId: "${DBTokenProvider.dbTokenProvider.tokenList[index].marketId}",
+                                   tokenType: DBTokenProvider.dbTokenProvider.tokenList[index].type,
+                                   tokenImage: DBTokenProvider.dbTokenProvider.tokenList[index].logo,
+                                   tokenUsdPrice: selectTokenUSD,
+                                   tokenFullPrice: DBTokenProvider.dbTokenProvider.tokenList[index].price,
+                                   tokenUpDown: DBTokenProvider.dbTokenProvider.tokenList[index].percentChange24H,
+                                   token_transection_Id: "${DBTokenProvider.dbTokenProvider.tokenList[index].token_id}",
+                                   explorerUrl: DBTokenProvider.dbTokenProvider.tokenList[index].explorer_url,
                                ),
-                             ),
+                             )
+                           );
 
-                             const SizedBox(width: 12),
+                         },
+                         child: Container(
+                           margin: const EdgeInsets.only(bottom: 10),
+                           padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                           decoration: BoxDecoration(
+                             borderRadius: BorderRadius.circular(15),
+                             color: MyColor.darkGreyColor
+                           ),
+                           child: Row(
+                             children: [
 
-                             // coin name and price and 24h
-                             Expanded(
-                               child: Column(
-                                 crossAxisAlignment: CrossAxisAlignment.start,
+                               // coin token
+                               ClipRRect(
+                                 borderRadius: BorderRadius.circular(100),
+                                 child: CachedNetworkImage(
+                                   height: 45,
+                                   width: 45,
+                                   fit: BoxFit.fill,
+                                   imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${list.marketId}.png",
+                                   placeholder: (context, url) => const Center(
+                                     child: CircularProgressIndicator(color: MyColor.greenColor),
+                                   ),
+                                   errorWidget: (context, url, error) =>
+                                       Container(
+                                         height: 45,
+                                         width: 45,
+                                         padding: const EdgeInsets.all(10),
+                                         decoration: BoxDecoration(
+                                           borderRadius: BorderRadius.circular(14),
+                                           color: MyColor.whiteColor,
+                                         ),
+                                         child: Image.asset(
+                                           "assets/images/bitcoin.png",
+                                         ),
+                                       ),
+                                 ),
+                               ),
+
+                               const SizedBox(width: 12),
+
+                               // coin name and price and 24h
+                               Expanded(
+                                 child: Column(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                     Text(
+                                       list.name,
+                                       style: MyStyle.tx18RWhite,
+                                     ),
+                                     const SizedBox(height: 3),
+                                     RichText(
+                                         text: TextSpan(
+                                             children: [
+                                               TextSpan(
+                                                 text: "\$${ApiHandler.calculateLength("${list.price}")} ",
+                                                 style: MyStyle.tx18RWhite.copyWith(
+                                                     fontSize: 14,
+                                                     color: MyColor.grey01Color
+                                                 ),
+                                               ),
+                                               TextSpan(
+                                                   text: "(${list.percentChange24H.toStringAsFixed(2)}%)" ,
+                                                   style:MyStyle.tx28RGreen.copyWith(
+                                                     fontSize: 12,
+                                                     color: list.percentChange24H < 0
+                                                         ?
+                                                     MyColor.redColor
+                                                         :
+                                                     MyColor.greenColor
+                                                   )
+                                               ),
+                                             ]
+                                         )
+                                     ),
+                                   ],
+                                 )
+                               ),
+                               const SizedBox(width: 10),
+
+                               // balance and coin price
+                               Column(
+                                 crossAxisAlignment: CrossAxisAlignment.end,
                                  children: [
                                    Text(
-                                     list.name,
-                                     style: MyStyle.tx18RWhite,
+                                     isCalculating == true
+                                         ?
+                                     "--"
+                                         :
+                                     DBTokenProvider.dbTokenProvider.tokenList[index].balance == "0"
+                                         ?
+                                     "${double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance).toStringAsFixed(2)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}"
+                                         :
+                                     "${ApiHandler.calculateLength3(DBTokenProvider.dbTokenProvider.tokenList[index].balance)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}",
+
+                                     style: MyStyle.tx22RWhite.copyWith(
+                                       fontSize: 16,
+                                       color: MyColor.mainWhiteColor
+                                     ),
                                    ),
                                    const SizedBox(height: 3),
-                                   RichText(
-                                       text: TextSpan(
-                                           children: [
-                                             TextSpan(
-                                               text: "\$${ApiHandler.calculateLength("${list.price}")} ",
-                                               style: MyStyle.tx18RWhite.copyWith(
-                                                   fontSize: 14,
-                                                   color: MyColor.grey01Color
-                                               ),
-                                             ),
-                                             TextSpan(
-                                                 text: "(${list.percentChange24H.toStringAsFixed(2)}%)" ,
-                                                 style:MyStyle.tx28RGreen.copyWith(
-                                                   fontSize: 12,
-                                                   color: list.percentChange24H < 0
-                                                       ?
-                                                   MyColor.redColor
-                                                       :
-                                                   MyColor.greenColor
-                                                 )
-                                             ),
-                                           ]
-                                       )
+                                   Text(
+                                     "\$ ${tokenUsdPrice!.toStringAsFixed(2)}",
+                                     style: MyStyle.tx18RWhite.copyWith(
+                                         fontSize: 14,
+                                         color: MyColor.grey01Color
+                                     ),
                                    ),
                                  ],
-                               )
-                             ),
-                             const SizedBox(width: 10),
-
-                             // balance and coin price
-                             Column(
-                               crossAxisAlignment: CrossAxisAlignment.end,
-                               children: [
-                                 Text(
-                                   isCalculating == true
-                                       ?
-                                   "--"
-                                       :
-                                   DBTokenProvider.dbTokenProvider.tokenList[index].balance == "0"
-                                       ?
-                                   "${double.parse(DBTokenProvider.dbTokenProvider.tokenList[index].balance).toStringAsFixed(2)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}"
-                                       :
-                                   "${ApiHandler.calculateLength3(DBTokenProvider.dbTokenProvider.tokenList[index].balance)} ${DBTokenProvider.dbTokenProvider.tokenList[index].symbol}",
-
-                                   style: MyStyle.tx22RWhite.copyWith(
-                                     fontSize: 16,
-                                     color: MyColor.mainWhiteColor
-                                   ),
-                                 ),
-                                 const SizedBox(height: 3),
-                                 Text(
-                                   "\$ ${tokenUsdPrice!.toStringAsFixed(2)}",
-                                   style: MyStyle.tx18RWhite.copyWith(
-                                       fontSize: 14,
-                                       color: MyColor.grey01Color
-                                   ),
-                                 ),
-                               ],
-                             ),
-                           ],
+                               ),
+                             ],
+                           ),
                          ),
-                       ),
-                     );
-                   },
+                       );
+                     },
+                   ),
                  ),
                ),
              )

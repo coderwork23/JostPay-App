@@ -92,7 +92,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
       sharedPreferences.setString('isLogin', 'true');
       sharedPreferences.setInt('account', 1);
       sharedPreferences.setString('password', pinCodeController.text);
-      //print(sharedPreferences.getString('isLogin'));
+      sharedPreferences.setBool('fingerOn',fingerBool);
 
       // print("accountProvider.accountData === > ${accountProvider.accountData.length}");
       for(int i=0; i<accountProvider.accountData.length; i++){

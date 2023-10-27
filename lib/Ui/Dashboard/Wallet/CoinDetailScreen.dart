@@ -66,14 +66,10 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
       builder: (context) {
         return Container(
             padding: const EdgeInsets.fromLTRB(20,22,20,10),
-            constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height/2,
-                maxHeight: MediaQuery.of(context).size.height*0.8
-            ),
             child: ReceiveScreen(
               networkId: int.parse(widget.tokenNetworkId),
-              networkName: widget.tokenName,
-              networkSymbol: widget.tokenSymbol,
+              tokenName: widget.tokenName,
+              tokenSymbol: widget.tokenSymbol,
             )
         );
       },

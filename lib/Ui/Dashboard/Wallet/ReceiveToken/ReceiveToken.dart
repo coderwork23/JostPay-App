@@ -37,8 +37,8 @@ class _ReceiveTokenState extends State<ReceiveToken> {
             ),
             child: ReceiveScreen(
               networkId: tokenNetworkId,
-              networkName: tokenName,
-              networkSymbol:symbol,
+              tokenName: tokenName,
+              tokenSymbol:symbol,
             )
         );
       },

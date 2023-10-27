@@ -20,6 +20,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
 
     var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       body: SafeArea(
@@ -30,6 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
+                // app logo
                 Image.asset(
                   "assets/images/splash_screen.png",
                   height: 40,
@@ -122,6 +124,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 const SizedBox(height: 8),
 
+                // And many more coins....
                 Text(
                   "And many more coins....",
                   style:MyStyle.tx22RWhite.copyWith(
@@ -132,6 +135,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 const SizedBox(height: 50),
 
+                // create wallet
                 InkWell(
                   onTap: () {
                     Navigator.push(
@@ -154,6 +158,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 const SizedBox(height: 20),
 
+                // i've got a recovery phrase
                 InkWell(
                   onTap: () {
                     Navigator.push(
@@ -164,10 +169,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     );
                   },
                   child: const Text(
-                    "I've got a recovery pharse",
+                    "I've got a recovery phrase",
                     style: MyStyle.tx18RWhite,
                   ),
                 ),
+                SizedBox(height: height * 0.15)
               ],
             ),
           )

@@ -107,13 +107,13 @@ class _LoginScreenState extends State<LoginScreen> {
         IOSAuthMessages iosStrings = const IOSAuthMessages(
             cancelButton: "cancel",
             goToSettingsButton:"settings",
-            goToSettingsDescription:  "Please_set_up_your_Touch_ID",
-            lockOut: "Please_Re_enable_your_Touch_ID"
+            goToSettingsDescription:"Please set up your Touch ID",
+            lockOut: "Please Re-enable your Touch ID"
         );
 
 
         authenticated = await auth.authenticate(
-          localizedReason: "Please_authenticate_to_Login_your_Account",
+          localizedReason: "Please authenticate to Login your Account",
           authMessages: [iosStrings],
           options: const AuthenticationOptions(
             stickyAuth: true,
@@ -179,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     else{
       setState((){
-        errorText = "Incorrect_Password";
+        errorText = "Incorrect Password";
         isLoading = false;
       });
 
@@ -224,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     deviceId = sharedPreferences.getString('deviceId')!;
-    print("object --> $deviceId");
+    // print("object --> $deviceId");
     setState(() {
       errorText = "";
       isLoading = true;
