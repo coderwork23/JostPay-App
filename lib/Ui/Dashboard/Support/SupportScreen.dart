@@ -1,5 +1,6 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:jost_pay_wallet/Values/MyColor.dart';
 
 class SupportScreen extends StatefulWidget {
   const SupportScreen({super.key});
@@ -9,8 +10,58 @@ class SupportScreen extends StatefulWidget {
 }
 
 class _SupportScreenState extends State<SupportScreen> {
+
+  late InAppWebViewController _webViewController;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return  Scaffold(
+      body: SafeArea(
+        child:Stack(
+          children: [
+            InAppWebView(
+              initialUrlRequest:URLRequest(
+                  url: Uri.parse("https://tawk.to/chat/653b61bcf2439e1631e8f3f8/1hdnvbihh")
+              ),
+              initialOptions: InAppWebViewGroupOptions(
+                crossPlatform: InAppWebViewOptions(
+                  useShouldOverrideUrlLoading: false,
+                  javaScriptEnabled: true,
+                  javaScriptCanOpenWindowsAutomatically: true,
+                ),
+              ),
+              onWebViewCreated: (controller) {
+                _webViewController = controller;
+              },
+
+              onLoadStop: (controller, url) async {
+                bool check  = await controller.isLoading();
+                if(!check){
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              },
+            ),
+
+            Visibility(
+              visible: isLoading,
+              child: const Center(
+                  child: CircularProgressIndicator(
+                    color: MyColor.greenColor,
+                  )
+              ),
+            ),
+
+          ],
+        ),
+      )
+    );
   }
 }

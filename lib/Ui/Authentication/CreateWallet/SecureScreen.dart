@@ -34,7 +34,7 @@ class _SecureScreenState extends State<SecureScreen> {
             size: 20,
           ),
         ),
-        title: Text(
+        title: const Text(
           "Secure your wallet",
         ),
       ),
