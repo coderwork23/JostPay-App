@@ -128,10 +128,15 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       print("object ---> resumed state");
-      getAccount();
-      if (Utils.wcUrlVal.split('?').last.substring(0, 9) != "requestId") {
-        signClient!.pair(Utils.wcUrlVal);
-        Utils.wcUrlVal = "";
+      if (Utils.wcUrlVal.isNotEmpty) {
+        getAccount();
+        if (Utils.wcUrlVal
+            .split('?')
+            .last
+            .substring(0, 9) != "requestId") {
+          signClient!.pair(Utils.wcUrlVal);
+          Utils.wcUrlVal = "";
+        }
       }
     }
   }

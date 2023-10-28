@@ -84,7 +84,33 @@ class DBTokenProvider{
     return res;
   }
 
-    getTokenById(acId,id) async {
+
+  updateTokenByTID(AccountTokenList newToken,token_id,id) async{
+    final db= await database;
+    Map<String, dynamic> data = {
+      "id": newToken.id,
+      "token_id": newToken.token_id,
+      "acc_address": newToken.accAddress,
+      "network_id": newToken.networkId,
+      "market_id": newToken.marketId,
+      "name": newToken.name,
+      "type": newToken.type,
+      "address": newToken.address,
+      "symbol": newToken.symbol,
+      "price":newToken.price,
+      "decimals": newToken.decimals,
+      "logo": newToken.logo,
+      "network_name": newToken.networkName,
+      "explorer_url": newToken.explorer_url,
+      "accountId": newToken.accountId,
+    };
+
+    final res = await db!.update('Token', data, where: "token_id = ? AND accountId = ? ",whereArgs: [token_id,id]);
+    getAccountToken(id);
+    return res;
+  }
+
+  getTokenById(acId,id) async {
     // print("object $id");
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM Token Where accountId = '$acId' AND id='$id'");

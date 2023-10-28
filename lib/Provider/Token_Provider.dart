@@ -80,12 +80,11 @@ class TokenProvider with ChangeNotifier {
 
         if(responseData.statusCode == 200){
           allToken = value;
-          await DBTokenProvider.dbTokenProvider.getAccountToken(id);
 
           List defaultList = ["1","1027","1839"];
 
 
-
+          // await DBTokenProvider.dbTokenProvider.deleteAccountToken(id);
           List marketId = ["1","2","74","328","825","1027","1839","1958"];
           List tokenID = ["8","29","28","0","-1","1","2","10"];
           List decimalsList = ["8","8","8","0","-1","18","18","6"];
@@ -128,6 +127,7 @@ class TokenProvider with ChangeNotifier {
               );
 
               // print("${accountTokenList.toJson()}");
+              await DBTokenProvider.dbTokenProvider.getAccountToken(id);
 
               var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
                 return "${element.id}"== "${marketId[i]}";
@@ -144,7 +144,8 @@ class TokenProvider with ChangeNotifier {
 
           // print(tokenNote);
 
-          addDefaultToken(defaultList,id);
+          await addDefaultToken(defaultList,id);
+          await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(id);
 
           isSuccess = true;
           isLoading = false;
@@ -166,8 +167,10 @@ class TokenProvider with ChangeNotifier {
 
   addTetherBNBTRX(marketInfo,String id,marketId) async {
     int bnbNetworkId =0,trxNetworkId = 0;
+    await DBTokenProvider.dbTokenProvider.getAccountToken(id);
 
     if(marketInfo['symbol'].toString().toLowerCase() == "bnb"){
+
       bnbNetworkId = DbNetwork.dbNetwork.networkListBySymbol.first.id;
 
       AccountTokenList accountTokenList = AccountTokenList(
@@ -191,11 +194,11 @@ class TokenProvider with ChangeNotifier {
       );
 
       var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-        return "${element.id}"== "${marketId}";
+        return "${element.token_id}"== "${3070}";
       });
 
       if(tokenListIndex != -1){
-        await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId,id);
+        await DBTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
       }else{
         await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
       }
@@ -226,18 +229,19 @@ class TokenProvider with ChangeNotifier {
       );
 
       var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-        return "${element.id}"== "${marketId}";
+        return "${element.token_id}"== "${3079}";
       });
 
       if(tokenListIndex != -1){
-        await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId,id);
+        // print("object check1 ---->");
+        await DBTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
       }else{
         await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
       }
     }
   }
 
-  addDefaultToken (List defaultList,acId) async {
+  Future<void> addDefaultToken (List defaultList,acId) async {
     await DBTokenProvider.dbTokenProvider.getAccountToken(acId);
     await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(acId);
 
@@ -265,8 +269,6 @@ class TokenProvider with ChangeNotifier {
         await DBDefaultTokenProvider.dbTokenProvider.updateToken(model,model.id,acId);
       }
     }
-
-    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(acId);
 
   }
 

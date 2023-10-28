@@ -220,7 +220,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
       "mnemonic":  phraseController.text,
     };
 
-    print(jsonEncode(data));
+    // print(jsonEncode(data));
 
     await accountProvider.addAccount(data, '/createWallet');
     if (accountProvider.isSuccess == true) {

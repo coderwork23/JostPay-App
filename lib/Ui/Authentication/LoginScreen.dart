@@ -407,7 +407,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: MyColor.grey01Color
                     ),
                   ),
-                  const SizedBox(height: 15),
+                  SizedBox(height: height*0.1),
 
                   //password field
                   TextFormField(
@@ -500,6 +500,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: MyStyle.tx18RWhite
                     ),
                   ),
+                  SizedBox(height: height*0.1),
+
                 ],
               ),
             ),

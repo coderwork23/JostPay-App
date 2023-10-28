@@ -214,9 +214,11 @@ class _WalletScreenState extends State<WalletScreen> {
       }
     }else {
       await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+      setState(() {});
     }
 
     getSocketData();
+
     if(mounted) {
       setState(() {
         _showRefresh = false;
