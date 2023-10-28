@@ -53,7 +53,7 @@ class DbNetwork{
   createNetwork(NetworkList networkLists) async{
     final db= await database;
     final res = await db!.insert("Network",networkLists.toJson());
-    print("createNetwork");
+    // print("createNetwork");
     return res;
   }
 
@@ -61,7 +61,7 @@ class DbNetwork{
   updateNetwork(NetworkList networkLists,id) async{
     final db= await database;
       final res = await db!.update("Network",networkLists.toJson(),where: "id = ? ",whereArgs: [id]);
-      print("updateNetwork");
+      // print("updateNetwork");
 
       // print("res update network $res");
       return res;

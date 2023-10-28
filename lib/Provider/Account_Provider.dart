@@ -23,7 +23,7 @@ class AccountProvider with ChangeNotifier{
       await ApiHandler.post(data,url).then((responseData){
 
         var value = json.decode(responseData.body);
-        print("account add =====>  $value");
+        // print("account add =====>  $value");
 
         if(responseData.statusCode == 200 && value["status"] == true)
         {
@@ -129,7 +129,7 @@ class AccountProvider with ChangeNotifier{
       await ApiHandler.post(data,url).then((responseData){
 
         var value = json.decode(responseData.body);
-        print(value);
+        // print(value);
 
         if(responseData.statusCode == 200 && value["status"] == true)
         {

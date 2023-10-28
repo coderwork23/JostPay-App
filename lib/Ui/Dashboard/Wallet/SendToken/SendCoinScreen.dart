@@ -863,7 +863,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                   || toController.text.isEmpty
           ){
 
-            print("object");
+            // print("object");
           }else{
             FocusScope.of(context).unfocus();
             getNetworkFees();

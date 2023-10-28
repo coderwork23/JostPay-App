@@ -26,7 +26,7 @@ class TokenProvider with ChangeNotifier {
 
         var value = json.decode(responseData.body);
 
-        print("get network");
+        // print("get network");
 
         // await DbNetwork.dbNetwork.deleteAllNetwork();
 
