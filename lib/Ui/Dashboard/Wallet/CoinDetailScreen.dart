@@ -77,7 +77,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
-  var height,width;
 
   late TransectionProvider transectionProvider;
 
@@ -184,6 +183,9 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final dashProvider = Provider.of<DashboardProvider>(context);
+
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
 
     return  Scaffold(
       appBar: AppBar(
@@ -500,12 +502,19 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     :
                 transectionProvider.transectionList.isEmpty
                     ?
-                Center(
-                  child: Text(
-                    "No Transaction Yet.",
-                    textAlign: TextAlign.center,
-                    style: MyStyle.tx18RWhite.copyWith(
-                        color: MyColor.grey01Color
+                SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: height * 0.45,
+                    width: width,
+                    child: Center(
+                      child: Text(
+                        "No Transaction Yet.",
+                        textAlign: TextAlign.center,
+                        style: MyStyle.tx18RWhite.copyWith(
+                            color: MyColor.grey01Color
+                        ),
+                      ),
                     ),
                   ),
                 )

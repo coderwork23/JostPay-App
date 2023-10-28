@@ -51,6 +51,14 @@ dependencies:
   web3dart: ^2.7.1
 
   flutter_inappwebview: ^5.8.0
+  flutter_slidable: ^3.0.0
+
+  #wallet connect v2
+  wallet_connect_dart_v2: ^0.0.1
+  bip39: ^1.0.6
+  bip32: ^2.0.0
+  eth_sig_util: ^0.0.9
+  uni_links: ^0.5.1
 
 
 

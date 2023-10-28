@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Default_Token_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,10 +27,11 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
   List toggleList = [];
   bool isLoading = true;
 
+  var selectedAccountId = "";
   // get token list
   getCoin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
     await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
     await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
     toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, false);
@@ -50,26 +52,37 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
 
   // upload wallet token list (add or remove token from list)
   toggleButton(id,changeBool,index,list)async{
-    SharedPreferences sharedPre = await SharedPreferences.getInstance();
-    var listCoin = sharedPre.getString("default")!.split(",");
-    if(changeBool) {
-      await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
-      listCoin.add("$id");
-      sharedPre.setString("default", listCoin.join(","));
+    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
 
-    }else{
-      await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
-          id,widget.selectedAccountId
-      );
-      listCoin.remove("$id");
-      sharedPre.setString("default", listCoin.join(","));
+
+      SharedPreferences sharedPre = await SharedPreferences.getInstance();
+      var listCoin = sharedPre.getString("default")!.split(",");
+      if (changeBool) {
+        await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
+        listCoin.add("$id");
+        sharedPre.setString("default", listCoin.join(","));
+        setState(() {
+          toggleList[index] = changeBool;
+        });
+      } else {
+        if (DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length >
+            1) {
+          await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
+              id, widget.selectedAccountId
+          );
+          listCoin.remove("$id");
+          sharedPre.setString("default", listCoin.join(","));
+
+          setState(() {
+            toggleList[index] = changeBool;
+          });
+        }else{
+          // ignore: use_build_context_synchronously
+          Helper.dialogCall.showToast(context, "You can't remove all coin");
+        }
+      }
     }
-    setState(() {
-      toggleList[index] = changeBool;
-    });
 
-
-  }
 
   @override
   void initState() {

@@ -14,7 +14,7 @@ class Helper {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
-        backgroundColor: MyColor.grey01Color,
+        backgroundColor: MyColor.darkGrey01Color,
         textColor: MyColor.whiteColor,
         fontSize: 15.0
     );

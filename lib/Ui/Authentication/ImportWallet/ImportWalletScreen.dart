@@ -380,7 +380,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
 
       appBar: AppBar(
         centerTitle: true,
-        leading:  InkWell(
+        leading: InkWell(
           onTap: () {
             Navigator.pop(context);
           },
