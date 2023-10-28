@@ -45,6 +45,7 @@ class TokenProvider with ChangeNotifier {
             }
           }).toList();
 
+          await DbNetwork.dbNetwork.getNetwork();
 
           networkLoad = true;
           isLoading = false;

@@ -69,8 +69,6 @@ class DbNetwork{
 
   List<NetworkList> networkList = [];
   getNetwork() async {
-    networkList.clear();
-
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM Network");
 
@@ -85,9 +83,6 @@ class DbNetwork{
 
   List<NetworkList> networkListBySymbol = [];
   getNetworkBySymbol(String symbol) async {
-    networkList.clear();
-
-    // print(symbol);
     final db = await database;
     final res = await db!.rawQuery('SELECT * FROM Network where symbol = "$symbol"');
 
@@ -95,8 +90,6 @@ class DbNetwork{
       return NetworkList.fromJson(c);
     }).toList();
     networkListBySymbol = list;
-
-
   }
 
   deleteAllNetwork() async {

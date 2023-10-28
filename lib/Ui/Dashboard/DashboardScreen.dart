@@ -47,7 +47,7 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingObserver{
 
   List body = [
     const WalletScreen(),
@@ -123,7 +123,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
     });
   }
-  
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      print("object ---> resumed state");
+      getAccount();
+      if (Utils.wcUrlVal.split('?').last.substring(0, 9) != "requestId") {
+        signClient!.pair(Utils.wcUrlVal);
+        Utils.wcUrlVal = "";
+      }
+    }
+  }
+
 
   checkInternet() async {
     await _internetProvider.checkInternet();
@@ -684,6 +696,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     _internetProvider = Provider.of<InternetProvider>(context, listen: false);
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     checkInternet();
     checkForWc2Url();
   }
