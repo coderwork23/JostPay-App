@@ -7,7 +7,6 @@ import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
-import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
