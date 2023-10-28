@@ -8,6 +8,7 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
+// ignore: must_be_immutable
 class AddAssetsScreen extends StatefulWidget {
   String selectedAccountId;
   AddAssetsScreen({
@@ -21,12 +22,11 @@ class AddAssetsScreen extends StatefulWidget {
 
 class _AddAssetsScreenState extends State<AddAssetsScreen> {
 
-
-
   TextEditingController searchController = TextEditingController();
   List toggleList = [];
   bool isLoading = true;
 
+  // get token list
   getCoin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var selectedAccountId = sharedPreferences.getString('accountId') ?? "";
@@ -46,6 +46,29 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
 
     isLoading = false;
     setState(() {});
+  }
+
+  // upload wallet token list (add or remove token from list)
+  toggleButton(id,changeBool,index,list)async{
+    SharedPreferences sharedPre = await SharedPreferences.getInstance();
+    var listCoin = sharedPre.getString("default")!.split(",");
+    if(changeBool) {
+      await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
+      listCoin.add("$id");
+      sharedPre.setString("default", listCoin.join(","));
+
+    }else{
+      await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
+          id,widget.selectedAccountId
+      );
+      listCoin.remove("$id");
+      sharedPre.setString("default", listCoin.join(","));
+    }
+    setState(() {
+      toggleList[index] = changeBool;
+    });
+
+
   }
 
   @override
@@ -144,7 +167,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
                           height: 35,
                           width: 35,
                           fit: BoxFit.fill,
-                          imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${list.marketId}.png",
+                          imageUrl: list.logo,
                           placeholder: (context, url) => const Center(
                             child: CircularProgressIndicator(color: MyColor.greenColor),
                           ),
@@ -199,18 +222,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
                         value: toggleList[index],
                         showOnOff: false,
                         onToggle: (val) async{
-
-                          if(val) {
-                            await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
-                          }else{
-                            await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
-                                list.id,widget.selectedAccountId
-                            );
-
-                          }
-                          setState(() {
-                            toggleList[index] = val;
-                          });
+                          toggleButton(list.id,val,index,list);
                         },
                       ),
                     ],

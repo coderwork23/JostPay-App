@@ -57,7 +57,8 @@ class _WalletScreenState extends State<WalletScreen> {
         );
       },
     ).whenComplete(() async {
-      await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+      getToken();
+      // await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
       setState(() {});
     });
   }
@@ -686,7 +687,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                    height: 45,
                                    width: 45,
                                    fit: BoxFit.fill,
-                                   imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${list.marketId}.png",
+                                   imageUrl: list.logo,
                                    placeholder: (context, url) => const Center(
                                      child: CircularProgressIndicator(color: MyColor.greenColor),
                                    ),

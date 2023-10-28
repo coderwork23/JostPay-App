@@ -55,15 +55,10 @@ class DBDefaultTokenProvider{
   createToken(AccountTokenList newToken) async{
     final db= await database;
     final res = await db!.insert('DefaultToken', newToken.toJson());
-    // print("data add here $res");
     return res;
   }
 
   updateToken(AccountTokenList newToken,id,acId) async{
-
-    print("token id :---> ${id}");
-    print("token name :---> ${newToken.name}");
-
     final db= await database;
     Map<String, dynamic> data = {
       "id": newToken.id,
@@ -84,7 +79,6 @@ class DBDefaultTokenProvider{
     };
 
     final res = await db!.update('DefaultToken', data, where: "id = ? AND accountId = ? ",whereArgs: [id,acId]);
-    print("update res --->  $res");
     getAccountToken(acId);
     return res;
   }
@@ -109,51 +103,35 @@ class DBDefaultTokenProvider{
 
   List<AccountTokenList> tokenDefaultList = [];
   getAccountToken(String accountId) async {
-    tokenDefaultList.clear();
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM DefaultToken Where accountId = '$accountId'");
 
-    // print("getAccountToken ${res.length}");
     List<AccountTokenList> list = res.map((c) {
-      print("c ---> $c");
-
       return AccountTokenList.fromJson(
           c,
           accountId,
       );
     }).toList();
     tokenDefaultList = list;
+
     tokenDefaultList.sort((a, b) {
       var aValue = a.name;
       var bValue = b.name;
       return aValue.compareTo(bValue);
     });
 
-     // print("check this value this ${tokenList.length}");
     return list;
   }
 
   updateTokenPrice(double live_price,double gain_loss,int id) async {
-
-    // print("$live_price,$gain_loss,$symbol");
-
-    List<AccountTokenList> list;
-
     final db = await database;
     final res = await db!.rawUpdate("UPDATE DefaultToken SET price = $live_price, percent_change_24h = $gain_loss WHERE market_id = '$id'");
-
-    //getAccountToken(address,btcAddress,solAddress,dotAddress);
-
     return res;
   }
 
   updateTokenBalance(String balance,String id) async {
-
     final db = await database;
     final res = await db!.rawUpdate("UPDATE DefaultToken SET balance = $balance WHERE id = '$id'");
-
-    //getAccountToken(address,btcAddress,solAddress,dotAddress);
-
     return res;
   }
 

@@ -93,13 +93,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     super.initState();
     transectionProvider = Provider.of<TransectionProvider>(context, listen: false);
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
-
     transectionProvider.transectionList.clear();
-    // print(widget.tokenBalance);
-
-    networkList = DbNetwork.dbNetwork.networkList.where((element) {
-      return "${element.id}" == widget.tokenNetworkId;
-    }).toList();
 
     tokenId = widget.tokenId;
     tokenNatewokrkId = widget.tokenNetworkId;
@@ -110,23 +104,23 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     sendTokenType = widget.tokenType;
     tokenUsd = "${widget.tokenUsdPrice}";
 
-    Future.delayed(Duration.zero,(){
-      getTransection();
-      getCustomTokenBalance();
-    });
+    getNetWork();
+
   }
 
-  String? currency;
-  late String crySymbol = "";
-  bool showBalance = false;
+
+  getNetWork() async {
+    await DbNetwork.dbNetwork.getNetwork();
+    networkList = DbNetwork.dbNetwork.networkList.where((element) {
+      return "${element.id}" == widget.tokenNetworkId;
+    }).toList();
+
+    setState(() {});
+    getTransection();
+    getCustomTokenBalance();
+  }
 
   getTransection() async {
-
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    currency = sharedPreferences.getString("currency") ?? "USD";
-    crySymbol = sharedPreferences.getString("crySymbol") ?? "\$";
-    showBalance = sharedPreferences.getBool('showBalance') ?? false;
 
     var data = {
       "network_id": widget.tokenNetworkId,
@@ -290,7 +284,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 ),
 
                 Text(
-                  showBalance ? "****" : tokenBalance == "0" ? "0 $tokenSymbol" : "${double.parse(ApiHandler.calculateLength(tokenBalance))} $tokenSymbol",
+                  tokenBalance == "0" ? "0 $tokenSymbol" : "${double.parse(ApiHandler.calculateLength(tokenBalance))} $tokenSymbol",
                   style: MyStyle.tx22RWhite.copyWith(
                     fontSize: 14,
                   ),

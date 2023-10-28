@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../LocalDb/Local_Token_provider.dart';
 import '../Models/AccountTokenModel.dart';
 import '../Models/NetworkModel.dart';
+import '../Values/utils.dart';
 
 class TokenProvider with ChangeNotifier {
 
@@ -82,6 +83,9 @@ class TokenProvider with ChangeNotifier {
           await DBTokenProvider.dbTokenProvider.getAccountToken(id);
 
           List defaultList = ["1","1027","1839"];
+
+
+
           List marketId = ["1","2","74","328","825","1027","1839","1958"];
           List tokenID = ["8","29","28","0","-1","1","2","10"];
           List decimalsList = ["8","8","8","0","-1","18","18","6"];
@@ -177,12 +181,12 @@ class TokenProvider with ChangeNotifier {
                 accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
                 networkId: DbNetwork.dbNetwork.networkListBySymbol.isNotEmpty ? DbNetwork.dbNetwork.networkListBySymbol.first.id:0,
                 marketId:int.parse(marketId[i]),
-                name: marketInfo['name'],
+                name: marketInfo['name'] == "BNB"? "Binance Smart Chain" : marketInfo['name'],
                 type: "",
                 address: "",
                 symbol: marketInfo['symbol'],
                 decimals: int.parse(decimalsList[i]),
-                logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/${marketId[i]}.png",
+                logo: marketInfo['name'] == "BNB" ?  "http://${Utils.url}/api/img/binance_logo.png" : "https://s2.coinmarketcap.com/static/img/coins/64x64/${marketId[i]}.png",
                 balance: "0",
                 networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
                 price: marketInfo['quote']['USD']['price'],
@@ -204,32 +208,11 @@ class TokenProvider with ChangeNotifier {
               }
 
             }
-
           }
 
           // print(tokenNote);
 
-          await DBTokenProvider.dbTokenProvider.getAccountToken(id);
-          // await DBDefaultTokenProvider.dbTokenProvider.deleteAccountToken(id);
-          await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(id);
-
-          for(int i=0; i<defaultList.length; i++){
-            AccountTokenList model = AccountTokenList.fromJson(
-                await DBTokenProvider.dbTokenProvider.getTokenById(id,defaultList[i]),
-                id
-            );
-
-            int checkIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => "${element.id}" == defaultList[i]);
-
-            if(checkIndex == -1) {
-              await DBDefaultTokenProvider.dbTokenProvider.createToken(model);
-            }else{
-              await DBDefaultTokenProvider.dbTokenProvider.updateToken(model,model.id,id);
-            }
-          }
-
-
-          await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(id);
+          addDefaultToken(defaultList,id);
 
           isSuccess = true;
           isLoading = false;
@@ -249,6 +232,38 @@ class TokenProvider with ChangeNotifier {
 
   }
 
+  addDefaultToken (List defaultList,acId) async {
+    await DBTokenProvider.dbTokenProvider.getAccountToken(acId);
+    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(acId);
+
+    SharedPreferences sharedPre = await SharedPreferences.getInstance();
+
+    List myDefaultList = [];
+    if(DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.isEmpty){
+      sharedPre.setString("default", defaultList.join(","));
+      myDefaultList.addAll(defaultList);
+    }else{
+      myDefaultList = sharedPre.getString("default")!.split(",");
+    }
+
+
+    for(int i=0; i<myDefaultList.length; i++){
+      AccountTokenList model = AccountTokenList.fromJson(
+          await DBTokenProvider.dbTokenProvider.getTokenById(acId,myDefaultList[i]),
+          acId
+      );
+      int checkIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => "${element.id}" == defaultList[i]);
+
+      if(checkIndex == -1) {
+        await DBDefaultTokenProvider.dbTokenProvider.createToken(model);
+      }else{
+        await DBDefaultTokenProvider.dbTokenProvider.updateToken(model,model.id,acId);
+      }
+    }
+
+    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(acId);
+
+  }
 
   var deleteData;
   deleteToken(data,url) async {
