@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -8,6 +9,21 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+class Debouncer {
+  final int milliseconds;
+  late VoidCallback action;
+  Timer? timer;
+
+  Debouncer({required this.milliseconds});
+
+  run(VoidCallback action) {
+    if (null != timer) {
+      timer!.cancel();
+    }
+    timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
+}
 
 // ignore: must_be_immutable
 class AddAssetsScreen extends StatefulWidget {
@@ -24,6 +40,8 @@ class AddAssetsScreen extends StatefulWidget {
 class _AddAssetsScreenState extends State<AddAssetsScreen> {
 
   TextEditingController searchController = TextEditingController();
+  final _debouncer = Debouncer(milliseconds: 500);
+
   List toggleList = [];
   bool isLoading = true;
 
@@ -48,6 +66,26 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
 
     isLoading = false;
     setState(() {});
+  }
+
+  searchToken(String searchValue) async {
+    if(searchController.text.isNotEmpty){
+      await DBTokenProvider.dbTokenProvider.getSearchToken(selectedAccountId,searchValue);
+    }else{
+      await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+    }
+    toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, false);
+    for(int i = 0; i< DBTokenProvider.dbTokenProvider.tokenList.length; i++){
+      var list = DBTokenProvider.dbTokenProvider.tokenList[i];
+      // print(list.name);
+      int index = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => element.id == list.id);
+      if(index != -1){
+        // print(list.name);
+        toggleList[i] = true;
+      }
+    }
+    setState(() {});
+
   }
 
   // upload wallet token list (add or remove token from list)
@@ -126,6 +164,11 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
             controller: searchController,
             cursorColor: MyColor.greenColor,
             style: MyStyle.tx18RWhite,
+            onChanged: (value) {
+              _debouncer.run(() async {
+                searchToken(value);
+              });
+            },
             decoration: InputDecoration(
               isDense: true,
               filled: true,

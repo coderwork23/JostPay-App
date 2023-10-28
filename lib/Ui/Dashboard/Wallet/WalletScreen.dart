@@ -13,7 +13,7 @@ import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/AddAssetsScreen.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/ReceiveToken/ReceiveToken.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/ReceiveToken/ReceiveTokenList.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/SendToken/SendTokenList.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -105,7 +105,7 @@ class _WalletScreenState extends State<WalletScreen> {
             minHeight: MediaQuery.of(context).size.height/2,
             maxHeight: MediaQuery.of(context).size.height*0.8
           ),
-            child: ReceiveToken()
+            child: const ReceiveTokenList()
         );
       },
     );
@@ -729,6 +729,12 @@ class _WalletScreenState extends State<WalletScreen> {
                                          text: TextSpan(
                                              children: [
                                                TextSpan(
+                                                 text: list.type.isNotEmpty ? "${list.type}\t" : "",
+                                                 style: MyStyle.tx18RWhite.copyWith(
+                                                     fontSize: 14,
+                                                     color: MyColor.grey01Color
+                                                 ),
+                                               ),TextSpan(
                                                  text: "\$${ApiHandler.calculateLength("${list.price}")} ",
                                                  style: MyStyle.tx18RWhite.copyWith(
                                                      fontSize: 14,

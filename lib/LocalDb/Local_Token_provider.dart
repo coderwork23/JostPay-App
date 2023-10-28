@@ -133,6 +133,32 @@ class DBTokenProvider{
     return list;
   }
 
+  getSearchToken(String accountId,name) async {
+
+    final db = await database;
+    final res = await db!.query(
+      'Token',
+      where: 'LOWER (name) LIKE ? OR LOWER(symbol) LIKE ?',
+      whereArgs: ['$name%','$name%',],
+    );
+    List<AccountTokenList> list = res.map((c) {
+      return AccountTokenList.fromJson(
+        c,
+        accountId,
+      );
+    }).toList();
+    tokenList = list;
+    tokenList.sort((a, b) {
+      var aValue = a.name;
+      var bValue = b.name;
+      return aValue.compareTo(bValue);
+    });
+
+    // print("check this value this ${tokenList.length}");
+    return list;
+  }
+
+
   updateTokenPrice(double live_price,double gain_loss,int id) async {
 
     // print("$live_price,$gain_loss,$symbol");

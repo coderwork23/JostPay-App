@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
@@ -6,16 +8,33 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// ignore: must_be_immutable
-class ReceiveToken extends StatefulWidget {
-  const ReceiveToken({super.key});
+class Debouncer {
+  final int milliseconds;
+  late VoidCallback action;
+  Timer? timer;
 
-  @override
-  State<ReceiveToken> createState() => _ReceiveTokenState();
+  Debouncer({required this.milliseconds});
+
+  run(VoidCallback action) {
+    if (null != timer) {
+      timer!.cancel();
+    }
+    timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
 }
 
-class _ReceiveTokenState extends State<ReceiveToken> {
+// ignore: must_be_immutable
+class ReceiveTokenList extends StatefulWidget {
+  const ReceiveTokenList({super.key});
+
+  @override
+  State<ReceiveTokenList> createState() => _ReceiveTokenListState();
+}
+
+class _ReceiveTokenListState extends State<ReceiveTokenList> {
+
   TextEditingController searchController = TextEditingController();
+  final _debouncer = Debouncer(milliseconds: 500);
 
   showReceivePage(BuildContext context,tokenNetworkId,tokenName,symbol){
     showModalBottomSheet(
@@ -44,11 +63,11 @@ class _ReceiveTokenState extends State<ReceiveToken> {
       },
     );
   }
-
+  var selectedAccountId = "";
 
   getCoin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
     await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
     setState(() {});
   }
@@ -92,6 +111,16 @@ class _ReceiveTokenState extends State<ReceiveToken> {
           controller: searchController,
           cursorColor: MyColor.greenColor,
           style: MyStyle.tx18RWhite,
+          onChanged: (value) {
+            _debouncer.run(() async {
+              if(searchController.text.isNotEmpty){
+                await DBTokenProvider.dbTokenProvider.getSearchToken(selectedAccountId,value);
+              }else{
+                await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+              }
+              setState(() {});
+            });
+          },
           decoration: InputDecoration(
             isDense: true,
             filled: true,
@@ -169,9 +198,24 @@ class _ReceiveTokenState extends State<ReceiveToken> {
                       const SizedBox(width: 12),
 
                       Expanded(
-                        child: Text(
-                          list.name,
-                          style: MyStyle.tx18RWhite,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              list.name,
+                              style: MyStyle.tx18RWhite,
+                            ),
+                            Visibility(
+                              visible: list.type.isNotEmpty,
+                              child: Text(
+                                "type: ${list.type}",
+                                style:MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 13,
+                                    color: MyColor.grey01Color
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 12),

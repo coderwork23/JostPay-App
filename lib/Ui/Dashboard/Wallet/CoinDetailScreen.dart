@@ -220,14 +220,33 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 const SizedBox(height: 5),
 
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        widget.tokenName,
-                        style: MyStyle.tx18RWhite.copyWith(
-                            fontSize: 18,
-                            color: MyColor.grey01Color
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.tokenName,
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 18,
+                                color: MyColor.grey01Color
+                            ),
+                          ),
+
+                          Visibility(
+                            visible: widget.tokenType.isNotEmpty,
+                            child: Text(
+                              "Type: ${widget.tokenType}",
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 13,
+                                  color: MyColor.grey01Color
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Text(
