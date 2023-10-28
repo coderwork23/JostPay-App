@@ -235,21 +235,23 @@ class _LoginScreenState extends State<LoginScreen> {
       "password": passwordController.text,
     };
 
-    await accountProvider.loginAccount(data,'/deviceLogin');
-    if(accountProvider.isSuccess == true){
-
-      getAccount();
-
-    }
-    else{
-
+    try {
+      await accountProvider.loginAccount(data, '/deviceLogin');
+      if (accountProvider.isSuccess == true) {
+        getAccount();
+      }
+      else {
+        setState(() {
+          isLoading = false;
+        });
+        errorText = "Incorrect Password!!";
+      }
+    }catch(e){
+      errorText = "Incorrect Password!!";
       setState(() {
         isLoading = false;
       });
-      errorText =  "Incorrect Password!!";
-
     }
-
   }
 
 
@@ -412,6 +414,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   //password field
                   TextFormField(
                     controller: passwordController,
+                    readOnly: isLoading,
                     obscureText: showPassword,
                     validator: (value) {
                       if(value!.isEmpty){
@@ -455,6 +458,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             )
                         )
                     ),
+                  ),
+                  Visibility(
+                    visible: errorText.isNotEmpty,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: Text(
+                        errorText,
+                        style: MyStyle.tx18BWhite.copyWith(
+                          color: MyColor.redColor,
+                          fontSize: 14
+                        ),
+                      ),
+                    )
                   ),
                   const SizedBox(height: 30),
 
@@ -500,7 +516,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: MyStyle.tx18RWhite
                     ),
                   ),
-                  SizedBox(height: height*0.1),
+
+                  Visibility(
+                    visible: fingerOn,
+                    child: InkWell(
+                       onTap: (){
+                         _authenticate();
+                       },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 12.0),
+                        child: Image.asset(
+                          "assets/images/fingerprint.png",
+                          height: 45,
+                          width: 45,
+                          fit: BoxFit.contain,
+                          color: MyColor.whiteColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // SizedBox(height: height*0.07),
 
                 ],
               ),
