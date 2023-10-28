@@ -85,10 +85,10 @@ class DBTokenProvider{
   }
 
     getTokenById(acId,id) async {
-    print("object $id");
+    // print("object $id");
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM Token Where accountId = '$acId' AND id='$id'");
-    print("res ---> $res");
+    // print("res ---> $res");
     return res.isEmpty ? null :res[0];
   }
 

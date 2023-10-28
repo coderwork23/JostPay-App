@@ -32,15 +32,15 @@ class SessionRequest extends StatefulWidget {
 class _SessionRequestState extends State<SessionRequest> {
   late AppMetadata _metadata;
   late List<String> _selectedAccountIds;
-
   late TokenProvider tokenProvider;
+
+
 
   @override
   void initState() {
     tokenProvider = Provider.of<TokenProvider>(context,listen: false);
     _metadata = widget.proposal.proposer.metadata;
     super.initState();
-
   }
 
   var chinId = "0";
@@ -138,20 +138,21 @@ class _SessionRequestState extends State<SessionRequest> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 itemBuilder: (_, idx) {
                   final item = widget.proposal.requiredNamespaces.entries.elementAt(idx);
-                  // print(item.value.toJson());
-                  // print(item.key);
-                  // print(item.value.chains);
+                  print(item.value.toJson());
+                  print(item.key);
+                  print(item.value.chains);
+                  print("check ---> ");
+                  print(DbNetwork.dbNetwork.networkList.length);
 
-                  // print("check ---> ");
 
 
                   int value = DbNetwork.dbNetwork.networkList.indexWhere((element) {
-                    // print(element.chain);
+                    print("element.chain -----> ${element.chain}");
                     return "${element.chain}" == item.value.chains.first.split(":").last && element.isEVM == 1;
                   });
 
-                  // print("value ---->  $value");
-                  // print("chain name ---> ${item.value.chains.first.split(":").last}");
+                  print("value ---->  $value");
+                  print("chain name ---> ${item.value.chains.first.split(":").last}");
 
                   if(value != -1){
                     // print("test val"+value.toString());
@@ -159,7 +160,7 @@ class _SessionRequestState extends State<SessionRequest> {
                     // print("test chain id"+chinId);
                   }else{
                     // print("check 2 ---> ");
-                   Helper.dialogCall.showToast(context, "not implement");
+                   Helper.dialogCall.showToast(context, "Network not implemented!!");
                     Navigator.pop(context);
                   }
 
@@ -184,7 +185,7 @@ class _SessionRequestState extends State<SessionRequest> {
                       child: TextButton(
                         style: TextButton.styleFrom(
                           primary: Colors.white,
-                          backgroundColor: MyColor.blueColor,
+                          backgroundColor: MyColor.greenColor,
                         ),
                         onPressed: () {
                           final SessionNamespaces params = {};

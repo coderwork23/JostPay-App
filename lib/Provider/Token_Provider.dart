@@ -26,7 +26,7 @@ class TokenProvider with ChangeNotifier {
 
         var value = json.decode(responseData.body);
 
-        // print("get network");x
+        print("get network");
 
         // await DbNetwork.dbNetwork.deleteAllNetwork();
 
@@ -39,7 +39,7 @@ class TokenProvider with ChangeNotifier {
           (netWorkData["data"] as List).map((token) async {
             var index = DbNetwork.dbNetwork.networkList.indexWhere((element) => "${element.id}" == "${token["id"]}");
             if(index != -1 ){
-              await DbNetwork.dbNetwork.updateNetwork(NetworkList.fromJson(token));
+              await DbNetwork.dbNetwork.updateNetwork(NetworkList.fromJson(token),token["id"]);
             }else {
               await DbNetwork.dbNetwork.createNetwork(NetworkList.fromJson(token));
             }
@@ -66,7 +66,6 @@ class TokenProvider with ChangeNotifier {
   }
 
 
-
   bool isAddTokenDone = false;
   var allToken;
   getAccountToken(data, url,id,shortType) async {
@@ -89,7 +88,6 @@ class TokenProvider with ChangeNotifier {
           List marketId = ["1","2","74","328","825","1027","1839","1958"];
           List tokenID = ["8","29","28","0","-1","1","2","10"];
           List decimalsList = ["8","8","8","0","-1","18","18","6"];
-          int bnbNetworkId =0,trxNetworkId = 0;
 
 
           for(int i = 0; i<marketId.length; i++){
@@ -99,74 +97,7 @@ class TokenProvider with ChangeNotifier {
             // print("price --->  ${marketInfo['name']}");
             await DbNetwork.dbNetwork.getNetworkBySymbol("${marketInfo['symbol']}");
 
-            // if(marketInfo['symbol'].toString().toLowerCase() == "bnb"){
-            //   bnbNetworkId = DbNetwork.dbNetwork.networkListBySymbol.first.id;
-            //
-            //   AccountTokenList accountTokenList = AccountTokenList(
-            //     id: 825,
-            //     token_id: int.parse(tokenID[i]),
-            //     accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
-            //     networkId: bnbNetworkId,
-            //     marketId: 825,
-            //     name: allToken['data']["825"]['name'],
-            //     type: "BEP20",
-            //     address: "0x55d398326f99059ff775485246999027b3197955",
-            //     symbol: allToken['data']["825"]['symbol'],
-            //     decimals: 18,
-            //     logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
-            //     balance: "0",
-            //     networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
-            //     price: allToken['data']["825"]['quote']['USD']['price'],
-            //     percentChange24H: allToken['data']["825"]['quote']['USD']['percent_change_24h'],
-            //     accountId: id,
-            //     explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.explorerUrl,
-            //   );
-            //
-            //   var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-            //     return "${element.id}"== "${marketId[i]}";
-            //   });
-            //
-            //   if(tokenListIndex != -1){
-            //     await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId[i],id);
-            //   }else{
-            //     await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
-            //   }
-            //
-            // }
-            // else if(marketInfo['symbol'].toString().toLowerCase() == "trx"){
-            //
-            //   trxNetworkId = DbNetwork.dbNetwork.networkListBySymbol.first.id;
-            //
-            //   AccountTokenList accountTokenList = AccountTokenList(
-            //     id: 825,
-            //     token_id: int.parse(tokenID[i]),
-            //     accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
-            //     networkId: trxNetworkId,
-            //     marketId: 825,
-            //     name: allToken['data']["825"]['name'],
-            //     type: "TRX20",
-            //     address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
-            //     symbol: allToken['data']["825"]['symbol'],
-            //     decimals: 6,
-            //     logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
-            //     balance: "0",
-            //     networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
-            //     price: allToken['data']["825"]['quote']['USD']['price'],
-            //     percentChange24H: allToken['data']["825"]['quote']['USD']['percent_change_24h'],
-            //     accountId: id,
-            //     explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.explorerUrl,
-            //   );
-            //
-            //   var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-            //     return "${element.id}"== "${marketId[i]}";
-            //   });
-            //
-            //   if(tokenListIndex != -1){
-            //     await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId[i],id);
-            //   }else{
-            //     await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
-            //   }
-            // }
+            addTetherBNBTRX(marketInfo,id,marketId[i]);
 
             if(DbNetwork.dbNetwork.networkListBySymbol.isNotEmpty) {
 
@@ -230,6 +161,79 @@ class TokenProvider with ChangeNotifier {
 
       });
 
+  }
+
+  addTetherBNBTRX(marketInfo,String id,marketId) async {
+    int bnbNetworkId =0,trxNetworkId = 0;
+
+    if(marketInfo['symbol'].toString().toLowerCase() == "bnb"){
+      bnbNetworkId = DbNetwork.dbNetwork.networkListBySymbol.first.id;
+
+      AccountTokenList accountTokenList = AccountTokenList(
+        id: 825,
+        token_id: 3070,
+        accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
+        networkId: bnbNetworkId,
+        marketId: 825,
+        name: allToken['data']["825"]['name'],
+        type: "BEP20",
+        address: "0x55d398326f99059ff775485246999027b3197955",
+        symbol: allToken['data']["825"]['symbol'],
+        decimals: 18,
+        logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
+        balance: "0",
+        networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
+        price: allToken['data']["825"]['quote']['USD']['price'],
+        percentChange24H: allToken['data']["825"]['quote']['USD']['percent_change_24h'],
+        accountId: id,
+        explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.explorerUrl,
+      );
+
+      var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
+        return "${element.id}"== "${marketId}";
+      });
+
+      if(tokenListIndex != -1){
+        await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId,id);
+      }else{
+        await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
+      }
+
+    }
+    else if(marketInfo['symbol'].toString().toLowerCase() == "trx"){
+
+      trxNetworkId = DbNetwork.dbNetwork.networkListBySymbol.first.id;
+
+      AccountTokenList accountTokenList = AccountTokenList(
+        id: 825,
+        token_id: 3079,
+        accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
+        networkId: trxNetworkId,
+        marketId: 825,
+        name: allToken['data']["825"]['name'],
+        type: "TRX20",
+        address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+        symbol: allToken['data']["825"]['symbol'],
+        decimals: 6,
+        logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
+        balance: "0",
+        networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
+        price: allToken['data']["825"]['quote']['USD']['price'],
+        percentChange24H: allToken['data']["825"]['quote']['USD']['percent_change_24h'],
+        accountId: id,
+        explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.explorerUrl,
+      );
+
+      var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
+        return "${element.id}"== "${marketId}";
+      });
+
+      if(tokenListIndex != -1){
+        await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId,id);
+      }else{
+        await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
+      }
+    }
   }
 
   addDefaultToken (List defaultList,acId) async {

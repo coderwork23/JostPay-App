@@ -52,20 +52,19 @@ class DbNetwork{
 
   createNetwork(NetworkList networkLists) async{
     final db= await database;
-    try {
-      final res = await db!.insert("Network",networkLists.toJson());
-      return res;
-    }catch(e){}
+    final res = await db!.insert("Network",networkLists.toJson());
+    print("createNetwork");
+    return res;
   }
 
 
-  updateNetwork(NetworkList networkLists) async{
+  updateNetwork(NetworkList networkLists,id) async{
     final db= await database;
-    try {
-      final res = await db!.update("Network",networkLists.toJson());
+      final res = await db!.update("Network",networkLists.toJson(),where: "id = ? ",whereArgs: [id]);
+      print("updateNetwork");
+
       // print("res update network $res");
       return res;
-    }catch(e){}
   }
 
   List<NetworkList> networkList = [];
@@ -88,7 +87,7 @@ class DbNetwork{
   getNetworkBySymbol(String symbol) async {
     networkList.clear();
 
-    print(symbol);
+    // print(symbol);
     final db = await database;
     final res = await db!.rawQuery('SELECT * FROM Network where symbol = "$symbol"');
 

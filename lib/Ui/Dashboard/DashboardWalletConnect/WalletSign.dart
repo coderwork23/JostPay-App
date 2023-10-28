@@ -209,7 +209,7 @@ class _WalletSignState extends State<WalletSign> {
                         height: 45,
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(
-                          color: MyColor.blueColor,
+                          color: MyColor.greenColor,
                           borderRadius: BorderRadius.all(Radius.circular(8.0)
                           ),
                         ),

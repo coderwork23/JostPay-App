@@ -205,7 +205,7 @@ class _WalletConnectScreenState extends State<WalletConnectScreen> with WidgetsB
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  tileColor:MyColor.backgroundColor.withOpacity(0.04),
+                  tileColor:MyColor.darkGrey01Color,
                   onTap: () {
                     Navigator.push(
                         context,

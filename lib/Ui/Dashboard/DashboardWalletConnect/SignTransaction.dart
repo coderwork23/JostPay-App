@@ -218,7 +218,7 @@ class _SignTransactionState extends State<SignTransaction> {
                         height: 45,
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(
-                          color: MyColor.blueColor,
+                          color: MyColor.greenColor,
                           borderRadius: BorderRadius.all(Radius.circular(8.0)
                           ),
                         ),

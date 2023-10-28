@@ -116,6 +116,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId =  sharedPreferences.getString('accountId')??"";
     await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,"2");
+    await DbNetwork.dbNetwork.getNetwork();
 
     setState((){
       selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;

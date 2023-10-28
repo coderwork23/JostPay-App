@@ -85,53 +85,52 @@ class _signTransactions2State extends State<signTransactions2> with WidgetsBindi
           reverse: true,
           itemCount: DBWalletConnectV2.dbWalletConnectV2.SignTList.length,
           scrollDirection: Axis.vertical,
-          padding: const EdgeInsets.only(top: 0),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           itemBuilder: (context, index) {
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 15),
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    color: MyColor.grey01Color,
-                    borderRadius: BorderRadius.circular(8.0)
-                ),
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            return Container(
+              margin: const EdgeInsets.only(bottom: 15),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  color: MyColor.darkGrey01Color,
+                  borderRadius: BorderRadius.circular(8.0)
+              ),
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-                        Expanded(
-                          child: Text("${DBWalletConnectV2.dbWalletConnectV2.SignTList[index]['date']}",
-                            style:  MyStyle.tx18RWhite.copyWith(
-                                fontSize: 14
-                            ),
-                          ),
-                        ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
 
-                        Text(
-                          "${DBWalletConnectV2.dbWalletConnectV2.SignTList[index]['type']}",
+                      Expanded(
+                        child: Text("${DBWalletConnectV2.dbWalletConnectV2.SignTList[index]['date']}",
                           style:  MyStyle.tx18RWhite.copyWith(
                               fontSize: 14
                           ),
                         ),
-
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    Text(
-                      "${DBWalletConnectV2.dbWalletConnectV2.SignTList[index]['text']}",
-                      style:  MyStyle.tx18RWhite.copyWith(
-                          fontSize: 14
                       ),
+
+                      Text(
+                        "${DBWalletConnectV2.dbWalletConnectV2.SignTList[index]['type']}",
+                        style:  MyStyle.tx18RWhite.copyWith(
+                            fontSize: 14
+                        ),
+                      ),
+
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  Text(
+                    "${DBWalletConnectV2.dbWalletConnectV2.SignTList[index]['text']}",
+                    style:  MyStyle.tx18RWhite.copyWith(
+                        fontSize: 14
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           }
