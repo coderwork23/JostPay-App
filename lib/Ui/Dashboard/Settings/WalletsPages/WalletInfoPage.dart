@@ -2,12 +2,23 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 
 import '../../../../Values/MyStyle.dart';
 
 class WalletInfoScreen extends StatefulWidget {
-  const WalletInfoScreen({super.key});
+
+  String  accountId,name;
+  List? seedPhare;
+
+  WalletInfoScreen({
+    super.key,
+    required this.accountId,
+    required this.seedPhare,
+    required this.name,
+  });
 
   @override
   State<WalletInfoScreen> createState() => _WalletInfoScreenState();
@@ -16,7 +27,36 @@ class WalletInfoScreen extends StatefulWidget {
 class _WalletInfoScreenState extends State<WalletInfoScreen> {
 
   bool showPhrase = false;
-  TextEditingController nameController = TextEditingController(text: "Main Wallet");
+  TextEditingController nameController = TextEditingController();
+
+  Future<void> secureScreen() async {
+    await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    secureScreen();
+    getAllACKey();
+  }
+
+  getAllACKey()async {
+    DbAccountAddress.dbAccountAddress.getAccountAddress(widget.accountId);
+    nameController.text = widget.name;
+    setState(() {});
+    // isListSelected = List.filled(DbAccountAddress.dbAccountAddress.allAccountAddress.length, false);
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    secureScreenOff();
+  }
+
+  Future<void> secureScreenOff() async {
+    await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +77,7 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
             size: 20,
           ),
         ),
-        title: Text(
+        title: const Text(
           "Wallets",
           // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
           // textAlign: TextAlign.center,
@@ -60,8 +100,10 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
 
             const SizedBox(height: 10),
 
+            // name text filed
             TextFormField(
               controller: nameController,
+              readOnly: true,
               cursorColor: MyColor.greenColor,
               style: MyStyle.tx18RWhite,
               decoration: InputDecoration(
@@ -80,12 +122,6 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
                       color: MyColor.boarderColor,
                     )
                 ),
-                hintText: "Search",
-                hintStyle:MyStyle.tx22RWhite.copyWith(
-                    fontSize: 14,
-                    color: MyColor.grey01Color
-                ),
-
               ),
             ),
             SizedBox(height: height * 0.1),
@@ -105,8 +141,9 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 10),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: 12,
+                    itemCount: widget.seedPhare!.length,
                     itemBuilder: (context, index) {
+                      var list =widget.seedPhare![index];
                       return Container(
                         height: 50,
                         alignment: Alignment.center,
@@ -115,7 +152,7 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
                             color: MyColor.backgroundColor
                         ),
                         child: Text(
-                          "${index+1} Check",
+                          "${index+1} $list",
                           textAlign: TextAlign.center,
                           style: MyStyle.tx18RWhite,
                         ),

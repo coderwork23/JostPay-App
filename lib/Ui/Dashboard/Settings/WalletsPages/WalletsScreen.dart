@@ -79,10 +79,21 @@ class _WalletsScreenState extends State<WalletsScreen> {
 
           return InkWell(
             onTap: () {
+
+              var seedPhase = DBAccountProvider.dbAccountProvider.newAccountList[index].mnemonic;
+              List seedPhaseList = [];
+              if(seedPhase != ""){
+                seedPhaseList = seedPhase.trim().split(" ");
+              }
+
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const WalletInfoScreen(),
+                    builder: (context) => WalletInfoScreen(
+                      accountId: DBAccountProvider.dbAccountProvider.newAccountList[index].id,
+                      seedPhare: seedPhaseList,
+                      name: DBAccountProvider.dbAccountProvider.newAccountList[index].name,
+                    ),
                   )
               );
             },
