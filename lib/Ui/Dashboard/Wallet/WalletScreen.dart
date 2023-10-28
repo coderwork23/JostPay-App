@@ -645,7 +645,7 @@ class _WalletScreenState extends State<WalletScreen> {
                            selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
 
                              // ignore: use_build_context_synchronously
-                           Navigator.push(
+                           var value = await Navigator.push(
                              context,
                              MaterialPageRoute(
                                builder: (context) => CoinDetailScreen(
@@ -668,6 +668,12 @@ class _WalletScreenState extends State<WalletScreen> {
                                ),
                              )
                            );
+
+                           if(value == null ){
+                             socket!.destroy();
+                             socket!.dispose();
+                             getSocketData();
+                           }
 
                          },
                          child: Container(
