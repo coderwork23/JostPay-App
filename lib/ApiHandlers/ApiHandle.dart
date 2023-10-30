@@ -182,55 +182,22 @@ class ApiHandler {
   }
 
 
-
-  static Future<dynamic> moralisGetParams(url, params) async {
-
-    var baseUrl = Uri.https('deep-index.moralis.io', '/api$url', params);
-
-    _setHeadersGet() => {
-      'Content-type': 'application/json',
-      'X-API-Key': 'ZhkwlXP0YNIMQ4kdc2A16RHPeieLN6TkgVkU43EgZ9Bq13KU5sP4WZuDHc6zWJNR'
-    };
-
-    http.Response response =
-    await http.get(baseUrl, headers: _setHeadersGet());
-
-    return response;
-  }
-
-  static Future<dynamic> moralisTokenUrl(url) async {
-
-    var baseUrl = Uri.parse('$url');
+  static Future<dynamic> getInstantApi(params) async {
+    var baseUrl = Uri.https(
+        'instantexchangers.net', '/mobile_server/',
+        params,
+    );
 
     _setHeadersGet() => {
       'Content-type': 'application/json',
     };
 
-    http.Response response =
-    await http.get(baseUrl, headers: _setHeadersGet());
-
-    return response;
-  }
-
-
-  static Future<dynamic> polkaPost(body, url) async {
-
-    _setHeadersPost() => {
-      'Content-type': 'application/json',
-      'X-API-Key': '18be4d7b73124fc69d9810018fbad122'
-    };
-
-    //var baseUrl = Uri.http('128.199.216.229', '/api$url');
-    var baseUrl = Uri.https('polkadot.api.subscan.io', '/api/scan/transfers');
-
-    http.Response response = await http.post(
-        baseUrl,
-        headers: _setHeadersPost(),
-        body: jsonEncode(body)
+    http.Response response = await http.get(
+      baseUrl,
+      headers: _setHeadersGet(),
     );
 
     return response;
-
   }
 
 

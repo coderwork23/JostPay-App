@@ -20,6 +20,15 @@ class Helper {
     );
   }
 
+
+  showLoader(){
+    return const Center(
+        child: CircularProgressIndicator(
+          color: MyColor.greenColor,
+        )
+    );
+  }
+
   showAlertDialog(BuildContext context){
     AlertDialog alert = AlertDialog(
       backgroundColor:MyColor.backgroundColor,

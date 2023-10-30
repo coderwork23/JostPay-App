@@ -203,7 +203,7 @@ class _WalletScreenState extends State<WalletScreen> {
         var data ={
           "id":"1,2,74,328,825,1027,1839,1958"
         };
-        await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
+        await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
       }
 
 

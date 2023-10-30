@@ -69,7 +69,7 @@ class TokenProvider with ChangeNotifier {
 
   bool isAddTokenDone = false;
   var allToken;
-  getAccountToken(data, url,id,shortType) async {
+  getAccountToken(data, url,id) async {
     isLoading = true;
     notifyListeners();
 
@@ -261,7 +261,9 @@ class TokenProvider with ChangeNotifier {
           await DBTokenProvider.dbTokenProvider.getTokenById(acId,myDefaultList[i]),
           acId
       );
-      int checkIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => "${element.id}" == defaultList[i]);
+      int checkIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere(
+              (element) => "${element.id}" == myDefaultList[i]
+      );
 
       if(checkIndex == -1) {
         await DBDefaultTokenProvider.dbTokenProvider.createToken(model);

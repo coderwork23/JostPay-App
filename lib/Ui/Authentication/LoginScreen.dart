@@ -203,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
       var data ={
         "id":"1,2,74,328,825,1027,1839,1958"
       };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
+      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
     }
 
     // ignore: use_build_context_synchronously
