@@ -20,7 +20,7 @@ class DBSignTransactionProvider{
 
   initDB() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentDirectory.path, 'sign_manager.db');
+    final path = join(documentDirectory.path, 'signManager.db');
 
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {

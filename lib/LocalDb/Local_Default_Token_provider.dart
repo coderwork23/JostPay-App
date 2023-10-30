@@ -21,7 +21,7 @@ class DBDefaultTokenProvider{
 
   initDB() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentDirectory.path, 'defaultToken_manager.db');
+    final path = join(documentDirectory.path, 'defaultTokenManager.db');
 
     return await openDatabase(path, version: 3, onOpen: (db) {},
         onCreate: (Database db, int version) async {

@@ -14,18 +14,13 @@ class _QrScannerPageState extends State<QrScannerPage> {
   bool flashlight=false;
   bool flashOn = false;
 
-  @override
-  void dispose() {
-    cameraController.stop();
-    cameraController.dispose();
-    super.dispose();
-  }
+
 
   @override
   void initState() {
     super.initState();
     cameraController = MobileScannerController(
-        detectionSpeed: DetectionSpeed.noDuplicates,
+        detectionSpeed: DetectionSpeed.normal,
         detectionTimeoutMs: 300,
         formats: [BarcodeFormat.qrCode],
         facing: CameraFacing.back,
@@ -34,6 +29,13 @@ class _QrScannerPageState extends State<QrScannerPage> {
         torchEnabled: false
     );
   }
+  @override
+  void dispose() {
+    cameraController.stop();
+    cameraController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +46,12 @@ class _QrScannerPageState extends State<QrScannerPage> {
             controller: cameraController,
             onDetect: (capture) async {
               cameraController.stop();
+              // print("barcodes -----> ${capture}");
               if(capture.barcodes.length < 2) {
                 final barcodes = capture.barcodes[0];
                 var result = barcodes;
+                  print(result.rawValue.toString());
                 if (result != null) {
-                  // print(result.rawValue.toString());
                   Navigator.pop(context, result.rawValue.toString());
                 }
               }

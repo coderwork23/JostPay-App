@@ -22,7 +22,7 @@ class DbNetwork{
 
   initDB() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentDirectory.path, 'network.db');
+    final path = join(documentDirectory.path, 'network_DB.db');
 
     return await openDatabase(path, version: 1, onOpen: (db) {},
       onCreate: (Database db, int version) async {

@@ -21,7 +21,7 @@ class DbAccountAddress{
 
   initDB() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentDirectory.path, 'account_address.db');
+    final path = join(documentDirectory.path, 'accountAddress.db');
 
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {

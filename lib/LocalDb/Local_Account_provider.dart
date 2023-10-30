@@ -22,7 +22,7 @@ class DBAccountProvider {
 
   initDB() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentDirectory.path, 'account_manager.db');
+    final path = join(documentDirectory.path, 'accountManager.db');
 
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {

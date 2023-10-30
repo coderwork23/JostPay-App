@@ -981,9 +981,13 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                               )
                           );
 
-                          setState(() {
-                            toController.text = value;
-                          });
+                          if(value != null ){
+                            setState(() {
+                              toController.text = value;
+                            });
+                          }
+
+
                         },
                         child: Image.asset(
                           "assets/images/dashboard/scan.png",

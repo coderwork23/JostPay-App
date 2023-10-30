@@ -20,7 +20,7 @@ class DBWalletConnectV2{
 
   initDB() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentDirectory.path, 'wallet_connect2.db');
+    final path = join(documentDirectory.path, 'walletConnect2.db');
 
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
