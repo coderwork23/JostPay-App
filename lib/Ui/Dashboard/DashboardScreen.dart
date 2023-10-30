@@ -127,7 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      print("object ---> resumed state");
+      // print("object ---> resumed state");
       if (Utils.wcUrlVal.isNotEmpty) {
         getAccount();
         if (Utils.wcUrlVal

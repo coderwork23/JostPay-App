@@ -88,10 +88,13 @@ class _SecurityScreenState extends State<SecurityScreen> {
                           activeColor: MyColor.greenColor,
                           value: fingerPrint,
                           showOnOff: false,
-                          onToggle: (val) {
+                          onToggle: (val) async {
+                            SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
                             setState(() {
                               fingerPrint = val;
+                              sharedPreferences.setBool('fingerOn',fingerPrint);
                             });
+
                           },
                         ),
                       ],
