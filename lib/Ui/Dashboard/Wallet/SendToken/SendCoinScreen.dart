@@ -263,6 +263,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         builder: (context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
+                print("object $sendTransactionFee");
                 return Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
@@ -432,7 +433,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                     ),
 
                                     Text(
-                                      "USD",
+                                      " USD",
                                       style: MyStyle.tx18RWhite.copyWith(
                                         fontSize: 14
                                       )
@@ -474,7 +475,8 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                   ),
 
                                   Text(
-                                    "${ApiHandler.calculateLength3(sendTransactionFee)}  $networkSymbol",
+                                      isTxfees == 0 ? "0" :
+                                    "${ApiHandler.calculateLength3(sendTransactionFee)} $networkSymbol",
                                       style: MyStyle.tx18RWhite.copyWith(
                                           fontSize: 14
                                       )
@@ -510,7 +512,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                               Align(
                                 alignment: Alignment.bottomRight,
                                 child: Text(
-                                    widget.sendTokenNetworkId == "9" ? double.parse("${double.parse(sendTokenQuantity.text)*double.parse(widget.sendTokenUsd)}").toStringAsFixed(4) : '(${totalUsd.toStringAsFixed(2)} USD)',
+                                    widget.sendTokenNetworkId == "9" ? "${double.parse("${double.parse(sendTokenQuantity.text)*double.parse(widget.sendTokenUsd)}").toStringAsFixed(4)} USD" : '(${totalUsd.toStringAsFixed(2)} USD)',
                                     style: MyStyle.tx18RWhite.copyWith(
                                         fontSize: 14
                                     )
@@ -783,6 +785,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
     transectionProvider = Provider.of<TransectionProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+    print(isTxfees);
 
     return Scaffold(
 
@@ -948,6 +951,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
               controller: toController,
               cursorColor: MyColor.greenColor,
               style: MyStyle.tx18RWhite,
+              onChanged: (value) {
+                setState(() {});
+              },
               decoration: MyStyle.textInputDecoration2.copyWith(
                 suffixIcon: SizedBox(
                   width: 90,
@@ -1023,6 +1029,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
               ],
+              onChanged: (value) {
+                setState(() {});
+              },
               cursorColor: MyColor.greenColor,
               style: MyStyle.tx18RWhite,
               decoration: MyStyle.textInputDecoration2.copyWith(

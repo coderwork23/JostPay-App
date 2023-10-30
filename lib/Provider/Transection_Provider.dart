@@ -77,38 +77,7 @@ class TransectionProvider with ChangeNotifier{
   }
 
 
-  var validAddressResponse;
-  bool isValidation = false;
-  validateAddress(data,url)async{
 
-    // print(data);
-    // print(url);
-
-    isValidation = true;
-    notifyListeners();
-
-    /*try {*/
-      await ApiHandler.post(data, url).then((responseData) {
-        var value = json.decode(responseData.body);
-        // print("validateAddress $value");
-        validAddressResponse = value;
-
-        if (responseData.statusCode == 200 && value["status"] == true) {
-          isValidation = false;
-          notifyListeners();
-        }
-        else {
-          isValidation = false;
-          notifyListeners();
-
-          print("=========== Send Token Api Error ==========");
-        }
-      });
-    /*}catch(e){
-      isValidation = false;
-      notifyListeners();
-    }*/
-  }
 
 
   List<TransectionList> transectionList = [];
@@ -121,7 +90,7 @@ class TransectionProvider with ChangeNotifier{
       List<TransectionList> list;
 
       var value = json.decode(responseData.body);
-      // print("value getTransection === > $value");
+      print("value getTransection === > $value");
 
       if(responseData.statusCode == 200 && value["status"] == true) {
         body = value;
