@@ -571,7 +571,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                       return InkWell(
                         onTap: () {
                           launchUrl(
-                            Uri.parse(transectionProvider.transectionList[index].explorerUrl)
+                            Uri.parse(transectionProvider.transectionList[index].explorerUrl),
+                            mode: LaunchMode.externalApplication,
                           );
                         },
                         child: Container(
