@@ -394,11 +394,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   // app image
                   Image.asset(
                     "assets/images/splash_screen.png",
-                    height: 40,
+                    height: 60,
                     width: width * 0.4,
                     fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 5),
 
                   // title
                   Text(
@@ -409,7 +409,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: MyColor.grey01Color
                     ),
                   ),
-                  SizedBox(height: height*0.1),
+                  SizedBox(height: height*0.09),
 
                   //password field
                   TextFormField(
@@ -528,7 +528,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Image.asset(
                           "assets/images/fingerprint.png",
                           height: 45,
-                          width: 45,
+                          width: 60,
                           fit: BoxFit.contain,
                           color: MyColor.whiteColor,
                         ),
