@@ -219,7 +219,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
         sendGasPrice = "${body['gasPrice']}";
         sendGas = "${body['gas']}";
-        sendNonce = body['nonce'];
+        sendNonce = "${body['nonce']}";
         sendTransactionFee = "${body['transactionFee']}";
 
         double networkUsd = 0.0,tokenUsd = 0.0;
