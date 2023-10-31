@@ -758,7 +758,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}")) / BigInt.from(10).pow(18);
     //print(value);
 
-    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(8)) - (value * 2);
+    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value * 2);
 
     //print(tokenBalance);
 
@@ -786,6 +786,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     transectionProvider = Provider.of<TransectionProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
+    // print(networkList[0].isEVM);
     return Scaffold(
 
       bottomNavigationBar:isLoading == true
@@ -1062,7 +1063,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                       //print(tokenBalance.toStringAsFixed(3));
                       setState(() {
                         sendTokenQuantity = TextEditingController(
-                            text: tokenBalance.toStringAsFixed(3)
+                            text: tokenBalance.toStringAsFixed(6)
                         );
                       });
                     }
