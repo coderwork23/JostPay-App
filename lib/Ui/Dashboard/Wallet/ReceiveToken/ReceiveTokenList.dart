@@ -151,43 +151,43 @@ class _ReceiveTokenListState extends State<ReceiveTokenList> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(100),
-                        child: CachedNetworkImage(
+                        child:  list.type == "BEP20" || list.type == "TRX20"
+                            ?
+                        Image.asset(
+                          list.type == "BEP20"
+                              ?
+                          "assets/images/bsc_usdt.png"
+                              :
+                          list.type == "TRX20"
+                              ?
+                          "assets/images/trx_usdt.png"
+                              :
+                          "assets/images/bitcoin.png",
+                          height: 45,
+                          width: 45,
+                        )
+                            :
+                        CachedNetworkImage(
                           height: 35,
                           width: 35,
                           fit: BoxFit.fill,
-                          imageUrl: list.type == "BEP20" || list.type == "TRX20" ? "" : list.logo,
+                          imageUrl: list.logo,
                           placeholder: (context, url) => const Center(
                             child: CircularProgressIndicator(color: MyColor.greenColor),
                           ),
                           errorWidget: (context, url, error) =>
-                          list.type == "BEP20" || list.type == "TRX20"
-                              ?
-                          Image.asset(
-                            list.type == "BEP20"
-                                ?
-                            "assets/images/bsc_usdt.png"
-                                :
-                            list.type == "TRX20"
-                                ?
-                            "assets/images/trx_usdt.png"
-                                :
-                            "assets/images/bitcoin.png",
-                            height: 45,
-                            width: 45,
-                          )
-                              :
-                          Container(
-                            height: 35,
-                            width: 35,
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              color: MyColor.whiteColor,
-                            ),
-                            child: Image.asset(
-                              "assets/images/bitcoin.png",
-                            ),
-                          ),
+                              Container(
+                                height: 35,
+                                width: 35,
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  color: MyColor.whiteColor,
+                                ),
+                                child: Image.asset(
+                                  "assets/images/bitcoin.png",
+                                ),
+                              ),
                         ),
                       ),
                       const SizedBox(width: 12),

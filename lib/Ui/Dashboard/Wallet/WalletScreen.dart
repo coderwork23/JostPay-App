@@ -686,43 +686,43 @@ class _WalletScreenState extends State<WalletScreen> {
                                // coin token
                                ClipRRect(
                                  borderRadius: BorderRadius.circular(100),
-                                 child: CachedNetworkImage(
+                                 child:  list.type == "BEP20" || list.type == "TRX20"
+                                     ?
+                                 Image.asset(
+                                   list.type == "BEP20"
+                                       ?
+                                   "assets/images/bsc_usdt.png"
+                                       :
+                                   list.type == "TRX20"
+                                       ?
+                                   "assets/images/trx_usdt.png"
+                                       :
+                                   "assets/images/bitcoin.png",
+                                   height: 45,
+                                   width: 45,
+                                 )
+                                     :
+                                 CachedNetworkImage(
                                    height: 45,
                                    width: 45,
                                    fit: BoxFit.fill,
-                                   imageUrl: list.type == "BEP20" || list.type == "TRX20" ? "" : list.logo,
+                                   imageUrl:  list.logo,
                                    placeholder: (context, url) => const Center(
                                      child: CircularProgressIndicator(color: MyColor.greenColor),
                                    ),
                                    errorWidget: (context, url, error) =>
-                                   list.type == "BEP20" || list.type == "TRX20"
-                                       ?
-                                   Image.asset(
-                                     list.type == "BEP20"
-                                         ?
-                                     "assets/images/bsc_usdt.png"
-                                         :
-                                     list.type == "TRX20"
-                                         ?
-                                     "assets/images/trx_usdt.png"
-                                         :
-                                     "assets/images/bitcoin.png",
-                                     height: 45,
-                                     width: 45,
-                                   )
-                                       :
-                                   Container(
-                                         height: 45,
-                                         width: 45,
-                                         padding: const EdgeInsets.all(10),
-                                         decoration: BoxDecoration(
-                                           borderRadius: BorderRadius.circular(14),
-                                           color: MyColor.whiteColor,
-                                         ),
-                                         child: Image.asset(
-                                           "assets/images/bitcoin.png",
-                                         ),
-                                       ),
+                                       Container(
+                                             height: 45,
+                                             width: 45,
+                                             padding: const EdgeInsets.all(10),
+                                             decoration: BoxDecoration(
+                                               borderRadius: BorderRadius.circular(14),
+                                               color: MyColor.whiteColor,
+                                             ),
+                                             child: Image.asset(
+                                               "assets/images/bitcoin.png",
+                                             ),
+                                           ),
                                  ),
                                ),
 
@@ -735,7 +735,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                    children: [
                                      Text(
                                        list.name,
-                                       style: MyStyle.tx18RWhite,
+                                       style: MyStyle.tx18RWhite.copyWith(
+                                         fontSize: 16
+                                       ),
                                      ),
                                      const SizedBox(height: 3),
                                      RichText(
@@ -789,7 +791,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                      "${ApiHandler.calculateLength3(list.balance)} ${list.symbol}",
 
                                      style: MyStyle.tx22RWhite.copyWith(
-                                       fontSize: 16,
+                                       fontSize: 15,
                                        color: MyColor.mainWhiteColor
                                      ),
                                    ),

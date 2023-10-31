@@ -758,7 +758,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}")) / BigInt.from(10).pow(18);
     //print(value);
 
-    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value * 2);
+    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(8)) - (value * 2);
 
     //print(tokenBalance);
 
@@ -785,7 +785,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
     transectionProvider = Provider.of<TransectionProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
-    print(isTxfees);
 
     return Scaffold(
 
@@ -1091,7 +1090,11 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
             //Available Balance
             Text(
-              "Available: ${ApiHandler.calculateLength("${double.parse(sendTokenBalance) }")} $sendTokenSymbol",
+                sendTokenBalance == "0"
+                    ?
+              "Available: 0.0 $sendTokenSymbol"
+                    :
+              "Available: ${ApiHandler.calculateLength3("${double.parse(sendTokenBalance) }")} $sendTokenSymbol",
               style:MyStyle.tx18RWhite.copyWith(
                   fontSize: 14,
                   color: MyColor.grey01Color

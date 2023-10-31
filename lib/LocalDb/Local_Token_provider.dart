@@ -53,6 +53,7 @@ class DBTokenProvider{
   }
 
   createToken(AccountTokenList newToken) async{
+    print("object newtoken ${newToken.id}");
     final db= await database;
     final res = await db!.insert('Token', newToken.toJson());
     // print("data add here $res");

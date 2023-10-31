@@ -91,9 +91,14 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
   // upload wallet token list (add or remove token from list)
   toggleButton(id,changeBool,index,list)async{
     await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+
+    SharedPreferences sharedPre = await SharedPreferences.getInstance();
+    var listCoin = sharedPre.getString("default")!.split(",");
+
     if (changeBool) {
       await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
-
+      listCoin.add("$id");
+      sharedPre.setString("default", listCoin.join(","));
       setState(() {
         toggleList[index] = changeBool;
       });
@@ -102,6 +107,10 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
           await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
               id, widget.selectedAccountId
           );
+
+          listCoin.remove("$id");
+          sharedPre.setString("default", listCoin.join(","));
+
           setState(() {
             toggleList[index] = changeBool;
           });

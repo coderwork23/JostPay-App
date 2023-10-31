@@ -30,6 +30,7 @@ class _CreatePasswordState extends State<CreatePassword> {
 
   String deviceId = "",phraseLength = "12";
   bool isLoading = false;
+  bool fingerBool = false;
 
   importAccount() async {
     setState(() {
@@ -59,6 +60,7 @@ class _CreatePasswordState extends State<CreatePassword> {
         sharedPreferences.setString('isLogin', 'false');
         sharedPreferences.setInt('account', 1);
         sharedPreferences.setString('password', passController.text);
+        sharedPreferences.setBool('fingerOn',fingerBool);
       }
       var body = accountProvider.accountData;
       String seedPhase = body/*['accounts']*/[0]['mnemonic'];
@@ -342,6 +344,47 @@ class _CreatePasswordState extends State<CreatePassword> {
                               color: MyColor.mainWhiteColor,
                             )
                         )
+                    ),
+                  ),
+                ),
+                SizedBox(height: widget.isNew ? 0 : 10),
+
+                Visibility(
+                  visible: !widget.isNew,
+                  child: InkWell(
+                    onTap: (){
+                      setState(() {
+                        fingerBool = !fingerBool;
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+
+                        Container(
+                          height: 24,
+                          width: 24,
+                          decoration: BoxDecoration(
+                              color: fingerBool ? MyColor.greenColor : Colors.transparent,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                  width: 1.5,
+                                  color: fingerBool ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
+                              )
+                          ),
+                          child: fingerBool ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "Sign in with FaceID and Finger Print",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 14,
+                                color: fingerBool ? MyColor.whiteColor : MyColor.greyColor
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                   ),
                 ),
