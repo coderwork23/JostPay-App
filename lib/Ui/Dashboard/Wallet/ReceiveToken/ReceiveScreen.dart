@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ignore: must_be_immutable
 class ReceiveScreen extends StatefulWidget {
   int networkId;
-  var tokenName,tokenSymbol,tokenImage,tokenType;
+  String tokenName,tokenSymbol,tokenImage,tokenType;
 
 
   ReceiveScreen({
@@ -106,7 +106,23 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                       color: MyColor.whiteColor
                   ),
                 ),
-                const SizedBox(height: 10),
+
+                SizedBox(height: widget.tokenType.isNotEmpty ? 0 : 10),
+
+                Visibility(
+                  visible: widget.tokenType.isNotEmpty,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      "Type: ${widget.tokenType}",
+                      textAlign: TextAlign.center,
+                      style:MyStyle.tx18RWhite.copyWith(
+                          fontSize: 12,
+                          color: MyColor.whiteColor
+                      ),
+                    ),
+                  ),
+                ),
 
                 Container(
                   height: height * 0.26,
@@ -146,8 +162,6 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
             ),
           ),
           const SizedBox(height: 20),
-
-
 
           // copy and shared
           SizedBox(
@@ -217,12 +231,11 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           ),
           const SizedBox(height: 20),
 
-
           // warning message
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Text(
-              "Send only ${widget.tokenName} (${widget.tokenSymbol}) to this address. "
+              "Send only ${widget.tokenName} (${widget.tokenSymbol} ${widget.tokenType}) to this address. "
                   "Sending any other coins may result in permanent loss of you token.",
               textAlign: TextAlign.center,
               style:MyStyle.tx18RWhite.copyWith(
