@@ -1,6 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
+import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -11,13 +12,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ignore: must_be_immutable
 class ReceiveScreen extends StatefulWidget {
   int networkId;
-  var tokenName;
-  var tokenSymbol;
+  var tokenName,tokenSymbol,tokenImage,tokenType;
+
+
   ReceiveScreen({
     super.key,
     required this.networkId,
     required this.tokenName,
-    required this.tokenSymbol
+    required this.tokenSymbol,
+    required this.tokenImage,
+    required this.tokenType,
   });
 
   @override
@@ -56,131 +60,181 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return  Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // dos icon
-        Container(
-          width: 45,
-          height: 5,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: MyColor.lightGreyColor
+
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
+
+    return  Scaffold(
+      appBar: AppBar(
+        leading:  InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_ios_new,
+            color: MyColor.mainWhiteColor,
+            size: 20,
           ),
         ),
-        const SizedBox(height: 25),
-
-        // Select assets text
-        Text(
+        title:  Text(
           "Receive ${widget.tokenSymbol}",
-          style: MyStyle.tx28RGreen.copyWith(
-              color: MyColor.mainWhiteColor,
-              fontFamily: "NimbusSanLBol",
-              fontSize: 22
-          ),
         ),
-        const SizedBox(height: 25),
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 30),
 
-        // warning message
-        Text(
-          "Send only ${widget.tokenName} (${widget.tokenSymbol}) to this address. "
-              "Sending any other coins may result in permanent loss.",
-          textAlign: TextAlign.center,
-          style:MyStyle.tx18RWhite.copyWith(
-              fontSize: 18,
-              color: MyColor.grey01Color
-          ),
-        ),
-        const SizedBox(height: 25),
 
-        // qr image
-        Container(
-          padding: const EdgeInsets.all(15),
-          width: 160,
-          height: 160,
-          decoration: BoxDecoration(
-              color: MyColor.backgroundColor,
-              borderRadius: BorderRadius.circular(10)
-          ),
-          child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-            child: QrImageView(
-              data: selectedAccountAddress,
-              eyeStyle: const QrEyeStyle(
-                color: MyColor.mainWhiteColor,
-                eyeShape: QrEyeShape.square
-              ),
-              dataModuleStyle: const QrDataModuleStyle(
-                  color: MyColor.mainWhiteColor,
-                  dataModuleShape:  QrDataModuleShape.square
-              ),
-              //embeddedImage: AssetImage('assets/icons/logo.png'),
-              version: QrVersions.auto,
+          // qr and token name
+          Container(
+            width: width * 0.8,
+            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 22),
+            decoration: BoxDecoration(
+              color: MyColor.darkGrey01Color,
+              borderRadius: BorderRadius.circular(12)
+            ),
+            child: Column(
+              children: [
+
+                Text(
+                  "${widget.tokenName}",
+                  textAlign: TextAlign.center,
+                  style:MyStyle.tx18BWhite.copyWith(
+                      fontSize: 18,
+                      color: MyColor.whiteColor
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                Container(
+                  height: height * 0.26,
+                  width: width * 0.55,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                      color: MyColor.mainWhiteColor,
+                      borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: QrImageView(
+                      data: selectedAccountAddress,
+                      eyeStyle: const QrEyeStyle(
+                          color: MyColor.backgroundColor,
+                          eyeShape: QrEyeShape.square
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                          color: MyColor.backgroundColor,
+                          dataModuleShape:  QrDataModuleShape.square
+                      ),
+                      //embeddedImage: AssetImage('assets/icons/logo.png'),
+                      version: QrVersions.auto,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+
+                Text(
+                  selectedAccountAddress,
+                  textAlign: TextAlign.center,
+                  style: MyStyle.tx18RWhite.copyWith(
+                      fontSize: 16
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 25),
+          const SizedBox(height: 20),
 
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
-                decoration: BoxDecoration(
-                  color: MyColor.backgroundColor,
-                  borderRadius: BorderRadius.circular(10),
+
+
+          // copy and shared
+          SizedBox(
+            width: width * 0.8,
+            child: Row(
+              children: [
+
+                InkWell(
+                  onTap: () {
+                    Share.share(selectedAccountAddress);
+                  },
+                  child: Container(
+                    height: 55,
+                    width: 60,
+                    padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 16),
+                    decoration: BoxDecoration(
+                      color: MyColor.darkGrey01Color,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Image.asset(
+                        "assets/images/dashboard/share.png",
+                      fit: BoxFit.contain,
+                      color: MyColor.whiteColor,
+                    ),
+                  ),
                 ),
-                child:  Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        selectedAccountAddress,
-                        textAlign: TextAlign.center,
-                        style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 16
-                        ),
+                const SizedBox(width: 15),
+
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      FlutterClipboard.copy(selectedAccountAddress).then((value) {
+                        Helper.dialogCall.showToast(context, "Copied");
+                      });
+                    },
+                    child: Container(
+                      height: 55,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: MyColor.darkGrey01Color,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child:  Row(
+                        children: [
+                          const Icon(
+                            Icons.copy,
+                            color: MyColor.whiteColor,
+                          ),
+                          const SizedBox(width: 15),
+
+                          Text(
+                            "Copy address",
+                            textAlign: TextAlign.center,
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    InkWell(
-                      onTap: () {
-                        FlutterClipboard.copy(selectedAccountAddress).then((value) {
-                          Helper.dialogCall.showToast(context, "Copied");
-                        });
-                      },
-                      child : const Icon(
-                        Icons.copy,
-                        color: MyColor.greenColor,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+
+          // warning message
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              "Send only ${widget.tokenName} (${widget.tokenSymbol}) to this address. "
+                  "Sending any other coins may result in permanent loss of you token.",
+              textAlign: TextAlign.center,
+              style:MyStyle.tx18RWhite.copyWith(
+                  fontSize: 12,
+                  color: MyColor.dotBoarderColor
               ),
             ),
-            const SizedBox(width: 10),
+          ),
+          const SizedBox(height: 25),
 
-            InkWell(
-              onTap: () {
-                Share.share('${widget.tokenSymbol} Address $selectedAccountAddress');
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
-                decoration: const BoxDecoration(
-                  color: MyColor.backgroundColor,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.share_outlined,
-                  color: MyColor.greenColor,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-
-      ],
+        ],
+      ),
     );
   }
 }

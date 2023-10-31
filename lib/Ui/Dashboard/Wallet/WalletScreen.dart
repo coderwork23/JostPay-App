@@ -366,22 +366,17 @@ class _WalletScreenState extends State<WalletScreen> {
     accountProvider = Provider.of<AccountProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
-    var width = MediaQuery.of(context).size.width;
-    var height = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: MyColor.darkGreyColor,
       appBar: AppBar(
         backgroundColor: MyColor.darkGreyColor,
         automaticallyImplyLeading: false,
-        leadingWidth: 0,
-        titleSpacing: 0,
+        titleSpacing: 15,
         title: Padding(
           padding: const EdgeInsets.only(top: 4.0,bottom: 4),
           child:  Image.asset(
             "assets/images/splash_screen.png",
             height: 35,
-            width: width * 0.4,
             fit: BoxFit.contain,
           ),
         ),
@@ -392,8 +387,8 @@ class _WalletScreenState extends State<WalletScreen> {
             },
             icon: Image.asset(
               "assets/images/dashboard/add.png",
-              height: 25,
-              width: 25,
+              height: 23,
+              width: 23,
               color: MyColor.mainWhiteColor,
               fit: BoxFit.contain,
             ),
@@ -464,11 +459,11 @@ class _WalletScreenState extends State<WalletScreen> {
                         color: MyColor.greenColor,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 6),
                     Text(
                       "Send",
                       style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: MyColor.whiteColor
                       ),
                     ),
@@ -500,11 +495,11 @@ class _WalletScreenState extends State<WalletScreen> {
                         color: MyColor.greenColor,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 6),
                     Text(
                       "Receive",
                       style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: MyColor.whiteColor
                       ),
                     ),
@@ -536,11 +531,11 @@ class _WalletScreenState extends State<WalletScreen> {
                         color: MyColor.greenColor,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 6),
                     Text(
                       "Withdraw",
                       style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: MyColor.whiteColor
                       ),
                     ),
@@ -577,11 +572,11 @@ class _WalletScreenState extends State<WalletScreen> {
                         color: MyColor.greenColor,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 6),
                     Text(
                       "Exchange",
                       style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: MyColor.whiteColor
                       ),
                     ),
@@ -695,12 +690,28 @@ class _WalletScreenState extends State<WalletScreen> {
                                    height: 45,
                                    width: 45,
                                    fit: BoxFit.fill,
-                                   imageUrl: list.logo,
+                                   imageUrl: list.type == "BEP20" || list.type == "TRX20" ? "" : list.logo,
                                    placeholder: (context, url) => const Center(
                                      child: CircularProgressIndicator(color: MyColor.greenColor),
                                    ),
                                    errorWidget: (context, url, error) =>
-                                       Container(
+                                   list.type == "BEP20" || list.type == "TRX20"
+                                       ?
+                                   Image.asset(
+                                     list.type == "BEP20"
+                                         ?
+                                     "assets/images/bsc_usdt.png"
+                                         :
+                                     list.type == "TRX20"
+                                         ?
+                                     "assets/images/trx_usdt.png"
+                                         :
+                                     "assets/images/bitcoin.png",
+                                     height: 45,
+                                     width: 45,
+                                   )
+                                       :
+                                   Container(
                                          height: 45,
                                          width: 45,
                                          padding: const EdgeInsets.all(10),

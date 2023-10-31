@@ -53,31 +53,6 @@ class CoinDetailScreen extends StatefulWidget {
 
 class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
-  showReceiveScreen(BuildContext context){
-    showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: MyColor.darkGreyColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(22),
-          topRight: Radius.circular(22),
-        ),
-      ),
-      context: context,
-      builder: (context) {
-        return Container(
-            padding: const EdgeInsets.fromLTRB(20,22,20,10),
-            child: ReceiveScreen(
-              networkId: int.parse(widget.tokenNetworkId),
-              tokenName: widget.tokenName,
-              tokenSymbol: widget.tokenSymbol,
-            )
-        );
-      },
-    );
-  }
-
-
   late TransectionProvider transectionProvider;
 
   String tokenId = "",tokenName = "",tokenNatewokrkId = "",
@@ -108,6 +83,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   }
 
 
+  // get selected token network data
   getNetWork() async {
     await DbNetwork.dbNetwork.getNetwork();
     networkList = DbNetwork.dbNetwork.networkList.where((element) {
@@ -119,6 +95,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     getCustomTokenBalance();
   }
 
+
+  // get transaction list
   getTransection() async {
 
     var data = {
@@ -141,6 +119,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     });
   }
 
+
+  // get token updated balance form api
   getCustomTokenBalance() async {
 
     var data = {
@@ -167,6 +147,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
   }
 
+
+  // pull to refresh
   bool _showRefresh = false;
   Future<void> _getData() async {
     setState(() {
@@ -276,12 +258,32 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     height: 45,
                     width: 45,
                     fit: BoxFit.fill,
-                    imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${widget.tokenMarketId}.png",
+                    imageUrl: widget.tokenType == "BEP20" || widget.tokenType == "TRX20"
+                        ?
+                        ""
+                        :
+                    "https://s2.coinmarketcap.com/static/img/coins/64x64/${widget.tokenMarketId}.png",
                     placeholder: (context, url) => const Center(
                       child: CircularProgressIndicator(color: MyColor.greenColor),
                     ),
                     errorWidget: (context, url, error) =>
-                        Container(
+                    widget.tokenType == "BEP20" || widget.tokenType == "TRX20"
+                        ?
+                    Image.asset(
+                      widget.tokenType == "BEP20"
+                          ?
+                      "assets/images/bsc_usdt.png"
+                          :
+                      widget.tokenType == "TRX20"
+                          ?
+                      "assets/images/trx_usdt.png"
+                          :
+                      "assets/images/bitcoin.png",
+                      height: 45,
+                      width: 45,
+                    )
+                        :
+                    Container(
                           height: 45,
                           width: 45,
                           padding: const EdgeInsets.all(10),
@@ -355,11 +357,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                               color: MyColor.greenColor,
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 6),
                           Text(
                             "Send",
                             style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: MyColor.whiteColor
                             ),
                           ),
@@ -371,7 +373,18 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     // receive
                     InkWell(
                       onTap: () {
-                        showReceiveScreen(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ReceiveScreen(
+                              networkId: int.parse(widget.tokenNetworkId),
+                              tokenName: widget.tokenName,
+                              tokenSymbol: widget.tokenSymbol,
+                              tokenType: widget.tokenType,
+                              tokenImage: widget.tokenImage,
+                            ),
+                          )
+                        );
                       },
                       child: Column(
                         children: [
@@ -391,11 +404,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                               color: MyColor.greenColor,
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 6),
                           Text(
                             "Receive",
                             style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: MyColor.whiteColor
                             ),
                           ),
@@ -428,11 +441,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                               color: MyColor.greenColor,
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 6),
                           Text(
                             "Withdraw",
                             style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: MyColor.whiteColor
                             ),
                           ),
@@ -469,11 +482,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                               color: MyColor.greenColor,
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 6),
                           Text(
                             "Exchange",
                             style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 14,
+                                fontSize: 12,
                                 color: MyColor.whiteColor
                             ),
                           ),
@@ -719,4 +732,5 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
       ),
     );
   }
+
 }

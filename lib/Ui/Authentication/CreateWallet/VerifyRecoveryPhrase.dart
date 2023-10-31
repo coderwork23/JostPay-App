@@ -592,7 +592,7 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
                           color: MyColor.darkGrey01Color
                       ),
                       child: Text(
-                        "${index+1} $list",
+                        "$list",
                         textAlign: TextAlign.center,
                         style: MyStyle.tx18RWhite.copyWith(
                           color:! boolList[index] ? MyColor.mainWhiteColor : MyColor.mainWhiteColor.withOpacity(0.4),

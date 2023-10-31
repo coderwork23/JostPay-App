@@ -133,7 +133,6 @@ class _WalletConnectScreenState extends State<WalletConnectScreen> with WidgetsB
     
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         leading:  InkWell(
           onTap: () {
             Navigator.pop(context);

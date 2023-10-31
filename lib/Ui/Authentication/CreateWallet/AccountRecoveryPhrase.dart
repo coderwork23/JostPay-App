@@ -111,7 +111,7 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: MyStyle.buttonDecoration,
           child:  const Text(
-            "Get Started",
+            "Continue",
             style: MyStyle.tx18BWhite
           ),
         ),
@@ -128,9 +128,8 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
             size: 20,
           ),
         ),
-        title: Text(
+        title: const Text(
           "Account Recovery Phrase",
-
         ),
       ),
       body: SafeArea(
@@ -142,14 +141,14 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
                 const SizedBox(height: 15),
 
                 // subTitle
-                Text(
-                  "Select each word in the order it was presented to you",
-                  textAlign: TextAlign.center,
-                  style:MyStyle.tx22RWhite.copyWith(
-                      fontSize: 18,
-                      color: MyColor.grey01Color
-                  ),
-                ),
+                // Text(
+                //   "Select each word in the order it was presented to you",
+                //   textAlign: TextAlign.center,
+                //   style:MyStyle.tx22RWhite.copyWith(
+                //       fontSize: 18,
+                //       color: MyColor.grey01Color
+                //   ),
+                // ),
                 const SizedBox(height: 22),
 
                 //  Grid View Phrase

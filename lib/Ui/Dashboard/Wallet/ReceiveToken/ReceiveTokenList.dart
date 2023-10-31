@@ -36,33 +36,6 @@ class _ReceiveTokenListState extends State<ReceiveTokenList> {
   TextEditingController searchController = TextEditingController();
   final _debouncer = Debouncer(milliseconds: 500);
 
-  showReceivePage(BuildContext context,tokenNetworkId,tokenName,symbol){
-    showModalBottomSheet(
-      isScrollControlled: false,
-      backgroundColor: MyColor.darkGreyColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(22),
-          topRight: Radius.circular(22),
-        ),
-      ),
-      context: context,
-      builder: (context) {
-        return Container(
-            padding: const EdgeInsets.fromLTRB(20,22,20,10),
-            constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height/2,
-                maxHeight: MediaQuery.of(context).size.height*0.8
-            ),
-            child: ReceiveScreen(
-              networkId: tokenNetworkId,
-              tokenName: tokenName,
-              tokenSymbol:symbol,
-            )
-        );
-      },
-    );
-  }
   var selectedAccountId = "";
 
   getCoin() async {
@@ -159,11 +132,17 @@ class _ReceiveTokenListState extends State<ReceiveTokenList> {
               return InkWell(
                 onTap: (){
                   Navigator.pop(context);
-                  showReceivePage(
+                  Navigator.push(
                       context,
-                      list.networkId,
-                      list.name,
-                      list.symbol
+                      MaterialPageRoute(
+                        builder: (context) => ReceiveScreen(
+                          networkId: list.networkId,
+                          tokenName:list.name,
+                          tokenSymbol: list.symbol,
+                          tokenImage: list.logo,
+                          tokenType: list.type,
+                        ),
+                      )
                   );
                 },
                 child : Padding(
@@ -176,23 +155,39 @@ class _ReceiveTokenListState extends State<ReceiveTokenList> {
                           height: 35,
                           width: 35,
                           fit: BoxFit.fill,
-                          imageUrl: list.logo,
+                          imageUrl: list.type == "BEP20" || list.type == "TRX20" ? "" : list.logo,
                           placeholder: (context, url) => const Center(
                             child: CircularProgressIndicator(color: MyColor.greenColor),
                           ),
                           errorWidget: (context, url, error) =>
-                              Container(
-                                height: 35,
-                                width: 35,
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  color: MyColor.whiteColor,
-                                ),
-                                child: Image.asset(
-                                  "assets/images/bitcoin.png",
-                                ),
-                              ),
+                          list.type == "BEP20" || list.type == "TRX20"
+                              ?
+                          Image.asset(
+                            list.type == "BEP20"
+                                ?
+                            "assets/images/bsc_usdt.png"
+                                :
+                            list.type == "TRX20"
+                                ?
+                            "assets/images/trx_usdt.png"
+                                :
+                            "assets/images/bitcoin.png",
+                            height: 45,
+                            width: 45,
+                          )
+                              :
+                          Container(
+                            height: 35,
+                            width: 35,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              color: MyColor.whiteColor,
+                            ),
+                            child: Image.asset(
+                              "assets/images/bitcoin.png",
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),

@@ -82,6 +82,30 @@ class DBDefaultTokenProvider{
     getAccountToken(acId);
     return res;
   }
+  updateTokenByTID(AccountTokenList newToken,token_id,id) async{
+    final db= await database;
+    Map<String, dynamic> data = {
+      "id": newToken.id,
+      "token_id": newToken.token_id,
+      "acc_address": newToken.accAddress,
+      "network_id": newToken.networkId,
+      "market_id": newToken.marketId,
+      "name": newToken.name,
+      "type": newToken.type,
+      "address": newToken.address,
+      "symbol": newToken.symbol,
+      "price":newToken.price,
+      "decimals": newToken.decimals,
+      "logo": newToken.logo,
+      "network_name": newToken.networkName,
+      "explorer_url": newToken.explorer_url,
+      "accountId": newToken.accountId,
+    };
+
+    final res = await db!.update('DefaultToken', data, where: "token_id = ? AND accountId = ? ",whereArgs: [token_id,id]);
+    getAccountToken(id);
+    return res;
+  }
 
   Future<int> deleteAllToken() async {
     final db = await database;

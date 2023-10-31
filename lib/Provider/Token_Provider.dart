@@ -80,15 +80,14 @@ class TokenProvider with ChangeNotifier {
 
         if(responseData.statusCode == 200){
           allToken = value;
-
-          List defaultList = ["1","1027","1839"];
-
-
           // await DBTokenProvider.dbTokenProvider.deleteAccountToken(id);
+          // await DBDefaultTokenProvider.dbTokenProvider.deleteAccountToken(id);
+
           List marketId = ["1","2","74","328","825","1027","1839","1958"];
           List tokenID = ["8","29","28","0","-1","1","2","10"];
           List decimalsList = ["8","8","8","0","-1","18","18","6"];
-
+          await DBTokenProvider.dbTokenProvider.getAccountToken(id);
+          await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(id);
 
           for(int i = 0; i<marketId.length; i++){
 
@@ -127,9 +126,13 @@ class TokenProvider with ChangeNotifier {
               );
 
               // print("${accountTokenList.toJson()}");
-              await DBTokenProvider.dbTokenProvider.getAccountToken(id);
+              // await DBTokenProvider.dbTokenProvider.getAccountToken(id);
 
               var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
+                return "${element.id}"== "${marketId[i]}";
+              });
+
+              var defaultIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) {
                 return "${element.id}"== "${marketId[i]}";
               });
 
@@ -139,12 +142,18 @@ class TokenProvider with ChangeNotifier {
                 await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
               }
 
+
+              if(defaultIndex != -1){
+                await DBDefaultTokenProvider.dbTokenProvider.updateToken(accountTokenList,marketId[i],id);
+              }else{
+                await DBDefaultTokenProvider.dbTokenProvider.createToken(accountTokenList);
+              }
+
+
             }
           }
 
           // print(tokenNote);
-
-          await addDefaultToken(defaultList,id);
           await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(id);
 
           isSuccess = true;
@@ -197,10 +206,20 @@ class TokenProvider with ChangeNotifier {
         return "${element.token_id}"== "${3070}";
       });
 
+      var defaultListIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) {
+        return "${element.token_id}"== "${3079}";
+      });
+
       if(tokenListIndex != -1){
         await DBTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
       }else{
         await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
+      }
+
+      if(defaultListIndex != -1){
+        await DBDefaultTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
+      }else{
+        await DBDefaultTokenProvider.dbTokenProvider.createToken(accountTokenList);
       }
 
     }
@@ -232,47 +251,25 @@ class TokenProvider with ChangeNotifier {
         return "${element.token_id}"== "${3079}";
       });
 
+      var defaultListIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) {
+        return "${element.token_id}"== "${3079}";
+      });
+
       if(tokenListIndex != -1){
-        // print("object check1 ---->");
         await DBTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
       }else{
         await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
       }
-    }
-  }
 
-  Future<void> addDefaultToken (List defaultList,acId) async {
-    await DBTokenProvider.dbTokenProvider.getAccountToken(acId);
-    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(acId);
-
-    SharedPreferences sharedPre = await SharedPreferences.getInstance();
-
-    List myDefaultList = [];
-    if(DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.isEmpty){
-      sharedPre.setString("default", defaultList.join(","));
-      myDefaultList.addAll(defaultList);
-    }else{
-      myDefaultList = sharedPre.getString("default")!.split(",");
-    }
-
-
-    for(int i=0; i<myDefaultList.length; i++){
-      AccountTokenList model = AccountTokenList.fromJson(
-          await DBTokenProvider.dbTokenProvider.getTokenById(acId,myDefaultList[i]),
-          acId
-      );
-      int checkIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere(
-              (element) => "${element.id}" == myDefaultList[i]
-      );
-
-      if(checkIndex == -1) {
-        await DBDefaultTokenProvider.dbTokenProvider.createToken(model);
+      if(defaultListIndex != -1){
+        await DBDefaultTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
       }else{
-        await DBDefaultTokenProvider.dbTokenProvider.updateToken(model,model.id,acId);
+        await DBDefaultTokenProvider.dbTokenProvider.createToken(accountTokenList);
       }
-    }
 
+    }
   }
+
 
   var deleteData;
   deleteToken(data,url) async {

@@ -50,16 +50,16 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
   getCoin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+
     await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
     await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+
     toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, false);
 
     for(int i = 0; i< DBTokenProvider.dbTokenProvider.tokenList.length; i++){
       var list = DBTokenProvider.dbTokenProvider.tokenList[i];
-      // print(list.name);
       int index = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => element.id == list.id);
       if(index != -1){
-        print(list.name);
         toggleList[i] = true;
       }
     }
@@ -91,26 +91,17 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
   // upload wallet token list (add or remove token from list)
   toggleButton(id,changeBool,index,list)async{
     await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+    if (changeBool) {
+      await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
 
-
-      SharedPreferences sharedPre = await SharedPreferences.getInstance();
-      var listCoin = sharedPre.getString("default")!.split(",");
-      if (changeBool) {
-        await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
-        listCoin.add("$id");
-        sharedPre.setString("default", listCoin.join(","));
-        setState(() {
-          toggleList[index] = changeBool;
-        });
-      } else {
-        if (DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length >
-            1) {
+      setState(() {
+        toggleList[index] = changeBool;
+      });
+    } else {
+      if (DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length > 1) {
           await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
               id, widget.selectedAccountId
           );
-          listCoin.remove("$id");
-          sharedPre.setString("default", listCoin.join(","));
-
           setState(() {
             toggleList[index] = changeBool;
           });

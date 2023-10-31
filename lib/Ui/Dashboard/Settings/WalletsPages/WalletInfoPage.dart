@@ -1,13 +1,14 @@
 import 'dart:ui';
-
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
-
 import '../../../../Values/MyStyle.dart';
 
+// ignore: must_be_immutable
 class WalletInfoScreen extends StatefulWidget {
 
   String  accountId,name;
@@ -79,19 +80,7 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
         ),
         title: const Text(
           "Wallets",
-          // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          // textAlign: TextAlign.center,
         ),
-        actions: [
-          Center(
-            child: Text(
-              "Save",
-              style:MyStyle.tx28RGreen.copyWith(fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(width: 20),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(15,20,15,10),
@@ -124,7 +113,7 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
                 ),
               ),
             ),
-            SizedBox(height: height * 0.1),
+            SizedBox(height: height * 0.09),
 
             //  Grid View Phrase
             Container(
@@ -222,27 +211,34 @@ class _WalletInfoScreenState extends State<WalletInfoScreen> {
             const SizedBox(height: 22),
 
             // copy button
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-              width: 120,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: MyColor.darkGreyColor,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.copy,
-                    color: MyColor.mainWhiteColor,
-                  ),
-                  SizedBox(width: 15),
-                  Text(
-                    "Copy",
-                    style: MyStyle.tx18RWhite,
-                  )
-                ],
+            InkWell(
+              onTap: () {
+                FlutterClipboard.copy(widget.seedPhare!.join(" ")).then((value) {
+                  Helper.dialogCall.showToast(context, "Copied");
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+                width: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: MyColor.darkGreyColor,
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.copy,
+                      color: MyColor.mainWhiteColor,
+                    ),
+                    SizedBox(width: 15),
+                    Text(
+                      "Copy",
+                      style: MyStyle.tx18RWhite,
+                    )
+                  ],
+                ),
               ),
             ),
           ],
