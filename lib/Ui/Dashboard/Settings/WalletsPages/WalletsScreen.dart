@@ -49,14 +49,14 @@ class _WalletsScreenState extends State<WalletsScreen> {
         actions: [
           InkWell(
             onTap: () {
-              // Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //       builder: (context) => WelcomeScreen(
-              //         isNew: true,
-              //       ),
-              //     )
-              // );
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WelcomeScreen(
+                      isNew: true,
+                    ),
+                  )
+              );
             },
             child: Image.asset(
               "assets/images/dashboard/add.png",

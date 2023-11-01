@@ -23,7 +23,7 @@ class AccountProvider with ChangeNotifier{
       await ApiHandler.post(data,url).then((responseData){
 
         var value = json.decode(responseData.body);
-        // print("account add =====>  $value");
+        print("account add =====>  $value");
 
         if(responseData.statusCode == 200 && value["status"] == true)
         {
@@ -55,8 +55,7 @@ class AccountProvider with ChangeNotifier{
 
 
   var allAccounts;
-  getAccount(data,url) async
-  {
+  getAccount(data,url) async {
     isLoading = true;
     isSuccess = false;
 
@@ -92,8 +91,7 @@ class AccountProvider with ChangeNotifier{
 
   bool isAccount = false;
   var checkAccountList;
-  checkAccount(data,url) async
-  {
+  checkAccount(data,url) async {
     isLoading = true;
 
       await ApiHandler.post(data,url).then((responseData){
@@ -120,8 +118,7 @@ class AccountProvider with ChangeNotifier{
 
 
   var loginAccountDetails;
-  loginAccount(data,url) async
-  {
+  loginAccount(data,url) async {
     isLoading = true;
     isSuccess = false;
     notifyListeners();

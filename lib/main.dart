@@ -13,6 +13,7 @@ import 'package:uni_links/uni_links.dart';
 import 'Provider/Account_Provider.dart';
 import 'Provider/BuySellProvider.dart';
 import 'Provider/DashboardProvider.dart';
+import 'Provider/ExchangeProvider.dart';
 import 'Provider/InternetProvider.dart';
 import 'Provider/Token_Provider.dart';
 import 'Provider/Transection_Provider.dart';
@@ -107,6 +108,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => TokenProvider()),
         ChangeNotifierProvider(create: (context) => TransectionProvider()),
         ChangeNotifierProvider(create: (context) => BuySellProvider()),
+        ChangeNotifierProvider(create: (context) => ExchangeProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

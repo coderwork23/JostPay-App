@@ -201,4 +201,58 @@ class ApiHandler {
   }
 
 
+  static Future<dynamic> getExchange(url) async {
+    var baseUrl = Uri.https(
+        'api.changenow.io', '$url',
+    );
+
+    _setHeadersGet() => {
+      'Content-type': 'application/json',
+    };
+
+    http.Response response = await http.get(
+      baseUrl,
+      headers: _setHeadersGet(),
+    );
+
+    return response;
+  }
+
+  static Future<dynamic> getExchangeParams(url,params) async {
+    var baseUrl = Uri.https(
+        'api.changenow.io', '$url',params
+    );
+
+    _setHeadersGet() => {
+      'Content-type': 'application/json',
+    };
+
+    http.Response response = await http.get(
+      baseUrl,
+      headers: _setHeadersGet(),
+    );
+
+    return response;
+  }
+
+
+  static Future<dynamic> postExchange(url,body) async {
+    var baseUrl = Uri.https(
+        'api.changenow.io', '$url'
+    );
+
+    _setHeadersGet() => {
+      'Content-type': 'application/json',
+    };
+
+    http.Response response = await http.post(
+      baseUrl,
+      body: jsonEncode(body),
+      headers: _setHeadersGet(),
+    );
+
+    return response;
+  }
+
+
 }

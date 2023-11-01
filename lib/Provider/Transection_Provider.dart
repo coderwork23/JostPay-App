@@ -90,7 +90,7 @@ class TransectionProvider with ChangeNotifier{
       List<TransectionList> list;
 
       var value = json.decode(responseData.body);
-      print("value getTransection === > $value");
+      // print("value getTransection === > $value");
 
       if(responseData.statusCode == 200 && value["status"] == true) {
         body = value;

@@ -26,7 +26,7 @@ class BuySellProvider with ChangeNotifier{
 
     try {
       ApiHandler.getInstantApi(params).then((responseData) {
-        print(responseData);
+        // print(responseData);
 
         var value = json.decode(responseData.body);
         print("value getLoginOTPApi ==> $value");
@@ -69,7 +69,9 @@ class BuySellProvider with ChangeNotifier{
       ApiHandler.getInstantApi(params).then((responseData) async {
 
         var value = json.decode(responseData.body);
-        // print("getLogIn->  $value");
+
+        // print("getLogIn->  ${value[0].}");
+        // json[0]["1"].keys.forEach((key){ print(key); });
 
         if (responseData.statusCode == 200 && value['error'] == null) {
           // print("check value here");
@@ -105,7 +107,7 @@ class BuySellProvider with ChangeNotifier{
 
 
   bool isExRateLoader = false;
-  getExRate(params,context)async{
+  getExRate(params,context)async  {
     isExRateLoader = true;
     notifyListeners();
 

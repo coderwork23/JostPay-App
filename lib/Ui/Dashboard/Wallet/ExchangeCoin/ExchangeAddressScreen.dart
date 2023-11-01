@@ -1,9 +1,18 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:jost_pay_wallet/Values/utils.dart';
+import 'package:provider/provider.dart';
 
 class ExchangeAddressScreen extends StatefulWidget {
-  const ExchangeAddressScreen({super.key});
+  final String sendAmount;
+  const ExchangeAddressScreen({
+    super.key,
+    required this.sendAmount
+  });
 
   @override
   State<ExchangeAddressScreen> createState() => _ExchangeAddressScreenState();
@@ -11,8 +20,37 @@ class ExchangeAddressScreen extends StatefulWidget {
 
 class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
 
-
   TextEditingController addressController = TextEditingController();
+
+  late ExchangeProvider exchangeProvider;
+
+
+  createExchange()async{
+    var data = {
+      "from": exchangeProvider.sendCoin.symbol.toLowerCase().trim(),
+      "to": exchangeProvider.receiveCoin.symbol.toLowerCase().trim(),
+      "amount": widget.sendAmount.trim(),
+      "address": addressController.text.trim()
+    };
+    
+    await exchangeProvider.createExchange("/v1/transactions/fixed-rate/${Utils.apiKey}", data);
+  }
+
+  addressVerification() async {
+    var params = {
+      "currency":exchangeProvider.receiveCoin.symbol.toLowerCase().trim(),
+      "address":addressController.text.trim()
+    };
+    await exchangeProvider.addressVerification("/v2/validate/address",params,context);
+  }
+
+
+  @override
+  void initState() {
+    exchangeProvider = Provider.of<ExchangeProvider>(context,listen: false);
+    exchangeProvider.isAddressVerify = false;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,24 +58,64 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
+    exchangeProvider = Provider.of<ExchangeProvider>(context,listen: true);
+
     return Scaffold(
-      bottomNavigationBar: InkWell(
+      bottomNavigationBar: !exchangeProvider.isAddressVerify
+          ?
+      exchangeProvider.verifyAddressLoading
+          ?
+      SizedBox(
+        height: 50,
+        child: Helper.dialogCall.showLoader(),
+      )
+          :
+      InkWell(
         onTap: () {
-          Navigator.pop(context);
-          Navigator.pop(context);
+          if(addressController.text.isNotEmpty) {
+            addressVerification();
+          }else{
+            Helper.dialogCall.showToast(context, "Please enter receive address");
+          }
         },
         child: Container(
           alignment: Alignment.center,
           height: 45,
           margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
           padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: MyStyle.buttonDecoration.copyWith(
-            color: MyColor.greenColor,
+          decoration: addressController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
+          child:Text(
+            "Verify address",
+            style: MyStyle.tx18BWhite.copyWith(
+              color:  addressController.text.isEmpty ? MyColor.mainWhiteColor.withOpacity(0.4) : MyColor.mainWhiteColor,
+            ),
           ),
+        ),
+      )
+          :
+      exchangeProvider.createExLoading
+          ?
+      SizedBox(
+        height: 50,
+        child: Helper.dialogCall.showLoader(),
+      )
+          :
+      InkWell(
+        onTap: () {
+          if(exchangeProvider.isAddressVerify){
+            createExchange();
+          }
+        },
+        child: Container(
+          alignment: Alignment.center,
+          height: 45,
+          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: addressController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
           child:Text(
             "Start Exchange",
             style: MyStyle.tx18BWhite.copyWith(
-              color:  MyColor.mainWhiteColor,
+              color:  addressController.text.isEmpty ? MyColor.mainWhiteColor.withOpacity(0.4) : MyColor.mainWhiteColor,
             ),
           ),
         ),
@@ -56,9 +134,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
           ),
         ),
         title: Text(
-          "Enter ETH address",
-          // style:MyStyle.tx22RWhite.copyWith(fontSize: 22),
-          // textAlign: TextAlign.center,
+          "Enter ${exchangeProvider.receiveCoin.symbol} address",
         ),
 
       ),
@@ -91,7 +167,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
                       style: MyStyle.tx18RWhite,
                       decoration: InputDecoration(
                           filled: true,
-                          hintText: "Add ETH Address or FIO name",
+                          hintText: "Add ${exchangeProvider.receiveCoin.symbol} Address",
                           fillColor: MyColor.blackColor,
                           border: InputBorder.none,
                           hintStyle:MyStyle.tx22RWhite.copyWith(
@@ -111,14 +187,27 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
                                   color: MyColor.blackColor,
                               )
                           ),
-                          suffixIcon: SizedBox(
-                            width: 80,
-                            child: Center(
-                              child: Text(
-                                "Past",
-                                style: MyStyle.tx18RWhite.copyWith(
-                                    fontSize: 16,
-                                    color: MyColor.greenColor
+                          suffixIcon: InkWell(
+                            onTap: (){
+                              FlutterClipboard.paste().then((value){
+                                setState(() {
+                                  exchangeProvider.isAddressVerify = false;
+                                  addressController.text = value;
+                                  FocusScope.of(context).unfocus();
+                                });
+
+                                addressVerification();
+                              });
+                            },
+                            child: SizedBox(
+                              width: 80,
+                              child: Center(
+                                child: Text(
+                                  "Past",
+                                  style: MyStyle.tx18RWhite.copyWith(
+                                      fontSize: 16,
+                                      color: MyColor.greenColor
+                                  ),
                                 ),
                               ),
                             ),
@@ -128,38 +217,38 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
                     ),
                   ),
 
-                  // add wallet text and icon
-                  Positioned(
-                    bottom: 75,
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: MyColor.greenColor
-                          ),
-                          child: Image.asset(
-                            "assets/images/dashboard/wallet.png",
-                            height: 20,
-                            width: 20,
-                            color: MyColor.whiteColor,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Add Wallet",
-                          style: MyStyle.tx18RWhite.copyWith(
-                              color: MyColor.greenColor,
-                            fontSize: 12
-                          ),
-                        )
-                      ],
-                    ),
-                  )
+                  // // add wallet text and icon
+                  // Positioned(
+                  //   bottom: 75,
+                  //   left: 0,
+                  //   right: 0,
+                  //   child: Column(
+                  //     children: [
+                  //       Container(
+                  //         padding: const EdgeInsets.all(10),
+                  //         decoration: const BoxDecoration(
+                  //           shape: BoxShape.circle,
+                  //           color: MyColor.greenColor
+                  //         ),
+                  //         child: Image.asset(
+                  //           "assets/images/dashboard/wallet.png",
+                  //           height: 20,
+                  //           width: 20,
+                  //           color: MyColor.whiteColor,
+                  //           fit: BoxFit.contain,
+                  //         ),
+                  //       ),
+                  //       const SizedBox(height: 8),
+                  //       Text(
+                  //         "Add Wallet",
+                  //         style: MyStyle.tx18RWhite.copyWith(
+                  //             color: MyColor.greenColor,
+                  //           fontSize: 12
+                  //         ),
+                  //       )
+                  //     ],
+                  //   ),
+                  // )
 
                 ],
               ),
