@@ -201,10 +201,10 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
 
                 // login button
 
-                buySellProvider.getOtpBool || buySellProvider.isLoginLoader
-                    ?
-                Helper.dialogCall.showLoader()
-                    :
+                // buySellProvider.getOtpBool || buySellProvider.isLoginLoader
+                //     ?
+                // Helper.dialogCall.showLoader()
+                //     :
                 InkWell(
                   onTap: () {
                     FocusScope.of(context).unfocus();

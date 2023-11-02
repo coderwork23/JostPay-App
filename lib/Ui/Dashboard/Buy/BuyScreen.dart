@@ -29,8 +29,9 @@ class _BuyScreenState extends State<BuyScreen> {
       isLoading = true;
     });
 
-    SharedPreferences sharedPre = await SharedPreferences.getInstance();
-    buySellProvider.accessToken = sharedPre.getString("accessToken")??"";
+    // SharedPreferences sharedPre = await SharedPreferences.getInstance();
+    // buySellProvider.accessToken = sharedPre.getString("accessToken")??"";
+    getExchangeRat();
 
     setState(() {
       isLoading = false;
@@ -41,11 +42,12 @@ class _BuyScreenState extends State<BuyScreen> {
 
     var params = {
       "action":"exchange_rate",
-      "token":buySellProvider.accessToken
     };
 
     await buySellProvider.getExRate(params,context);
   }
+
+
 
   String? selectedCoin;
 
@@ -53,7 +55,7 @@ class _BuyScreenState extends State<BuyScreen> {
   @override
   void initState() {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
-
+    buySellProvider.accessToken = "";
     super.initState();
     getAccessToken();
   }

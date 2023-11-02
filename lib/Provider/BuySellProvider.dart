@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,6 +62,7 @@ class BuySellProvider with ChangeNotifier{
   }
 
   bool isLoginLoader = false;
+  LoginModel? loginModel;
   getLogIn(params,context)async{
     isLoginLoader = true;
     notifyListeners();
@@ -74,6 +76,18 @@ class BuySellProvider with ChangeNotifier{
         // json[0]["1"].keys.forEach((key){ print(key); });
 
         if (responseData.statusCode == 200 && value['error'] == null) {
+
+          List<RatesInfo> ratesInfoList = [];
+
+          // print("${}");
+          value['rates_info'].keys.forEach((key){
+            ratesInfoList.add(
+                RatesInfo.fromJson(value['rates_info'][key],key));
+          });
+
+
+          loginModel = LoginModel.fromJson(value,ratesInfoList);
+
           // print("check value here");
           SharedPreferences sharedPre = await SharedPreferences.getInstance();
           sharedPre.setString("accessToken","${value['access_token']}");
@@ -117,14 +131,40 @@ class BuySellProvider with ChangeNotifier{
         var value = json.decode(responseData.body);
         // print("getLogIn->  $value");
 
-        if (responseData.statusCode == 200 && value['error'] == null) {
-          // print("check value here");
+        if (responseData.statusCode == 200) {
+          var buy =value['exchange_rate'].toString().split("Buy");
 
+          for(int i = 0; i<buy.length; i++){
+            if(buy[i].split("Sell").length > 1) {
+              var buyValue = buy[i].split("Sell")[0];
+              var sellValue = buy[i].split("Sell")[1];
+              var buyMainValue = buyValue.split(".").last.split(" ")[1].trim();
+              var sellMainValue = sellValue.split(".").last.split(" ")[1].trim();
+
+              print("buyValue 1 -----> $buyMainValue");
+              print("sellValue 1 ----> $sellMainValue");
+            }else{
+              var buyValue1 = buy[i].split("Sell")[0];
+              List buyMainValue1 = buyValue1.split(".").last.split(" ").toList();
+              // print("buyValue 0 ---> ${buyMainValue1}");
+
+              if (buyMainValue1.length >= 2) {
+                var currencyValue = buyMainValue1[1].trim();
+
+                print("buyValue 0 ---> $currencyValue");
+              } else {
+                print("Invalid format for buyValue1");
+              }
+
+            }
+
+          }
+          //
           isExRateLoader = false;
           notifyListeners();
         } else {
 
-          Helper.dialogCall.showToast(context, "${value['error']}");
+          // Helper.dialogCall.showToast(context, "${value['error']}");
           isExRateLoader = false;
           notifyListeners();
 
