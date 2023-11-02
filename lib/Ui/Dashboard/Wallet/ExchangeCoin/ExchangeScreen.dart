@@ -6,6 +6,7 @@ import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../Values/utils.dart';
 import 'ExChangeTokenList.dart';
 import 'ExchangeAddressScreen.dart';
@@ -23,14 +24,17 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
   TextEditingController sendCoinController = TextEditingController();
   late ExchangeProvider exchangeProvider;
   var selectedAccountId = "",sendError ="";
+  bool showSendError = false;
 
 
+  // get token list
   getExToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
     await exchangeProvider.getTokenList("/v1/currencies");
   }
 
-  bool showSendError = false;
-
+  // get receive token animate amount
   estimateExchangeAmount()async{
     String sendSymbol = exchangeProvider.sendCoin.symbol.toLowerCase();
     String receiveSymbol = exchangeProvider.receiveCoin.symbol.toLowerCase();
@@ -38,9 +42,9 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
       "api_key":Utils.apiKey
     };
     await exchangeProvider.estimateExchangeAmount("v1/exchange-amount/fixed-rate/${sendCoinController.text.trim()}/${sendSymbol}_$receiveSymbol",data);
-
   }
 
+  // swap UpDown methods
   swapUpDown(){
     var tempSend = exchangeProvider.sendCoin;
     var tempReceive = exchangeProvider.receiveCoin;
@@ -83,14 +87,19 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
             :
       InkWell(
         onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ExchangeAddressScreen(
-                  sendAmount: sendCoinController.text.trim(),
-                ),
-              )
-          );
+          if(showSendError || exchangeProvider.getCoinController.text.isEmpty || sendCoinController.text.isEmpty){
+            Helper.dialogCall.showToast(context, "Please provide all details");
+          }else {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ExchangeAddressScreen(
+                        sendAmount: sendCoinController.text.trim(),
+                      ),
+                )
+            );
+          }
         },
         child: Container(
           alignment: Alignment.center,
@@ -99,7 +108,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: showSendError || exchangeProvider.getCoinController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
           child:  Text(
-            "Enter Address",
+            "Continue",
             style: MyStyle.tx18BWhite.copyWith(
                 color: showSendError || exchangeProvider.getCoinController.text.isEmpty ? MyColor.dotBoarderColor : MyColor.mainWhiteColor,
             ),
@@ -509,4 +518,5 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
 
     );
   }
+
 }

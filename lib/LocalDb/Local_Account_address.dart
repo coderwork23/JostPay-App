@@ -73,7 +73,7 @@ class DbAccountAddress{
   }
 
   String selectAccountPublicAddress = "",selectAccountPrivateAddress = "";
-    getPublicKey(accountId,networkId) async {
+  getPublicKey(accountId,networkId) async {
 
     final db = await database;
     final res = await db!.rawQuery("SELECT publicAddress,privateAddress FROM AccountAddress Where accountId = '$accountId' AND networkId = '$networkId'");

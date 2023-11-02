@@ -39,7 +39,7 @@ class DbExTransaction{
               'expectedReceiveAmount REAL,'
               'createdAt TEXT,'
               'accountId TEXT,'
-              'isPartner TEXT,'
+              'isPartner TEXT'
               ')');
         },
     );
@@ -57,12 +57,12 @@ class DbExTransaction{
     final db= await database;
 
     final res = await db!.update('ExTransaction', newToken.toJson(), where: "id = ? AND accountId = ? ",whereArgs: [tokenId,id]);
-    getAccountToken(id);
+    getExTransaction(id);
     return res;
   }
 
   List<ExTransactionModel> exTransactionList = [];
-  getAccountToken(String accountId) async {
+  getExTransaction(String accountId) async {
 
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM ExTransaction Where accountId = '$accountId'");
@@ -75,6 +75,22 @@ class DbExTransaction{
     }).toList();
     exTransactionList = list;
     return list;
+  }
+
+
+  ExTransactionModel? getTrxStatusData;
+  getTrxStatus(String accountId,String id) async {
+
+    final db = await database;
+    final res = await db!.rawQuery("SELECT * FROM ExTransaction Where accountId = '$accountId' AND id = '$id'");
+
+    if(res.isNotEmpty) {
+      getTrxStatusData = ExTransactionModel.fromJson(
+        res[0],
+        accountId,
+      );
+    }
+    return getTrxStatusData;
   }
 
   Future<int> deleteAllExTransaction() async {

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
+import 'package:jost_pay_wallet/Models/ExTransactionModel.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -73,7 +75,6 @@ class ExchangeProvider with ChangeNotifier{
     // });
 
   }
-
 
   double minAmount = 0,maxAmount = 0;
   bool exRateLoading= true;
@@ -148,7 +149,7 @@ class ExchangeProvider with ChangeNotifier{
     print("object--->  $url");
     print("object--->  $params");
 
-    ApiHandler.getExchangeParams(url, params).then((responseData){
+    await ApiHandler.getExchangeParams(url, params).then((responseData){
       var value = json.decode(responseData.body);
 
       print("estimate object --->  $value");
@@ -169,39 +170,85 @@ class ExchangeProvider with ChangeNotifier{
   }
 
 
-  String payinAddress ="",payoutAddress ="",fromCurrency ="",toCurrency ="",validUntil ="",id ="";
+  String payinAddress ="",payoutAddress ="",fromCurrency ="",toCurrency ="",validUntil ="",trxId ="";
   double amount = 0;
-  bool createExLoading = false;
+
+  bool createExLoading = false,createExSuccess = false;
   createExchange(url,body)async{
 
+    createExSuccess = false;
     createExLoading = true;
     notifyListeners();
-   ApiHandler.postExchange(url,body).then((responseData){
 
-     var value = json.decode(responseData.body);
-     // print("object url ---> $url");
-     print("object ---> $value");
+    await ApiHandler.postExchange(url,body).then((responseData) async {
 
-     if(responseData.statusCode == 200) {
-       payinAddress = value["payinAddress"];
-       payoutAddress = value["payoutAddress"];
-       fromCurrency = value["fromCurrency"];
-       toCurrency = value["toCurrency"];
-       validUntil = value["validUntil"];
-       id = value["id"];
-       amount = value["amount"];
-
-       createExLoading = false;
-       notifyListeners();
-
-     }else{
-
-       createExLoading = false;
-       notifyListeners();
-
-     }
-   });
+      var value = json.decode(responseData.body);
+      // print("object url ---> $url");
+      if(responseData.statusCode == 200) {
+        payinAddress = value["payinAddress"];
+        payoutAddress = value["payoutAddress"];
+        fromCurrency = value["fromCurrency"];
+        toCurrency = value["toCurrency"];
+        validUntil = value["validUntil"];
+        trxId = value["id"];
+        amount = value["amount"];
+        print("object ---> $value");
+        createExLoading = false;
+        createExSuccess = true;
+        print("createExSuccess $createExSuccess");
+        notifyListeners();
+      }
+      else{
+        createExLoading = false;
+        createExSuccess = false;
+        notifyListeners();
+      }
+    });
   
+  }
+
+
+  bool getTrxStatus = false,statusLoading = false;
+  transactionStatus(url,accountId) async {
+    statusLoading = true;
+    getTrxStatus = false;
+    notifyListeners();
+
+    await ApiHandler.getExchange(url).then((responseData) async {
+      var value = json.decode(responseData.body);
+      // print("object url ---> $url");
+      print("transactionStatus ---> $value");
+
+      if(responseData.statusCode == 200) {
+
+        await DbExTransaction.dbExTransaction.getExTransaction(accountId);
+
+        var trxIndex = DbExTransaction.dbExTransaction.exTransactionList.indexWhere((element) => "${element.id}" == "${value['id']}");
+
+        if(trxIndex == -1) {
+          await DbExTransaction.dbExTransaction.createExTransaction(
+              ExTransactionModel.fromJson(value, accountId)
+          );
+        }else{
+          await DbExTransaction.dbExTransaction.updateExTransaction(
+              ExTransactionModel.fromJson(value, accountId),
+              value["id"],
+              accountId
+          );
+        }
+
+
+        statusLoading = false;
+        getTrxStatus = true;
+        notifyListeners();
+
+      }else{
+        statusLoading = false;
+        getTrxStatus = false;
+        notifyListeners();
+        print("-----> transactionStatus api error <------");
+      }
+    });
   }
 
 
