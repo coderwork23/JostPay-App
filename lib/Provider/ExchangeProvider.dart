@@ -101,6 +101,31 @@ class ExchangeProvider with ChangeNotifier{
     });
   }
 
+
+  bool exMinMaxLoading= false;
+  getMinMax(String url,params)async{
+    exMinMaxLoading = true;
+    notifyListeners();
+
+    await ApiHandler.getExchangeParams(url, params).then((responseData){
+      var value = json.decode(responseData.body);
+      // print("object ---> $value");
+
+      if(responseData.statusCode == 200) {
+
+        minAmount = value['minAmount'] ?? -1;
+        maxAmount = value['maxAmount'] ?? -1;
+
+        exMinMaxLoading = false;
+        notifyListeners();
+      }else{
+        exMinMaxLoading = false;
+        notifyListeners();
+
+      }
+    });
+  }
+
   changeSendToken(AccountTokenList newToken, context, id) async {
     if (sendCoin.id != newToken.id) {
       // Create a copy of newToken

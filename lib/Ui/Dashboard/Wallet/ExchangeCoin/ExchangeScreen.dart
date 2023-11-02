@@ -78,7 +78,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
       bottomNavigationBar: exchangeProvider.isLoading || exchangeProvider.exRateLoading || exchangeProvider.estimateLoading
           ?
       Visibility(
-        visible: exchangeProvider.exRateLoading,
+        visible: exchangeProvider.exMinMaxLoading,
         child: SizedBox(
           height: 55,
           child: Helper.dialogCall.showLoader(),
