@@ -56,7 +56,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
       // var deviceId = sharedPreferences.getString('deviceId');
       savePassword = sharedPreferences.getString('password') ?? "";
 
-      sharedPreferences.setString('passcode',"123456");
       savePasscode = sharedPreferences.getString('passcode') ?? "";
       // print(" deviceId $savePassword ");
     });
