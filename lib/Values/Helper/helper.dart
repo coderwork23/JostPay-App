@@ -30,25 +30,24 @@ class Helper {
   }
 
   showAlertDialog(BuildContext context){
-    AlertDialog alert = AlertDialog(
-      backgroundColor:MyColor.backgroundColor,
-      content: Row(
+    AlertDialog alert =  AlertDialog(
+      backgroundColor:MyColor.boarderColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      content: const Row(
         children: [
-          const CircularProgressIndicator(
+          CircularProgressIndicator(
             backgroundColor: Colors.white,
-            valueColor: AlwaysStoppedAnimation<Color>(MyColor.blueColor),
+            valueColor: AlwaysStoppedAnimation<Color>(MyColor.greenColor),
           ),
-          Container(
-              margin: const EdgeInsets.only(left: 5),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 10.0),
-                child: Text("Loading...",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: MyColor.whiteColor,
-                  ),
-                ),
-              )
+
+          SizedBox(width: 20),
+          Text("Loading...",
+            style: TextStyle(
+              fontSize: 18,
+              color: MyColor.whiteColor,
+            ),
           ),
         ],
       ),

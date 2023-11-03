@@ -6,6 +6,7 @@ import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
+import 'package:jost_pay_wallet/Ui/Authentication/LoginWithPasscode.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -123,17 +124,30 @@ class _SplashScreenState extends State<SplashScreen> {
 
   checkIfLogin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    isLogin = sharedPreferences.getString('isLogin')??"false";
     if(sharedPreferences.getString('isLogin') != null){
-      isLogin = sharedPreferences.getString('isLogin')!;
-
+      var passwordType = sharedPreferences.getBool('passwordType')?? false;
+      // print("object passwordType ---> $passwordType");
       if(isLogin == "true"){
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const LoginScreen()
-          )
-        );
+
+        if(passwordType){
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const LoginWithPassCode()
+              )
+          );
+        }else {
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const LoginScreen()
+              )
+          );
+        }
       }
       else{
         // ignore: use_build_context_synchronously
@@ -148,18 +162,9 @@ class _SplashScreenState extends State<SplashScreen> {
     }
     else{
 
-      if(isLogin == "true"){
+
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const LoginScreen()
-          )
-        );
-      }
-      else{
-        // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(
               builder: (context) =>  WelcomeScreen(isNew: false,)
@@ -167,7 +172,7 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       }
 
-    }
+
 
   }
 

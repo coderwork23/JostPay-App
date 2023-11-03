@@ -183,9 +183,9 @@ class AccountProvider with ChangeNotifier{
 
 
   bool isPassword = false;
-  forgotPassword(data,url) async
-  {
-    isLoading = true;
+  bool passwordLoading = false;
+  forgotPassword(data,url) async {
+    passwordLoading = true;
     notifyListeners();
 
       await ApiHandler.post(data,url).then((responseData){
@@ -196,13 +196,13 @@ class AccountProvider with ChangeNotifier{
         if(responseData.statusCode == 200 && value["status"] == true)
         {
           isPassword = true;
-          isLoading = false;
+          passwordLoading = false;
           notifyListeners();
         }
         else
         {
           isPassword = false;
-          isLoading = false;
+          passwordLoading = false;
           notifyListeners();
 
           print("=========== Forgot Password Api Error ==========");
@@ -214,8 +214,7 @@ class AccountProvider with ChangeNotifier{
 
 
   bool isChange = false;
-  changeAccountName(data,url) async
-  {
+  changeAccountName(data,url) async {
     isLoading = true;
     notifyListeners();
 
@@ -242,32 +241,5 @@ class AccountProvider with ChangeNotifier{
 
   }
 
-
-  bool isGetHelp = false;
-  getHelp(data,url) async {
-    isLoading = true;
-    notifyListeners();
-
-    await ApiHandler.post1(data,url).then((responseData){
-
-      var value = json.decode(responseData.body);
-      //print(value);
-
-      if(responseData.statusCode == 200 && value["status"] == true)
-      {
-        isGetHelp = true;
-        isLoading = false;
-        notifyListeners();
-      }
-      else
-      {
-        isGetHelp = false;
-        isLoading = false;
-        notifyListeners();
-        print("=========== Get Help Api Error ==========");
-      }
-    });
-
-  }
 
 }
