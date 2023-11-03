@@ -53,14 +53,18 @@ class _SecurityScreenState extends State<SecurityScreen> {
     setState(() {
       fingerPrint = sharedPreferences.getBool('fingerOn') ?? false;
       passwordType = sharedPreferences.getBool('passwordType') ?? false;
+      // var deviceId = sharedPreferences.getString('deviceId');
       savePassword = sharedPreferences.getString('password') ?? "";
 
+      sharedPreferences.setString('passcode',"123456");
       savePasscode = sharedPreferences.getString('passcode') ?? "";
-      // var deviceId = sharedPreferences.getString('deviceId');
       // print(" deviceId $savePassword ");
     });
-
   }
+
+  final newPassCodeKey = GlobalKey<FormState>();
+  final passwordFormKey = GlobalKey<FormState>();
+  final passcodeFormKey = GlobalKey<FormState>();
 
   bool isLoading = false;
   changePasswordApi(bool passwordChange) async {
@@ -285,40 +289,310 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
                     pinNotSave
                         ?
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    // set new passcode text widgets
+                    Form(
+                      key: newPassCodeKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // new passcode
+                            TextFormField(
+                              obscureText: hideSetCode,
+                                controller: setPassCodeController,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(6)
+                                ],
+                                validator: (value) {
+                                  if(value!.isEmpty){
+                                    newPassMess = "Enter your passcode";
+                                    return "";
+                                  }else if(value != setRePassCodeController.text){
+                                    newRePassMess = "Passcode not matched!";
+                                    return "";
+                                  }else{
+                                    newPassMess = "";
+                                    return null;
+                                  }
+                                },
+                                onChanged: (value) {
+                                  if(value.isEmpty){
+                                    newPassMess = "Enter your passcode";
+                                  }else if(value != setRePassCodeController.text){
+                                    newRePassMess = "Passcode not matched!";
+                                  }else{
+                                    newPassMess = "";
+                                  }
+                                  setState(() {});
+                                },
+                                keyboardType: TextInputType.number,
+                                cursorColor: MyColor.greenColor,
+                                style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                                ),
+                                decoration: MyStyle.textInputDecoration.copyWith(
+                                  hintText:"Enter new passcode",
+                                    errorStyle: const TextStyle(height: 0,fontSize: 0),
+                                    suffixIcon: hideSetCode
+                                        ?
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideSetCode = false;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                        :
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideSetCode = true;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility_off,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                )
+                            ),
+                            Visibility(
+                                visible: newPassMess.isNotEmpty,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 12.0,left: 10),
+                                  child: Text(
+                                    newPassMess,
+                                    style: MyStyle.tx18BWhite.copyWith(
+                                        color: MyColor.redColor,
+                                        fontSize: 14
+                                    ),
+                                  ),
+                                )
+                            ),
+                            const SizedBox(height: 15),
+
+                            //Confirm new passcode
+                            TextFormField(
+                                obscureText: hideSetReCode,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(6)
+                                ],
+                                controller: setRePassCodeController,
+                                cursorColor: MyColor.greenColor,
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                                validator: (value) {
+                                    if(value!.isEmpty){
+                                      newRePassMess = "Enter your passcode";
+                                      return "";
+                                    }else if(setPassCodeController.text != value){
+                                      newRePassMess = "Passcode not matched!";
+                                      return "";
+                                    }else{
+                                      newRePassMess = "";
+                                      return null;
+                                    }
+                                },
+                                onChanged: (value) {
+                                  setState(() {
+                                    if(value.isEmpty){
+                                      newRePassMess = "Enter your passcode";
+                                    }else if(setPassCodeController.text != value){
+                                      newRePassMess = "Passcode not matched!";
+                                    }else{
+                                      print("object");
+                                      newRePassMess = "";
+                                    }
+                                  });
+                                },
+                                decoration: MyStyle.textInputDecoration.copyWith(
+                                    hintText: "Confirm new passcode",
+                                    errorStyle: const TextStyle(height: 0,fontSize: 0),
+
+                                    suffixIcon: hideSetReCode
+                                        ?
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideSetReCode = false;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                        :
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideSetReCode = true;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility_off,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                )
+                            ),
+                            Visibility(
+                                visible: newRePassMess.isNotEmpty,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 12.0,left: 10),
+                                  child: Text(
+                                    newRePassMess,
+                                    style: MyStyle.tx18BWhite.copyWith(
+                                        color: MyColor.redColor,
+                                        fontSize: 14
+                                    ),
+                                  ),
+                                )
+                            ),
+                          ]
+                      ),
+                    )
+                        :
+                    passwordType
+                        ?
+                    // passcode text widgets
+                    Form(
+                      key: passcodeFormKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          //old passcode
+                          Visibility(
+                            visible: savePasscode.isNotEmpty ,
+                            child: TextFormField(
+                                obscureText: hideOldCode,
+                                validator: (value) {
+                                  if(value!.isEmpty){
+                                    oldCodeError = "please enter you passcode";
+                                    return "";
+                                  }else if(value != savePasscode){
+                                    oldCodeError = "Entered old passcode not matched!";
+                                    return "";
+                                  }else{
+                                    oldCodeError = "";
+                                    return null;
+                                  }
+                                },
+                                onChanged: (value) {
+                                  if(value.isEmpty){
+                                    oldCodeError = "please enter you passcode";
+                                  }else if(value != savePasscode){
+                                    // print("savePasscode $savePasscode");
+
+                                    oldCodeError = "Entered old passcode not matched!";
+                                  }else{
+                                    oldCodeError = "";
+                                  }
+                                  setState(() {});
+                                },
+                                inputFormatters:  [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(6)
+                                ],
+                                keyboardType: TextInputType.number,
+                                controller: oldPassCodeController,
+                                cursorColor: MyColor.greenColor,
+                                style: MyStyle.tx18RWhite,
+                                decoration: MyStyle.textInputDecoration.copyWith(
+                                    hintText: "Enter old passcode",
+                                    errorStyle: const TextStyle(height: 0,fontSize: 0),
+                                    suffixIcon: hideOldCode
+                                        ?
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideOldCode = false;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                        :
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideOldCode = true;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility_off,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                )
+                            ),
+                          ),
+                          Visibility(
+                              visible: oldCodeError.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 12.0,left: 10),
+                                child: Text(
+                                  oldCodeError,
+                                  style: MyStyle.tx18BWhite.copyWith(
+                                      color: MyColor.redColor,
+                                      fontSize: 14
+                                  ),
+                                ),
+                              )
+                          ),
+                          const SizedBox(height: 15),
+
                           // new passcode
                           TextFormField(
-                            obscureText: hideSetCode,
-                              controller: setPassCodeController,
-                              inputFormatters: [
+                              controller: newPassCodeController,
+                              obscureText: hideNewCode,
+                              inputFormatters:[
                                 FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(6)
                               ],
+                              validator: (value) {
+                                if(value!.isEmpty){
+                                  newCodeError = "please enter you passcode";
+                                  return "";
+                                }else if(value != reNewPassCodeController.text){
+                                  newCodeError = "Entered passcode not matched!";
+                                  return "";
+                                }else{
+                                  newCodeError = "";
+                                  return null;
+                                }
+                              },
                               onChanged: (value) {
                                 if(value.isEmpty){
-                                  newPassMess = "Enter your passcode";
-                                }else if(value != setRePassCodeController.text){
-                                  newRePassMess = "Passcode not matched!";
+                                  newCodeError = "please enter you passcode";
+                                }else if(value != reNewPassCodeController.text){
+                                  newCodeError = "Entered passcode not matched!";
                                 }else{
-                                  newPassMess = "";
+                                  newCodeError = "";
                                 }
                                 setState(() {});
                               },
                               keyboardType: TextInputType.number,
                               cursorColor: MyColor.greenColor,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 16
-                              ),
+                              style: MyStyle.tx18RWhite,
                               decoration: MyStyle.textInputDecoration.copyWith(
-                                hintText:"Enter new passcode",
-                                  suffixIcon: hideSetCode
+                                  hintText: "Enter new passcode",
+                                  errorStyle: const TextStyle(height: 0,fontSize: 0),
+                                  suffixIcon: hideNewCode
                                       ?
                                   IconButton(
                                       onPressed: (){
                                         setState(() {
-                                          hideSetCode = false;
+                                          hideNewCode = false;
                                         });
                                       },
                                       icon: const Icon(
@@ -330,7 +604,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                   IconButton(
                                       onPressed: (){
                                         setState(() {
-                                          hideSetCode = true;
+                                          hideNewCode = true;
                                         });
                                       },
                                       icon: const Icon(
@@ -341,11 +615,11 @@ class _SecurityScreenState extends State<SecurityScreen> {
                               )
                           ),
                           Visibility(
-                              visible: newPassMess.isNotEmpty,
+                              visible: newCodeError.isNotEmpty,
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 12.0,left: 10),
                                 child: Text(
-                                  newPassMess,
+                                  newCodeError,
                                   style: MyStyle.tx18BWhite.copyWith(
                                       color: MyColor.redColor,
                                       fontSize: 14
@@ -357,37 +631,46 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
                           //Confirm new passcode
                           TextFormField(
-                              obscureText: hideSetReCode,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
+                              onChanged: (value) {
+                                if(value.isEmpty){
+                                  reNewCodeError = "please enter you passcode";
+                                }else if(value != newPassCodeController.text){
+                                  reNewCodeError = "Entered passcode not matched!";
+                                }else{
+                                  reNewCodeError = "";
+                                }
+                                setState(() {});
+                              },
+                              validator: (value) {
+                                if(value!.isEmpty){
+                                  reNewCodeError = "please enter you passcode";
+                                  return "";
+                                }else if(value != newPassCodeController.text){
+                                  reNewCodeError = "Entered passcode not matched!";
+                                  return "";
+                                }else{
+                                  reNewCodeError = "";
+                                  return null;
+                                }
+                              },
+                              keyboardType:TextInputType.number,
+                              obscureText: hideReNewCode,
+                              inputFormatters:[
                                 FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(6)
                               ],
-                              controller: setRePassCodeController,
+                              controller: reNewPassCodeController,
                               cursorColor: MyColor.greenColor,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  if(value.isEmpty){
-                                    newRePassMess = "Enter your passcode";
-                                  }else if(setPassCodeController.text != value){
-                                    newRePassMess = "Passcode not matched!";
-                                  }else{
-                                    print("object");
-                                    newRePassMess = "";
-                                  }
-                                });
-                              },
+                              style: MyStyle.tx18RWhite,
                               decoration: MyStyle.textInputDecoration.copyWith(
-                                hintText: "Confirm new passcode",
-                                  suffixIcon: hideSetReCode
+                                  hintText:"Confirm new passcode",
+                                  errorStyle: const TextStyle(height: 0,fontSize: 0),
+                                  suffixIcon: hideReNewCode
                                       ?
                                   IconButton(
                                       onPressed: (){
                                         setState(() {
-                                          hideSetReCode = false;
+                                          hideReNewCode = false;
                                         });
                                       },
                                       icon: const Icon(
@@ -399,7 +682,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                   IconButton(
                                       onPressed: (){
                                         setState(() {
-                                          hideSetReCode = true;
+                                          hideReNewCode = true;
                                         });
                                       },
                                       icon: const Icon(
@@ -410,11 +693,11 @@ class _SecurityScreenState extends State<SecurityScreen> {
                               )
                           ),
                           Visibility(
-                              visible: newRePassMess.isNotEmpty,
+                              visible: reNewCodeError.isNotEmpty,
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 12.0,left: 10),
                                 child: Text(
-                                  newRePassMess,
+                                  reNewCodeError,
                                   style: MyStyle.tx18BWhite.copyWith(
                                       color: MyColor.redColor,
                                       fontSize: 14
@@ -422,248 +705,110 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                 ),
                               )
                           ),
-                        ]
+                        ],
+                      ),
                     )
                         :
-                    passwordType
-                        ?
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        //old passcode
-                        Visibility(
-                          visible: savePasscode.isNotEmpty ,
-                          child: TextFormField(
-                              obscureText: hideOldCode,
-                              onChanged: (value) {
-                                if(value.isEmpty){
-                                  oldCodeError = "please enter you passcode";
-                                }else if(value != savePasscode){
-                                  // print("savePasscode $savePasscode");
+                    // password text widgets
+                    Form(
+                      key: passwordFormKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          //old passcode
+                          Visibility(
+                            visible: savePassword.isNotEmpty,
+                            child: TextFormField(
+                                keyboardType:TextInputType.text,
+                                obscureText: hideOldPass,
+                                onChanged: (value) {
+                                  if(value.isEmpty){
+                                    oldPassError = "please enter you passcode";
+                                  }else if(value != savePassword){
+                                    // print("savePasscode $savePasscode");
 
-                                  oldCodeError = "Entered old passcode not matched!";
-                                }else{
-                                  oldCodeError = "";
-                                }
-                                setState(() {});
-                              },
-                              inputFormatters:  [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(6)
-                              ],
-                              keyboardType: TextInputType.number,
-                              controller: oldPassCodeController,
-                              cursorColor: MyColor.greenColor,
-                              style: MyStyle.tx18RWhite,
-                              decoration: MyStyle.textInputDecoration.copyWith(
-                                  hintText: "Enter old passcode",
-                                  suffixIcon: hideOldCode
-                                      ?
-                                  IconButton(
-                                      onPressed: (){
-                                        setState(() {
-                                          hideOldCode = false;
-                                        });
-                                      },
-                                      icon: const Icon(
-                                        Icons.visibility,
-                                        color: MyColor.mainWhiteColor,
-                                      )
-                                  )
-                                      :
-                                  IconButton(
-                                      onPressed: (){
-                                        setState(() {
-                                          hideOldCode = true;
-                                        });
-                                      },
-                                      icon: const Icon(
-                                        Icons.visibility_off,
-                                        color: MyColor.mainWhiteColor,
-                                      )
-                                  )
+                                    oldPassError = "Entered old passcode not matched!";
+                                  }else{
+                                    oldPassError = "";
+                                  }
+                                  setState(() {});
+                                },
+                                controller: oldPassController,
+                                cursorColor: MyColor.greenColor,
+                                style: MyStyle.tx18RWhite,
+                                decoration: MyStyle.textInputDecoration.copyWith(
+                                    hintText: "Enter old password",
+                                    errorStyle: const TextStyle(height: 0,fontSize: 0),
+                                    suffixIcon: hideOldPass
+                                        ?
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideOldPass = false;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                        :
+                                    IconButton(
+                                        onPressed: (){
+                                          setState(() {
+                                            hideOldPass = true;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.visibility_off,
+                                          color: MyColor.mainWhiteColor,
+                                        )
+                                    )
+                                )
+                             ),
+                           ),
+                          Visibility(
+                              visible: oldPassError.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 12.0,left: 10),
+                                child: Text(
+                                  oldPassError,
+                                  style: MyStyle.tx18BWhite.copyWith(
+                                      color: MyColor.redColor,
+                                      fontSize: 14
+                                  ),
+                                ),
                               )
                           ),
-                        ),
-                        Visibility(
-                            visible: oldCodeError.isNotEmpty,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 12.0,left: 10),
-                              child: Text(
-                                oldCodeError,
-                                style: MyStyle.tx18BWhite.copyWith(
-                                    color: MyColor.redColor,
-                                    fontSize: 14
-                                ),
-                              ),
-                            )
-                        ),
-                        const SizedBox(height: 15),
+                          const SizedBox(height: 15),
 
-                        // new passcode
-                        TextFormField(
-                            controller: newPassCodeController,
-                            obscureText: hideNewCode,
-                            inputFormatters:[
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(6)
-                            ],
-                            onChanged: (value) {
-                              if(value.isEmpty){
-                                newCodeError = "please enter you passcode";
-                              }else if(value != reNewPassCodeController.text){
-                                newCodeError = "Entered passcode not matched!";
-                              }else{
-                                newCodeError = "";
-                              }
-                              setState(() {});
-                            },
-                            keyboardType: TextInputType.number,
-                            cursorColor: MyColor.greenColor,
-                            style: MyStyle.tx18RWhite,
-                            decoration: MyStyle.textInputDecoration.copyWith(
-                                hintText: "Enter new passcode",
-                                suffixIcon: hideNewCode
-                                    ?
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideNewCode = false;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                                    :
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideNewCode = true;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility_off,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                            )
-                        ),
-                        Visibility(
-                            visible: newCodeError.isNotEmpty,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 12.0,left: 10),
-                              child: Text(
-                                newCodeError,
-                                style: MyStyle.tx18BWhite.copyWith(
-                                    color: MyColor.redColor,
-                                    fontSize: 14
-                                ),
-                              ),
-                            )
-                        ),
-                        const SizedBox(height: 15),
-
-                        //Confirm new passcode
-                        TextFormField(
-                            onChanged: (value) {
-                              if(value.isEmpty){
-                                reNewCodeError = "please enter you passcode";
-                              }else if(value != newPassCodeController.text){
-                                reNewCodeError = "Entered passcode not matched!";
-                              }else{
-                                reNewCodeError = "";
-                              }
-                              setState(() {});
-                            },
-                            keyboardType:TextInputType.number,
-                            obscureText: hideReNewCode,
-                            inputFormatters:[
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(6)
-                            ],
-                            controller: reNewPassCodeController,
-                            cursorColor: MyColor.greenColor,
-                            style: MyStyle.tx18RWhite,
-                            decoration: MyStyle.textInputDecoration.copyWith(
-                                hintText:"Confirm new passcode",
-                                suffixIcon: hideReNewCode
-                                    ?
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideReNewCode = false;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                                    :
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideReNewCode = true;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility_off,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                            )
-                        ),
-                        Visibility(
-                            visible: reNewCodeError.isNotEmpty,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 12.0,left: 10),
-                              child: Text(
-                                reNewCodeError,
-                                style: MyStyle.tx18BWhite.copyWith(
-                                    color: MyColor.redColor,
-                                    fontSize: 14
-                                ),
-                              ),
-                            )
-                        ),
-                      ],
-                    )
-                        :
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        //old passcode
-                        Visibility(
-                          visible: savePassword.isNotEmpty,
-                          child: TextFormField(
-                              keyboardType:TextInputType.text,
-                              obscureText: hideOldPass,
+                          // new passcode
+                          TextFormField(
+                            controller: newPassController,
+                              obscureText: hideNewPass,
+                              keyboardType: TextInputType.text,
                               onChanged: (value) {
                                 if(value.isEmpty){
-                                  oldPassError = "please enter you passcode";
-                                }else if(value != savePassword){
-                                  // print("savePasscode $savePasscode");
-
-                                  oldPassError = "Entered old passcode not matched!";
+                                  newPassError = "please enter you passcode";
+                                }else if(value != reNewPassController.text){
+                                  newPassError = "Entered passcode not matched!";
                                 }else{
-                                  oldPassError = "";
+                                  newPassError = "";
                                 }
                                 setState(() {});
                               },
-                              controller: oldPassController,
                               cursorColor: MyColor.greenColor,
                               style: MyStyle.tx18RWhite,
                               decoration: MyStyle.textInputDecoration.copyWith(
-                                  hintText: "Enter old password",
-                                  suffixIcon: hideOldPass
+                                  hintText:"Enter new password",
+                                  errorStyle: const TextStyle(height: 0,fontSize: 0),
+                                  suffixIcon: hideNewPass
                                       ?
                                   IconButton(
                                       onPressed: (){
                                         setState(() {
-                                          hideOldPass = false;
+                                          hideNewPass = false;
                                         });
                                       },
                                       icon: const Icon(
@@ -675,7 +820,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                   IconButton(
                                       onPressed: (){
                                         setState(() {
-                                          hideOldPass = true;
+                                          hideNewPass = true;
                                         });
                                       },
                                       icon: const Icon(
@@ -685,143 +830,83 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                   )
                               )
                            ),
-                         ),
-                        Visibility(
-                            visible: oldPassError.isNotEmpty,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 12.0,left: 10),
-                              child: Text(
-                                oldPassError,
-                                style: MyStyle.tx18BWhite.copyWith(
-                                    color: MyColor.redColor,
-                                    fontSize: 14
+                          Visibility(
+                              visible: newPassError.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 12.0,left: 10),
+                                child: Text(
+                                  newPassError,
+                                  style: MyStyle.tx18BWhite.copyWith(
+                                      color: MyColor.redColor,
+                                      fontSize: 14
+                                  ),
                                 ),
-                              ),
-                            )
-                        ),
-                        const SizedBox(height: 15),
+                              )
+                          ),
+                          const SizedBox(height: 15),
 
-                        // new passcode
-                        TextFormField(
-                          controller: newPassController,
-                            obscureText: hideNewPass,
-                            keyboardType: TextInputType.text,
-                            onChanged: (value) {
-                              if(value.isEmpty){
-                                newPassError = "please enter you passcode";
-                              }else if(value != reNewPassController.text){
-                                newPassError = "Entered passcode not matched!";
-                              }else{
-                                newPassError = "";
-                              }
-                              setState(() {});
-                            },
-                            cursorColor: MyColor.greenColor,
-                            style: MyStyle.tx18RWhite,
-                            decoration: MyStyle.textInputDecoration.copyWith(
-                                hintText:"Enter new password",
-                                suffixIcon: hideNewPass
-                                    ?
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideNewPass = false;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                                    :
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideNewPass = true;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility_off,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                            )
-                         ),
-                        Visibility(
-                            visible: newPassError.isNotEmpty,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 12.0,left: 10),
-                              child: Text(
-                                newPassError,
-                                style: MyStyle.tx18BWhite.copyWith(
-                                    color: MyColor.redColor,
-                                    fontSize: 14
+                          //Confirm new passcode
+                          TextFormField(
+                              keyboardType: TextInputType.text,
+                              obscureText: hideReNewPass,
+                              onChanged: (value) {
+                                if(value.isEmpty){
+                                  reNewPassError = "please enter you passcode";
+                                }else if(value != newPassController.text){
+                                  reNewPassError = "Entered passcode not matched!";
+                                }else{
+                                  reNewPassError = "";
+                                }
+                                setState(() {});
+                              },
+                              controller: reNewPassController,
+                              cursorColor: MyColor.greenColor,
+                              style: MyStyle.tx18RWhite,
+                              decoration: MyStyle.textInputDecoration.copyWith(
+                                  hintText: "Confirm new password",
+                                  errorStyle: const TextStyle(height: 0,fontSize: 0),
+                                  suffixIcon: hideReNewPass
+                                      ?
+                                  IconButton(
+                                      onPressed: (){
+                                        setState(() {
+                                          hideReNewPass = false;
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        Icons.visibility,
+                                        color: MyColor.mainWhiteColor,
+                                      )
+                                  )
+                                      :
+                                  IconButton(
+                                      onPressed: (){
+                                        setState(() {
+                                          hideReNewPass = true;
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        Icons.visibility_off,
+                                        color: MyColor.mainWhiteColor,
+                                      )
+                                  )
+                              )
+                           ),
+                          Visibility(
+                              visible: reNewPassError.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 12.0,left: 10),
+                                child: Text(
+                                  reNewPassError,
+                                  style: MyStyle.tx18BWhite.copyWith(
+                                      color: MyColor.redColor,
+                                      fontSize: 14
+                                  ),
                                 ),
-                              ),
-                            )
-                        ),
-                        const SizedBox(height: 15),
-
-                        //Confirm new passcode
-                        TextFormField(
-                            keyboardType: TextInputType.text,
-                            obscureText: hideReNewPass,
-                            onChanged: (value) {
-                              if(value.isEmpty){
-                                reNewPassError = "please enter you passcode";
-                              }else if(value != newPassController.text){
-                                reNewPassError = "Entered passcode not matched!";
-                              }else{
-                                reNewPassError = "";
-                              }
-                              setState(() {});
-                            },
-                            controller: reNewPassController,
-                            cursorColor: MyColor.greenColor,
-                            style: MyStyle.tx18RWhite,
-                            decoration: MyStyle.textInputDecoration.copyWith(
-                                hintText: "Confirm new password",
-                                suffixIcon: hideReNewPass
-                                    ?
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideReNewPass = false;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                                    :
-                                IconButton(
-                                    onPressed: (){
-                                      setState(() {
-                                        hideReNewPass = true;
-                                      });
-                                    },
-                                    icon: const Icon(
-                                      Icons.visibility_off,
-                                      color: MyColor.mainWhiteColor,
-                                    )
-                                )
-                            )
-                         ),
-                        Visibility(
-                            visible: reNewPassError.isNotEmpty,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 12.0,left: 10),
-                              child: Text(
-                                reNewPassError,
-                                style: MyStyle.tx18BWhite.copyWith(
-                                    color: MyColor.redColor,
-                                    fontSize: 14
-                                ),
-                              ),
-                            )
-                        ),
-                      ],
+                              )
+                          ),
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 25),
@@ -842,11 +927,15 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             }
                           }else{
                             if(passwordType){
-                              if(oldCodeError.isNotEmpty && newCodeError.isNotEmpty && reNewCodeError.isNotEmpty){
-                                changePasswordApi(true);
+                              if(passcodeFormKey.currentState!.validate()) {
+                                if (oldCodeError.isNotEmpty && newCodeError.isNotEmpty && reNewCodeError.isNotEmpty) {
+                                  changePasswordApi(true);
+                                } else {
+                                  Helper.dialogCall.showToast(context, "Please filed all details first");
+                                }
                               }else{
-                                Helper.dialogCall.showToast(context, "Please filed all details first");
-                              }
+                              Helper.dialogCall.showToast(context, "Please filed all details first");
+                            }
                             }else{
                               if(oldPassError.isNotEmpty && newPassError.isNotEmpty && reNewPassError.isNotEmpty){
                                 changePasswordApi(true);
