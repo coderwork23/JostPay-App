@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,18 +16,34 @@ class SecurityScreen extends StatefulWidget {
 class _SecurityScreenState extends State<SecurityScreen> {
 
   bool fingerPrint = false;
+  bool passwordType = false;
+
+  String savePassword = "",savePasscode = "";
+  bool pinNotSave = false;
 
   TextEditingController oldPassController = TextEditingController();
   TextEditingController newPassController = TextEditingController();
   TextEditingController reNewPassController = TextEditingController();
 
+  TextEditingController setPassCodeController = TextEditingController();
+  TextEditingController setRePassCodeController = TextEditingController();
+
+  TextEditingController oldPassCodeController = TextEditingController();
+  TextEditingController newPassCodeController = TextEditingController();
+  TextEditingController reNewPassCodeController = TextEditingController();
 
   getData()async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
       fingerPrint = sharedPreferences.getBool('fingerOn') ?? false;
+      passwordType = sharedPreferences.getBool('passwordType') ?? false;
+      savePassword = sharedPreferences.getString('password') ?? "";
+      savePasscode = sharedPreferences.getString('passcode') ?? "";
     });
+
   }
+
+
 
   @override
   void initState() {
@@ -106,7 +123,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                           "the application at different key areas like launching"
                           " the app, sending tokens or changing wallets!",
                       style:MyStyle.tx18RWhite.copyWith(
-                          fontSize: 16,
+                          fontSize: 14,
                           color: MyColor.grey01Color
                       ),
                     )
@@ -125,86 +142,190 @@ class _SecurityScreenState extends State<SecurityScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Use App PassCode",
-                      style: MyStyle.tx18RWhite,
+                      style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                      ),
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 8),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            !passwordType ? "Password is Enable" : "Passcode is Enable",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 14
+                            ),
+                          ),
+                        ),
+                        FlutterSwitch(
+                          width: 50.0,
+                          height: 24.0,
+                          toggleSize: 15.0,
+                          valueFontSize: 0.0,
+                          borderRadius: 30.0,
+                          inactiveColor: MyColor.boarderColor,
+                          activeColor: MyColor.greenColor,
+                          value: passwordType,
+                          showOnOff: false,
+                          onToggle: (val) async {
+                            SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+
+                            var savePince2 = sharedPreferences.getString("passcode")??"";
+                            if(savePince2 == ""){
+                              setState(() {
+                                pinNotSave = true;
+                              });
+                              // ignore: use_build_context_synchronously
+                              Helper.dialogCall.showToast(context, "Please set your passcode.");
+                            }else{
+                              setState(() {
+                                passwordType = val;
+                                sharedPreferences.setBool('passwordType',passwordType);
+                              });
+                            }
+
+                          },
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
 
                     Text(
                       "The App PassCode helps you keep your wallet secured and safe.",
                       style:MyStyle.tx18RWhite.copyWith(
-                          fontSize: 16,
+                          fontSize: 13,
                           color: MyColor.grey01Color
                       ),
                     ),
                     const SizedBox(height: 15),
 
-                    //old passcode
-                    TextFormField(
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6)
-                        ],
-                        keyboardType: TextInputType.number,
-                        controller: oldPassController,
-                        cursorColor: MyColor.greenColor,
-                        style: MyStyle.tx18RWhite,
-                        decoration: MyStyle.textInputDecoration.copyWith(
-                          hintText: "Enter old passcode"
-                        )
-                    ),
-                    const SizedBox(height: 15),
+                    pinNotSave
+                        ?
+                    Column(
+                        children: [
+                          // new passcode
+                          TextFormField(
+                              controller: setPassCodeController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(6)
+                              ],
+                              keyboardType: TextInputType.number,
+                              cursorColor: MyColor.greenColor,
+                              style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16
+                              ),
+                              decoration: MyStyle.textInputDecoration.copyWith(
+                                  hintText:"Enter new passcode",
+                              )
+                          ),
+                          const SizedBox(height: 15),
 
-                    // new passcode
-                    TextFormField(
-                        keyboardType: TextInputType.number,
-                        controller: newPassController,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6)
-                        ],
-                        cursorColor: MyColor.greenColor,
-                        style: MyStyle.tx18RWhite,
-                        decoration: MyStyle.textInputDecoration.copyWith(
-                            hintText: "Enter new passcode"
-                        )
-                    ),
-                    const SizedBox(height: 15),
+                          //Confirm new passcode
+                          TextFormField(
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(6)
+                              ],
+                              controller: setRePassCodeController,
+                              cursorColor: MyColor.greenColor,
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                              decoration: MyStyle.textInputDecoration.copyWith(
+                                  hintText: "Confirm new passcode"
+                              )
+                          ),
+                        ]
+                    )
+                        :
+                    Column(
+                      children: [
+                        //old passcode
+                        Visibility(
+                          visible: savePasscode.isNotEmpty || savePassword.isNotEmpty,
+                          child: TextFormField(
+                              inputFormatters: passwordType ?  [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(6)
+                              ] : [],
+                              keyboardType:passwordType ? TextInputType.number : TextInputType.text,
+                              controller: passwordType ? oldPassCodeController : oldPassController,
+                              cursorColor: MyColor.greenColor,
+                              style: MyStyle.tx18RWhite,
+                              decoration: MyStyle.textInputDecoration.copyWith(
+                                  hintText: !passwordType ? "Enter old password" : "Enter old passcode"
+                              )
+                           ),
+                         ),
+                        const SizedBox(height: 15),
 
-                    //Confirm new passcode
-                    TextFormField(
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6)
-                        ],
-                        controller: reNewPassController,
-                        cursorColor: MyColor.greenColor,
-                        style: MyStyle.tx18RWhite,
-                        decoration: MyStyle.textInputDecoration.copyWith(
-                            hintText: "Confirm new passcode"
-                        )
+                        // new passcode
+                        TextFormField(
+                            inputFormatters: passwordType ?  [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(6)
+                            ] : [],
+                            keyboardType:passwordType ? TextInputType.number : TextInputType.text,
+                            cursorColor: MyColor.greenColor,
+                            style: MyStyle.tx18RWhite,
+                            decoration: MyStyle.textInputDecoration.copyWith(
+                                hintText: !passwordType ? "Enter new password"  : "Enter new passcode"
+                            )
+                         ),
+                        const SizedBox(height: 15),
+
+                        //Confirm new passcode
+                        TextFormField(
+                            keyboardType:passwordType ? TextInputType.number : TextInputType.text,
+                            inputFormatters: passwordType ?  [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(6)
+                            ] : [],
+                            controller: passwordType ? reNewPassCodeController : reNewPassController,
+                            cursorColor: MyColor.greenColor,
+                            style: MyStyle.tx18RWhite,
+                            decoration: MyStyle.textInputDecoration.copyWith(
+                                hintText: !passwordType ? "Confirm new password" :  "Confirm new passcode"
+                            )
+                         ),
+                      ],
                     ),
+
                     const SizedBox(height: 25),
 
                     Center(
-                      child: Container(
-                        height: 45,
-                        width: 100,
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.only(top: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: MyColor.greenColor
-                          )
-                        ),
-                        child: Text(
-                          "Reset",
-                          textAlign: TextAlign.center,
-                          style: MyStyle.tx28RGreen.copyWith(
-                            fontSize: 18
+                      child: InkWell(
+                        onTap: () {
+                          if(pinNotSave){
+
+                          }else{
+
+                          }
+                        },
+                        child: Container(
+                          height: 45,
+                          width: 100,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.only(top: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: MyColor.greenColor
+                            )
+                          ),
+                          child: Text(
+                            pinNotSave ? "Set ": "Reset",
+                            textAlign: TextAlign.center,
+                            style: MyStyle.tx28RGreen.copyWith(
+                              fontSize: 18
+                            ),
                           ),
                         ),
                       ),

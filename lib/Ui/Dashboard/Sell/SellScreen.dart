@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/InstantLoginScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
@@ -23,9 +24,10 @@ class _SellScreenState extends State<SellScreen> {
   TextEditingController phoneNoController = TextEditingController();
   TextEditingController emailController = TextEditingController();
 
-  String? selectedCoin,selectedBank;
+  String? selectedBank;
   bool isLoading = false;
 
+  RatesInfo? selectedCoin;
 
   late BuySellProvider buySellProvider;
 
@@ -101,7 +103,7 @@ class _SellScreenState extends State<SellScreen> {
                 children: [
 
                   // coin drop down
-                  DropdownButtonFormField<String>(
+                  DropdownButtonFormField<RatesInfo>(
                     value: selectedCoin,
                     decoration: MyStyle.textInputDecoration.copyWith(
                       contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
@@ -119,16 +121,21 @@ class _SellScreenState extends State<SellScreen> {
                     ),
                     dropdownColor: MyColor.backgroundColor,
                     isExpanded: true,
-                    items: ["Bitcoin","Tron"].map((String category) {
+                    style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
+                    items: buySellProvider.loginModel!.ratesInfo.map((RatesInfo category) {
                       return DropdownMenuItem(
                           value: category,
                           child: Text(
-                            category,
-                            style: MyStyle.tx18RWhite,
+                            category.name,
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16
+                            ),
                           )
                       );
                     }).toList(),
-                    onChanged: (String? value) {
+                    onChanged: (RatesInfo? value) async {
                       setState(() {
                         selectedCoin = value;
                       });
@@ -141,7 +148,9 @@ class _SellScreenState extends State<SellScreen> {
                     keyboardType: TextInputType.number,
                     controller: priceController,
                     cursorColor: MyColor.greenColor,
-                    style: MyStyle.tx18RWhite,
+                     style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                     decoration: MyStyle.textInputDecoration.copyWith(
                         hintText: "Withdraw amount",
                         isDense: false,
@@ -165,9 +174,11 @@ class _SellScreenState extends State<SellScreen> {
                   // Bank Account No.
                   TextFormField(
                     keyboardType: TextInputType.number,
-                    controller: priceController,
+                    controller: bankNoController,
                     cursorColor: MyColor.greenColor,
-                    style: MyStyle.tx18RWhite,
+                     style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                     decoration: MyStyle.textInputDecoration.copyWith(
                       hintText: "Bank Account No.",
                       isDense: false,
@@ -180,10 +191,11 @@ class _SellScreenState extends State<SellScreen> {
 
                   // Account Name
                   TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: priceController,
+                    controller: acNameController,
                     cursorColor: MyColor.greenColor,
-                    style: MyStyle.tx18RWhite,
+                     style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                     decoration: MyStyle.textInputDecoration.copyWith(
                       hintText: "Account Name",
                       isDense: false,
@@ -216,7 +228,9 @@ class _SellScreenState extends State<SellScreen> {
                           value: category,
                           child: Text(
                             category,
-                            style: MyStyle.tx18RWhite,
+                             style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                           )
                       );
                     }).toList(),
@@ -232,9 +246,11 @@ class _SellScreenState extends State<SellScreen> {
                   // Your Phone No
                   TextFormField(
                     keyboardType: TextInputType.number,
-                    controller: priceController,
+                    controller: phoneNoController,
                     cursorColor: MyColor.greenColor,
-                    style: MyStyle.tx18RWhite,
+                     style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                     decoration: MyStyle.textInputDecoration.copyWith(
                       hintText: "Your Phone No",
                       isDense: false,
@@ -247,10 +263,12 @@ class _SellScreenState extends State<SellScreen> {
 
                   // Your Email Address
                   TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: priceController,
+                    keyboardType: TextInputType.emailAddress,
+                    controller: emailController,
                     cursorColor: MyColor.greenColor,
-                    style: MyStyle.tx18RWhite,
+                     style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                     decoration: MyStyle.textInputDecoration.copyWith(
                       hintText: "Your Email Address",
                       isDense: false,

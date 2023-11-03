@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/InstantLoginScreen.dart';
@@ -22,34 +25,43 @@ class _BuyScreenState extends State<BuyScreen> {
   bool isLoading = false;
 
   late BuySellProvider buySellProvider;
+  RatesInfo? selectedCoin;
 
-  getAccessToken()async{
+  bool showError = false;
+  String errorMessage = "",selectedAccountId = "";
 
-    setState(() {
-      isLoading = true;
-    });
+  // getAccessToken()async{
+  //
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+  //
+  //   // SharedPreferences sharedPre = await SharedPreferences.getInstance();
+  //   // buySellProvider.accessToken = sharedPre.getString("accessToken")??"";
+  //   getExchangeRat();
+  //
+  //   setState(() {
+  //     isLoading = false;
+  //   });
+  // }
 
-    // SharedPreferences sharedPre = await SharedPreferences.getInstance();
-    // buySellProvider.accessToken = sharedPre.getString("accessToken")??"";
-    getExchangeRat();
+  // getExchangeRat() async {
+  //
+  //   var params = {
+  //     "action":"exchange_rate",
+  //   };
+  //
+  //   await buySellProvider.getExRate(params,context);
+  // }
 
-    setState(() {
-      isLoading = false;
-    });
+
+  getSelectedAccount()async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    await DbNetwork.dbNetwork.getNetwork();
+    setState(() {});
   }
 
-  getExchangeRat() async {
-
-    var params = {
-      "action":"exchange_rate",
-    };
-
-    await buySellProvider.getExRate(params,context);
-  }
-
-
-
-  String? selectedCoin;
 
 
   @override
@@ -57,7 +69,10 @@ class _BuyScreenState extends State<BuyScreen> {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
     buySellProvider.accessToken = "";
     super.initState();
-    getAccessToken();
+
+    getSelectedAccount();
+
+    // getExchangeRat();
   }
 
   @override
@@ -89,6 +104,7 @@ class _BuyScreenState extends State<BuyScreen> {
                children: [
                  const SizedBox(height: 17),
 
+                 // buy text
                  const Text(
                    "Buy",
                    style: MyStyle.tx18BWhite,
@@ -96,7 +112,7 @@ class _BuyScreenState extends State<BuyScreen> {
                  const SizedBox(height: 30),
 
                  // coin drop down
-                 DropdownButtonFormField<String>(
+                 DropdownButtonFormField<RatesInfo>(
                    value: selectedCoin,
                    decoration: MyStyle.textInputDecoration.copyWith(
                      contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
@@ -114,30 +130,72 @@ class _BuyScreenState extends State<BuyScreen> {
                    ),
                    dropdownColor: MyColor.backgroundColor,
                    isExpanded: true,
-                   items: ["Bitcoin","Tron"].map((String category) {
+                   style: MyStyle.tx18RWhite.copyWith(
+                       fontSize: 16
+                   ),
+                   items: buySellProvider.loginModel!.ratesInfo.map((RatesInfo category) {
                      return DropdownMenuItem(
                          value: category,
                          child: Text(
-                           category,
-                           style: MyStyle.tx18RWhite,
+                           category.name,
+                           style: MyStyle.tx18RWhite.copyWith(
+                               fontSize: 16
+                           ),
                          )
                      );
                    }).toList(),
-                   onChanged: (String? value) {
-                     setState(() {
-                       selectedCoin = value;
-                     });
+                   onChanged: (RatesInfo? value) async {
+
+                     var index = DbNetwork.dbNetwork.networkList.indexWhere((element) => element.name == value!.name);
+
+
+                     if(index != -1){
+                       await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, DbNetwork.dbNetwork.networkList[index].id);
+                       setState(() {
+                         currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                         selectedCoin = value;
+                       });
+                     }else if(value!.name == "Tether - USDT TRC20"){
+                       await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 9);
+                       setState(() {
+                         currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                         selectedCoin = value;
+                       });
+                     }else if(value.name == "Tether BEP20"){
+                       await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 2);
+                       setState(() {
+                         currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                         selectedCoin = value;
+                       });
+                     }else if(value.name == "Binance Coin BSC"){
+                       await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 2);
+                       setState(() {
+                         currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                         selectedCoin = value;
+                       });
+                     }else{
+                       currencyAcController.clear();
+                       // ignore: use_build_context_synchronously
+                       Helper.dialogCall.showToast(context, "Selected Network is not implemented");
+                     }
+
                    },
                  ),
                  const SizedBox(height: 20),
-
 
                  // Buy amount
                  TextFormField(
                    keyboardType: TextInputType.number,
                    controller: priceController,
                    cursorColor: MyColor.greenColor,
-                   style: MyStyle.tx18RWhite,
+                   style: MyStyle.tx18RWhite.copyWith(
+                       fontSize: 16
+                   ),
+                   onChanged: (value){
+                     if(double.parse(value) < selectedCoin!.minBuyAmount){
+
+                     }
+                   },
                    decoration: MyStyle.textInputDecoration.copyWith(
                        hintText: "Withdraw amount",
                        isDense: false,
@@ -158,17 +216,18 @@ class _BuyScreenState extends State<BuyScreen> {
                  ),
                  const SizedBox(height: 20),
 
-
                  // Currency account
                  TextFormField(
                    controller: currencyAcController,
                    cursorColor: MyColor.greenColor,
-                   style: MyStyle.tx18RWhite,
+                   style: MyStyle.tx18RWhite.copyWith(
+                     fontSize: 16
+                   ),
+                   readOnly: true,
                    decoration: MyStyle.textInputDecoration.copyWith(
-                       hintText: "Currency account",
+                       hintText: selectedCoin == null ? "Currency account" : "${selectedCoin!.name} account",
                        isDense: false,
                        contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-
                    ),
 
                  ),
