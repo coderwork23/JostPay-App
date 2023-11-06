@@ -175,7 +175,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
       Navigator.pop(context,"refresh");
       // ignore: use_build_context_synchronously
       Navigator.pop(context,"refresh");
-      await DBTokenProvider.dbTokenProvider.deleteToken(tokenId);
+      await DBTokenProvider.dbTokenProvider.deleteToken(DBTokenProvider.dbTokenProvider.tokenList[index].id.toString());
       await  DBTokenProvider.dbTokenProvider.tokenList.removeAt(index);
 
     }else{
