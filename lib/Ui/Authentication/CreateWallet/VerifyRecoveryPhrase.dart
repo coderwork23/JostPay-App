@@ -208,33 +208,20 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
     }
   }
 
-  var currency = "";
   getToken() async {
-    // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    // currency = sharedPreferences.getString("currency") ?? "USD";
-    await DBTokenProvider.dbTokenProvider.deleteAllToken();
 
     for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-      var data ={
-        "id":"1,2,74,328,825,1027,1839,1958"
-      };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-    }
 
-    // for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-    //
-    //   await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-    //   var data = {};
-    //
-    //   for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
-    //     data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
-    //   }
-    //
-    //   data["convert"] = currency;
-    //
-    //   await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
-    //
-    // }
+      await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
+      var data = {};
+
+      for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+        data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+      }
+
+      await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,);
+
+    }
 
     if(tokenProvider.isSuccess){
       // ignore: use_build_context_synchronously
@@ -248,21 +235,15 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
   }
 
   getTokenForOld(String accountId) async {
+
     await DbAccountAddress.dbAccountAddress.getAccountAddress(accountId);
+    var data = {};
 
-    // var data = {};
-    //
-    // for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
-    //   data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
-    // }
-    // await tokenProvider.getAccountToken(data, '/getAccountTokens', accountId,"");
+    for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+      data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+    }
 
-    // for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-      var data ={
-        "id":"1,2,74,328,825,1027,1839,1958"
-      };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', accountId);
-    // }
+    await tokenProvider.getAccountToken(data, '/getAccountTokens', accountId);
 
     if(tokenProvider.isSuccess) {
 
@@ -291,16 +272,11 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
     super.initState();
 
-    print("object --> ${widget.seedPhrase}");
     var newList1 = [];
     newList1.addAll(widget.seedPhrase);
-    print(" newList1 object --> $newList1");
 
     newList.addAll(newList1..shuffle());
     newList1 = [];
-
-    print("old list object --> ${widget.seedPhrase}");
-
 
     firstId = "${widget.selectedParse[0]['id']}";
     secondId = "${widget.selectedParse[1]['id']}";
@@ -314,7 +290,6 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
 
 
 
-    print("after shuffle object --> ${widget.seedPhrase}");
   }
 
   @override

@@ -157,36 +157,20 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
 
   // var currency;
   getToken() async {
-    // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    // // currency = sharedPreferences.getString("currency") ?? "USD";
-    // //print("token =======> ");
-    //
-    // await DBTokenProvider.dbTokenProvider.deleteAllToken();
-    //
-    // for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-    //
-    //   await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-    //   var data = {};
-    //
-    //   for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
-    //     //print("public address");
-    //     //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName);
-    //     //print(DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress);
-    //     data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
-    //
-    //   }
-    //   // data["convert"] = currency;
-    //   //print(json.encode(data));
-    //   await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,"");
-    //
-    // }
-
     for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-      var data ={
-        "id":"1,2,74,328,825,1027,1839,1958"
-      };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
+
+      await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
+      var data = {};
+
+      for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+        data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+
+      }
+      //print(json.encode(data));
+      await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
+
     }
+
 
     // ignore: use_build_context_synchronously
     Navigator.pushAndRemoveUntil(

@@ -1,20 +1,19 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Default_Token_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jost_pay_wallet/Models/SearchTokenModel.dart';
 import '../LocalDb/Local_Token_provider.dart';
 import '../Models/AccountTokenModel.dart';
 import '../Models/NetworkModel.dart';
-import '../Values/utils.dart';
 
 class TokenProvider with ChangeNotifier {
 
   bool isLoading = true;
   bool isSuccess = false;
 
+  // ignore: prefer_typing_uninitialized_variables
   var netWorkData;
   bool networkLoad = false;
   getNetworks(url) async {
@@ -58,7 +57,9 @@ class TokenProvider with ChangeNotifier {
 
           notifyListeners();
 
-          print("=========== Get Network Api Error ==========");
+          if (kDebugMode) {
+            print("=========== Get Network Api Error ==========");
+          }
 
         }
 
@@ -68,222 +69,60 @@ class TokenProvider with ChangeNotifier {
 
 
   bool isAddTokenDone = false;
+  // ignore: prefer_typing_uninitialized_variables
   var allToken;
   getAccountToken(data, url,id) async {
     isLoading = true;
     notifyListeners();
 
-    await ApiHandler.getCapWithParams(url,data).then((responseData) async {
+    await ApiHandler.post(data, url).then((responseData) async {
 
-        var value = json.decode(responseData.body);
-        // print("get Token api :- $value");
+      var value = json.decode(responseData.body);
+      // print("get Token api :- $value");
+      if(responseData.statusCode == 200 && value["status"] == true){
 
-        if(responseData.statusCode == 200){
-          allToken = value;
-          // await DBTokenProvider.dbTokenProvider.deleteAccountToken(id);
-          // await DBDefaultTokenProvider.dbTokenProvider.deleteAccountToken(id);
+        allToken = value;
 
-          /// TODO: 328 add this coin after Monero chain added
-          List defaultList = ["1","2","74","825","1027","1839","1958","3079"];
-
-          List marketId = ["1","2","74","328","825","1027","1839","1958"];
-          List tokenID = ["8","29","28","0","-1","1","2","10"];
-          List decimalsList = ["8","8","8","0","-1","18","18","6"];
-          await DBTokenProvider.dbTokenProvider.getAccountToken(id);
-          await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(id);
-
-          for(int i = 0; i<marketId.length; i++){
-
-            Map<String,dynamic> marketInfo = allToken['data'][marketId[i]];
-
-            // print("price --->  ${marketInfo['name']}");
-            await DbNetwork.dbNetwork.getNetworkBySymbol("${marketInfo['symbol']}");
-
-            addTetherBNBTRX(marketInfo,id,marketId[i]);
-
-            if(DbNetwork.dbNetwork.networkListBySymbol.isNotEmpty) {
-
-              await DbAccountAddress.dbAccountAddress.getPublicKey(
-                  id,
-                  DbNetwork.dbNetwork.networkListBySymbol.first.id
-              );
-
-              AccountTokenList accountTokenList = AccountTokenList(
-                id: int.parse(marketId[i]),
-                token_id: int.parse(tokenID[i]),
-                accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
-                networkId: DbNetwork.dbNetwork.networkListBySymbol.isNotEmpty ? DbNetwork.dbNetwork.networkListBySymbol.first.id:0,
-                marketId:int.parse(marketId[i]),
-                name: marketInfo['name'] == "BNB"? "Binance Smart Chain" : marketInfo['name'],
-                type: "",
-                address: "",
-                symbol: marketInfo['symbol'],
-                decimals: int.parse(decimalsList[i]),
-                logo: marketInfo['name'] == "BNB" ?  "http://${Utils.url}/api/img/binance_logo.png" : "https://s2.coinmarketcap.com/static/img/coins/64x64/${marketId[i]}.png",
-                balance: "0",
-                networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
-                price: marketInfo['quote']['USD']['price'],
-                percentChange24H: marketInfo['quote']['USD']['percent_change_24h'],
-                accountId: id,
-                explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.explorerUrl,
-              );
-
-              // print("${accountTokenList.toJson()}");
-              // await DBTokenProvider.dbTokenProvider.getAccountToken(id);
-
-              var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-                return "${element.id}"== "${marketId[i]}";
-              });
+        // await DBTokenProvider.dbTokenProvider.deleteAccountToken(id);
 
 
+        await DBTokenProvider.dbTokenProvider.getAccountToken(id,);
 
-              if(tokenListIndex != -1){
-                await DBTokenProvider.dbTokenProvider.updateToken(accountTokenList, marketId[i],id);
-              }else{
-                await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
-              }
-
-            }
+        (allToken["data"] as List).map((token) async {
+          var index = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
+            return "${element.id}"== "${token["id"]}";
+          });
+          // print(index);
+          if(index != -1){
+            await DBTokenProvider.dbTokenProvider.updateToken(AccountTokenList.fromJson(token,id), token["id"],id);
+          }else{
+            await DBTokenProvider.dbTokenProvider.createToken(AccountTokenList.fromJson(token,id));
           }
+        }).toList();
 
-          // print(tokenNote);
-          await addDefaultToken(defaultList,id);
-          await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(id);
+        // print(tokenNote);
 
-          isSuccess = true;
-          isLoading = false;
-          notifyListeners();
+        isSuccess = true;
+        isLoading = false;
+        notifyListeners();
 
-        }
-        else {
-          isSuccess = false;
-          isLoading = false;
-          notifyListeners();
+      }
+      else {
+        isSuccess = false;
+        isLoading = false;
+        notifyListeners();
 
+        if (kDebugMode) {
           print("=========== Get Account Token Api Error ==========");
-
         }
 
-      });
+      }
+
+    });
 
   }
 
-  addTetherBNBTRX(marketInfo,String id,marketId) async {
-    int bnbNetworkId =0,trxNetworkId = 0;
-    await DBTokenProvider.dbTokenProvider.getAccountToken(id);
-
-    if(marketInfo['symbol'].toString().toLowerCase() == "bnb"){
-
-      bnbNetworkId = DbNetwork.dbNetwork.networkListBySymbol.first.id;
-
-      AccountTokenList accountTokenList = AccountTokenList(
-        id: 825,
-        token_id: 3070,
-        accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
-        networkId: bnbNetworkId,
-        marketId: 825,
-        name: allToken['data']["825"]['name'],
-        type: "BEP20",
-        address: "0x55d398326f99059ff775485246999027b3197955",
-        symbol: allToken['data']["825"]['symbol'],
-        decimals: 18,
-        logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
-        balance: "0",
-        networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
-        price: allToken['data']["825"]['quote']['USD']['price'],
-        percentChange24H: allToken['data']["825"]['quote']['USD']['percent_change_24h'],
-        accountId: id,
-        explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.explorerUrl,
-      );
-
-      var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-        return "${element.token_id}"== "${3070}";
-      });
-
-      if(tokenListIndex != -1){
-        await DBTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
-      }else{
-        await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
-      }
-
-    }
-
-    else if(marketInfo['symbol'].toString().toLowerCase() == "trx"){
-
-      trxNetworkId = DbNetwork.dbNetwork.networkListBySymbol.first.id;
-
-      AccountTokenList accountTokenList = AccountTokenList(
-        id: 3079,
-        token_id: 3079,
-        accAddress: DbAccountAddress.dbAccountAddress.selectAccountPublicAddress,
-        networkId: trxNetworkId,
-        marketId: 825,
-        name: allToken['data']["825"]['name'],
-        type: "TRX20",
-        address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
-        symbol: allToken['data']["825"]['symbol'],
-        decimals: 6,
-        logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
-        balance: "0",
-        networkName: DbNetwork.dbNetwork.networkListBySymbol.first.name,
-        price: allToken['data']["825"]['quote']['USD']['price'],
-        percentChange24H: allToken['data']["825"]['quote']['USD']['percent_change_24h'],
-        accountId: id,
-        explorer_url: DbNetwork.dbNetwork.networkListBySymbol.first.explorerUrl,
-      );
-
-      var tokenListIndex = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-        return "${element.token_id}"== "${3079}";
-      });
-
-      if(tokenListIndex != -1){
-        await DBTokenProvider.dbTokenProvider.updateTokenByTID(accountTokenList, marketId,id);
-      }else{
-
-        await DBTokenProvider.dbTokenProvider.createToken(accountTokenList);
-
-      }
-
-    }
-  }
-
-  Future<void> addDefaultToken (List defaultList,acId) async {
-    await DBTokenProvider.dbTokenProvider.getAccountToken(acId);
-    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(acId);
-
-    SharedPreferences sharedPre = await SharedPreferences.getInstance();
-
-    List myDefaultList = [];
-    if(DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.isEmpty){
-      sharedPre.setString("default", defaultList.join(","));
-      myDefaultList.addAll(defaultList);
-    }else{
-      myDefaultList = sharedPre.getString("default")!.split(",");
-    }
-
-    // print("myDefaultList---> $myDefaultList");
-
-    for(int i=0; i<myDefaultList.length; i++){
-      // print("object myDefaultList----> ${myDefaultList[i]}");
-
-      AccountTokenList model = AccountTokenList.fromJson(
-          await DBTokenProvider.dbTokenProvider.getTokenById(acId,myDefaultList[i]),
-          acId
-      );
-      int checkIndex = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere(
-              (element) => "${element.id}" == myDefaultList[i]
-      );
-
-      if(checkIndex == -1) {
-        await DBDefaultTokenProvider.dbTokenProvider.createToken(model);
-      }else{
-        await DBDefaultTokenProvider.dbTokenProvider.updateToken(model,model.id,acId);
-      }
-    }
-
-  }
-
-
+  // ignore: prefer_typing_uninitialized_variables
   var deleteData;
   deleteToken(data,url) async {
     isLoading = true;
@@ -306,7 +145,9 @@ class TokenProvider with ChangeNotifier {
           isSuccess = false;
           notifyListeners();
 
-          print("=========== Delete Token Api Error ==========");
+          if (kDebugMode) {
+            print("=========== Delete Token Api Error ==========");
+          }
 
         }
 
@@ -315,6 +156,7 @@ class TokenProvider with ChangeNotifier {
   }
 
 
+  // ignore: prefer_typing_uninitialized_variables
   var tokenData;
   getCustomToken(data,url) async {
     isLoading = true;
@@ -337,7 +179,9 @@ class TokenProvider with ChangeNotifier {
         isLoading = false;
         notifyListeners();
 
-        print("=========== Get Custom Token Api Error ==========");
+        if (kDebugMode) {
+          print("=========== Get Custom Token Api Error ==========");
+        }
 
       }
 
@@ -348,6 +192,7 @@ class TokenProvider with ChangeNotifier {
 
   bool isTokenLoading = false;
   bool isTokenAdded = false;
+  // ignore: prefer_typing_uninitialized_variables
   var tokenDetail;
   addCustomToken(data,url,id) async {
     isTokenLoading = true;
@@ -376,7 +221,9 @@ class TokenProvider with ChangeNotifier {
         isTokenLoading = false;
         notifyListeners();
 
-        print("=========== Add Custom Token Api Error ==========");
+        if (kDebugMode) {
+          print("=========== Add Custom Token Api Error ==========");
+        }
 
       }
 
@@ -384,71 +231,12 @@ class TokenProvider with ChangeNotifier {
   }
 
 
-  bool isEstimate = false;
-  var estimateData = null;
-  getEstimate(data,url) async{
 
-    isLoading = true;
-    isEstimate = false;
-    notifyListeners();
-
-    //print(data);
-    await ApiHandler.testPost(data,url).then((responseData){
-
-      var value = json.decode(responseData.body);
-      // print(" ====> $value");
-
-      if(responseData.statusCode == 200 && value["status"] == true) {
-        isLoading = false;
-        isEstimate = true;
-        estimateData = value;
-        notifyListeners();
-      } else {
-        estimateData = null;
-        isEstimate = false;
-        isLoading = false;
-
-        print("=========== Get Estimate Api Error ==========");
-
-      }
-
-    });
-
-  }
-
-
-  var pairDetails;
-  getPairPrice(url,params) async {
-    isLoading = true;
-    notifyListeners();
-
-    await ApiHandler.getParams(url,params).then((responseData){
-
-      var value = json.decode(responseData.body);
-      //print(value);
-
-      if(responseData.statusCode == 200 && value["status"] == true) {
-        pairDetails = value;
-
-        isSuccess = true;
-        isLoading = false;
-        notifyListeners();
-      }
-      else {
-        isSuccess = false;
-        isLoading = false;
-        notifyListeners();
-
-        print("=========== Get Pair Price Api Error ==========");
-
-      }
-
-    });
-  }
-
-
+  // ignore: prefer_typing_uninitialized_variables
   var tokenBalance;
   bool isBalance = false;
+
+  /// get specific token balance use in coin detail page
   getTokenBalance(data,url) async {
     isLoading = true;
     notifyListeners();
@@ -474,11 +262,81 @@ class TokenProvider with ChangeNotifier {
           isBalance = false;
           notifyListeners();
 
-          print("=========== get Token Balance Api Error ==========");
+          if (kDebugMode) {
+            print("=========== get Token Balance Api Error ==========");
+          }
 
         }
 
       });
+
+  }
+
+
+
+  List<SearchTokenModel> searchTokenList = [];
+  List<Map<String,dynamic>> selectTokenBool = [];
+  List<Map<String,dynamic>> searchSelectTokenBool = [];
+  var allTokenDetails;
+  bool isSearch = false;
+
+  /// use in add assets page to get all token
+  /// and show which selected and not
+  getSearchToken(data,url) async {
+    isLoading = true;
+    notifyListeners();
+
+
+    await ApiHandler.post(data, url).then((responseData) async {
+      List<SearchTokenModel> list;
+
+      var value = json.decode(responseData.body);
+      if (responseData.statusCode == 200 && value["status"] == true) {
+        searchTokenList.clear();
+        selectTokenBool.clear();
+        searchSelectTokenBool.clear();
+
+        var items = value["data"];
+        List client = items as List;
+
+        list = client.map<SearchTokenModel>((json) {
+          return SearchTokenModel.fromJson(json);
+        }).toList();
+
+        searchTokenList.addAll(list);
+        selectTokenBool = List.generate(
+            searchTokenList.length, (index) => {
+              "tokenName": searchTokenList[index].name,
+              "symbol": searchTokenList[index].symbol,
+              "tokenId": searchTokenList[index].id,
+              "isSelected": false
+            }
+        );
+
+        for (int i = 0; i < DBTokenProvider.dbTokenProvider.tokenList.length; i++) {
+          var index = searchTokenList.indexWhere((element) {
+            return "${element.id}" == "${DBTokenProvider.dbTokenProvider.tokenList[i].token_id}";
+          });
+          if (index != -1) {
+            selectTokenBool[index]['isSelected'] = true;
+          }
+        }
+
+        searchSelectTokenBool = selectTokenBool;
+
+
+        isSearch = true;
+        isLoading = false;
+        notifyListeners();
+      } else {
+        isSearch = true;
+        isLoading = false;
+        notifyListeners();
+
+        print("=========== Search Token List Api Error ==========");
+      }
+    });
+
 
   }
 

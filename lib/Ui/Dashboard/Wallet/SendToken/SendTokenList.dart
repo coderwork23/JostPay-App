@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Default_Token_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -39,7 +38,7 @@ class _SendTokenListState extends State<SendTokenList> {
   getCoin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+    await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
     setState(() {});
   }
 
@@ -124,11 +123,11 @@ class _SendTokenListState extends State<SendTokenList> {
         // coin list
         Expanded(
           child : ListView.builder(
-            itemCount: DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length,
+            itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
 
-              var list = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[index];
+              var list = DBTokenProvider.dbTokenProvider.tokenList[index];
 
               return InkWell(
                 onTap: () async {
@@ -159,23 +158,7 @@ class _SendTokenListState extends State<SendTokenList> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(100),
-                        child: list.type == "BEP20" || list.type == "TRX20"
-                            ?
-                        Image.asset(
-                          list.type == "BEP20"
-                              ?
-                          "assets/images/bsc_usdt.png"
-                              :
-                          list.type == "TRX20"
-                              ?
-                          "assets/images/trx_usdt.png"
-                              :
-                          "assets/images/bitcoin.png",
-                          height: 45,
-                          width: 45,
-                        )
-                            :
-                        CachedNetworkImage(
+                        child: CachedNetworkImage(
                           height: 35,
                           width: 35,
                           fit: BoxFit.fill,

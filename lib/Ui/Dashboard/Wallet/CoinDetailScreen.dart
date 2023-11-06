@@ -165,6 +165,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final dashProvider = Provider.of<DashboardProvider>(context);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
@@ -258,43 +259,24 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     height: 45,
                     width: 45,
                     fit: BoxFit.fill,
-                    imageUrl: widget.tokenType == "BEP20" || widget.tokenType == "TRX20"
-                        ?
-                        ""
-                        :
-                    "https://s2.coinmarketcap.com/static/img/coins/64x64/${widget.tokenMarketId}.png",
+                    imageUrl: tokenImage,
                     placeholder: (context, url) => const Center(
                       child: CircularProgressIndicator(color: MyColor.greenColor),
                     ),
                     errorWidget: (context, url, error) =>
-                    widget.tokenType == "BEP20" || widget.tokenType == "TRX20"
-                        ?
-                    Image.asset(
-                      widget.tokenType == "BEP20"
-                          ?
-                      "assets/images/bsc_usdt.png"
-                          :
-                      widget.tokenType == "TRX20"
-                          ?
-                      "assets/images/trx_usdt.png"
-                          :
-                      "assets/images/bitcoin.png",
-                      height: 45,
-                      width: 45,
-                    )
-                        :
-                    Container(
-                          height: 45,
-                          width: 45,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            color: MyColor.whiteColor,
+
+                      Container(
+                            height: 45,
+                            width: 45,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              color: MyColor.whiteColor,
+                            ),
+                            child: Image.asset(
+                              "assets/images/bitcoin.png",
+                            ),
                           ),
-                          child: Image.asset(
-                            "assets/images/bitcoin.png",
-                          ),
-                        ),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -612,7 +594,9 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                   Expanded(
                                       child: Text(
                                         widget.tokenName,
-                                        style: MyStyle.tx18RWhite,
+                                        style: MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 16
+                                        ),
                                       )
                                   ),
                                   const SizedBox(width: 10),

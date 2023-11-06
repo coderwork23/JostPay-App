@@ -2,11 +2,14 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Default_Token_provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
+import 'package:jost_pay_wallet/Values/utils.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -45,92 +48,159 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
   List toggleList = [];
   bool isLoading = true;
 
-  var selectedAccountId = "";
-  // get token list
-  getCoin() async {
+  var selectedAccountId = "",selectedAccountName = "";
+
+  late TokenProvider tokenProvider;
+
+
+  getSearchToken() async {
+
+    setState(() {
+      isLoading = true;
+    });
+
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    selectedAccountName = sharedPreferences.getString('accountName') ?? "";
+    await DbAccountAddress.dbAccountAddress.getAccountAddress(selectedAccountId);
+
+    for(int i=0; i< DbAccountAddress.dbAccountAddress.allAccountAddress.length; i ++){
+
+      if(DbAccountAddress.dbAccountAddress.allAccountAddress[i].publicKeyName == "address"){
+        selectedAccountAddress = DbAccountAddress.dbAccountAddress.allAccountAddress[i].publicAddress;
+      }
+    }
+
+    var data = {
+      "search_term": "",
+    };
+    await tokenProvider.getSearchToken(data,'/getTokens');
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+
+  String selectedTokenType='',token_normal_id = "",
+      tokenId = "",tokenAddress="",tokan_name = "",token_symbol = "",tokan_decimals = "",network_id ="",selectedAccountAddress = "";
+
+  addCustomToken(index,val) async {
+
+    Helper.dialogCall.showAlertDialog(context);
+
+    var data = {
+      "network_id": network_id,
+      "tokenAddress": tokenAddress,
+      "type":selectedTokenType,
+      "name":tokan_name,
+      "symbol":token_symbol,
+      "decimals":tokan_decimals,
+      "address":  selectedAccountAddress,
+    };
+    //print("add token data //print ");
+    // print("${json.encode(data)}");
+    await tokenProvider.addCustomToken(data,'/addToken',selectedAccountId);
+    if(tokenProvider.isTokenAdded == false){
+
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Token already added to this account");
+
+      setState(() {
+        // isLoading = false;
+
+        network_id = "";
+        tokenAddress = "";
+        selectedTokenType = "";
+        token_symbol = "";
+        tokan_name = "";
+        tokan_decimals = "";
+
+      });
+      Navigator.pop(context);
+
+    }
+    else{
+
+      setState(() {
+        tokenProvider.selectTokenBool[index]["isSelected"] = val;
+      });
+
+      network_id = "";
+      selectedTokenType = "";
+      token_symbol = "";
+      tokan_name = "";
+      tokan_decimals = "";
+
+      // DBTokenProvider.dbTokenProvider.deleteAccountToken(selectedAccountId);
+
+      await DbAccountAddress.dbAccountAddress.getAccountAddress(selectedAccountId);
+
+      var data = {};
+
+      for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+        data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+      }
+
+
+      await tokenProvider.getAccountToken(data, '/getAccountTokens', selectedAccountId);
+
+      await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+
+      Navigator.pop(context,"Refresh");
+      Navigator.pop(context,"Refresh");
+
+
+    }
+  }
+
+
+  // Delete Token Flow
+  deleteToken(String tokenId) async {
+    Helper.dialogCall.showAlertDialog(context);
 
     await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
-    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+    var index = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) =>"${element.token_id}" == tokenId);
 
-    toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, false);
+    if(index != -1){
+      // ignore: use_build_context_synchronously
+      var data = {
+        "token_id": DBTokenProvider.dbTokenProvider.tokenList[index].id,
+      };
 
-    for(int i = 0; i< DBTokenProvider.dbTokenProvider.tokenList.length; i++){
-      var list = DBTokenProvider.dbTokenProvider.tokenList[i];
-      int index = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => element.id == list.id);
-      if(index != -1){
-        toggleList[i] = true;
-      }
-    }
+      print(data);
+      await tokenProvider.deleteToken(data,'/deleteAccountToken');
 
-    isLoading = false;
-    setState(() {});
-  }
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context,"refresh");
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context,"refresh");
+      await DBTokenProvider.dbTokenProvider.deleteToken(tokenId);
+      await  DBTokenProvider.dbTokenProvider.tokenList.removeAt(index);
 
-  searchToken(String searchValue) async {
-    if(searchController.text.isNotEmpty){
-      await DBTokenProvider.dbTokenProvider.getSearchToken(selectedAccountId,searchValue);
     }else{
-      await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Coin not added in wallet coin list");
+      Navigator.pop(context,"refresh");
     }
-    toggleList = List.filled(DBTokenProvider.dbTokenProvider.tokenList.length, false);
-    for(int i = 0; i< DBTokenProvider.dbTokenProvider.tokenList.length; i++){
-      var list = DBTokenProvider.dbTokenProvider.tokenList[i];
-      // print(list.name);
-      int index = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.indexWhere((element) => element.id == list.id);
-      if(index != -1){
-        // print(list.name);
-        toggleList[i] = true;
-      }
-    }
-    setState(() {});
+
 
   }
-
-  // upload wallet token list (add or remove token from list)
-  toggleButton(id,changeBool,index,list)async{
-    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
-
-    SharedPreferences sharedPre = await SharedPreferences.getInstance();
-    var listCoin = sharedPre.getString("default")!.split(",");
-
-    if (changeBool) {
-      await DBDefaultTokenProvider.dbTokenProvider.createToken(list);
-      listCoin.add("$id");
-      sharedPre.setString("default", listCoin.join(","));
-      setState(() {
-        toggleList[index] = changeBool;
-      });
-    } else {
-      if (DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length > 1) {
-          await DBDefaultTokenProvider.dbTokenProvider.deleteToken(
-              id, widget.selectedAccountId
-          );
-
-          listCoin.remove("$id");
-          sharedPre.setString("default", listCoin.join(","));
-
-          setState(() {
-            toggleList[index] = changeBool;
-          });
-        }else{
-          // ignore: use_build_context_synchronously
-          Helper.dialogCall.showToast(context, "You can't remove all coin");
-        }
-      }
-    }
-
 
   @override
   void initState() {
     super.initState();
-    getCoin();
+    tokenProvider = Provider.of<TokenProvider>(context, listen: false);
+    Future.delayed(Duration.zero,(){
+      getSearchToken();
+    });
   }
 
 
   @override
   Widget build(BuildContext context) {
+    tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+
     return  Padding(
       padding: const EdgeInsets.fromLTRB(20,22,20,10),
       child: Column(
@@ -166,7 +236,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
             style: MyStyle.tx18RWhite,
             onChanged: (value) {
               _debouncer.run(() async {
-                searchToken(value);
+
               });
             },
             decoration: InputDecoration(
@@ -207,11 +277,11 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
             )
                 :
             ListView.builder(
-              itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
+              itemCount: tokenProvider.searchTokenList.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
 
-                var list = DBTokenProvider.dbTokenProvider.tokenList[index];
+                var list = tokenProvider.searchTokenList[index];
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 18),
@@ -275,10 +345,29 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
                         borderRadius: 30.0,
                         inactiveColor: MyColor.boarderColor,
                         activeColor: MyColor.greenColor,
-                        value: toggleList[index],
+                        value: tokenProvider.selectTokenBool[index]["isSelected"],
                         showOnOff: false,
                         onToggle: (val) async{
-                          toggleButton(list.id,val,index,list);
+                          if(val){
+                            await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, list.networkId);
+
+                            setState(() {
+                              selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                              tokenProvider.isSearch = false;
+                              network_id = "${list.networkId}";
+                              token_normal_id = "${list.id}";
+                              tokenId = "${list.marketId}";
+                              tokan_name = list.name;
+                              tokenAddress = list.address;
+                              selectedTokenType = list.type;
+                              token_symbol = list.symbol;
+                              tokan_decimals = "${list.decimals}";
+                            });
+
+                            addCustomToken(index,val);
+                          }else{
+                            deleteToken("${list.id}");
+                          }
                         },
                       ),
                     ],
