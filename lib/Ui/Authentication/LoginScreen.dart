@@ -261,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (context) => AlertDialog(
         backgroundColor:  MyColor.backgroundColor,
         title: Text(
-           "Are you sure",
+           "Are you sure?",
           style: MyStyle.tx18BWhite.copyWith(
             fontSize: 16
           )
@@ -288,7 +288,8 @@ class _LoginScreenState extends State<LoginScreen> {
               "No",
                 style: MyStyle.tx18RWhite.copyWith(
                     fontSize: 14
-                )            ),
+                )
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -302,7 +303,8 @@ class _LoginScreenState extends State<LoginScreen> {
               "Yes",
                 style: MyStyle.tx18RWhite.copyWith(
                     fontSize: 14
-                )            ),
+                )
+            ),
           ),
         ],
       ),

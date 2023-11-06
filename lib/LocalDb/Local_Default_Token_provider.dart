@@ -127,10 +127,12 @@ class DBDefaultTokenProvider{
 
   List<AccountTokenList> tokenDefaultList = [];
   getAccountToken(String accountId) async {
+    // print("object getAccount Token ");
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM DefaultToken Where accountId = '$accountId'");
 
     List<AccountTokenList> list = res.map((c) {
+      // print("get default token data $c");
       return AccountTokenList.fromJson(
           c,
           accountId,
@@ -153,9 +155,9 @@ class DBDefaultTokenProvider{
     return res;
   }
 
-  updateTokenBalance(String balance,String id) async {
+  updateTokenBalance(String balance,String id,String acId) async {
     final db = await database;
-    final res = await db!.rawUpdate("UPDATE DefaultToken SET balance = $balance WHERE id = '$id'");
+    final res = await db!.rawUpdate("UPDATE DefaultToken SET balance = $balance WHERE id = '$id' AND accountId = '$acId'");
     return res;
   }
 

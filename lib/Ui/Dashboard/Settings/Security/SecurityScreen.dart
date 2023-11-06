@@ -406,7 +406,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                     }else if(setPassCodeController.text != value){
                                       newRePassMess = "Passcode not matched!";
                                     }else{
-                                      print("object");
+                                      // print("object");
                                       newRePassMess = "";
                                     }
                                   });

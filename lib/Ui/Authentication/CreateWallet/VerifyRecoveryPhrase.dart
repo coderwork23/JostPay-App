@@ -35,6 +35,7 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
 
   confirmBottomSheet(BuildContext context){
     showModalBottomSheet(
+      isDismissible: false,
       isScrollControlled: false,
       backgroundColor: MyColor.backgroundColor,
       shape: const RoundedRectangleBorder(
@@ -256,12 +257,12 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
     // }
     // await tokenProvider.getAccountToken(data, '/getAccountTokens', accountId,"");
 
-    for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
+    // for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
       var data ={
         "id":"1,2,74,328,825,1027,1839,1958"
       };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-    }
+      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', accountId);
+    // }
 
     if(tokenProvider.isSuccess) {
 

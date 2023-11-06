@@ -24,7 +24,7 @@ class BuySellProvider with ChangeNotifier{
         // print(responseData);
 
         var value = json.decode(responseData.body);
-        print("value getLoginOTPApi ==> $value");
+        // print("value getLoginOTPApi ==> $value");
         if (responseData.statusCode == 200 && value['error'] == null) {
 
           Helper.dialogCall.showToast(context, "${value['info']}");
@@ -45,7 +45,7 @@ class BuySellProvider with ChangeNotifier{
       });
     }catch(e){
 
-      print("$e");
+      // print("$e");
       print("============  get Login OTP Api error  ============");
 
       getOtpBool = false;
@@ -77,7 +77,7 @@ class BuySellProvider with ChangeNotifier{
           // print("${}");
           value['rates_info'].keys.forEach((key){
             if(list.indexWhere((element) => element == key) == -1){
-              print("object key $key");
+              // print("object key $key");
               ratesInfoList.add(
                   RatesInfo.fromJson(value['rates_info'][key],key));
             }

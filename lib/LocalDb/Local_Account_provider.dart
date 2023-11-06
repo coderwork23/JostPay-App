@@ -44,60 +44,6 @@ class DBAccountProvider {
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM Account");
 
-    //print("New Account Data : " + res.toString());
-
-/*    var accountListNew = [];
-    for(int i=0; i<res.length; i++){
-
-      Map<String, dynamic> data = res[i];
-
-      var addressArray = data["address"].substring(0, data["address"].length - 1);
-      var data2 = addressArray.split("-");
-
-      List finalPublicArray = [];
-      for(int j=0;j<data2.length;j++){
-
-        var data3 = data2[j].split(":");
-
-        var publicArray = {
-          "id" : data3[0],
-          "address" : data3[1],
-          "keyName" : data3[2],
-        };
-
-        finalPublicArray.add(publicArray);
-      }
-
-      var privateArray = data["privateKey"].substring(0, data["privateKey"].length - 1);
-      var private2 = privateArray.split("-");
-      List finalPrivateArray = [];
-
-      for(int j=0;j<private2.length;j++){
-
-        var private3 = private2[j].split(":");
-        var privateArray = {
-          "id" : private3[0],
-          "address" : private3[1],
-          "keyName" : private3[2],
-        };
-
-        finalPrivateArray.add(privateArray);
-      }
-
-      var accountArray = {
-        "id" : "${res[i]["id"]}",
-        "device_id" : "${res[i]["device_id"]}",
-        "name" : "${res[i]["name"]}",
-        "mnemonic" : "${res[i]["mnemonic"]}",
-        "publicList" : finalPublicArray,
-        "privateList" : finalPrivateArray
-      };
-
-      //print("New Account Data :" + accountArray.toString());
-
-      accountListNew.add(accountArray);
-
-    }*/
 
     List<NewAccountList> list = res.map<NewAccountList>((json) => NewAccountList.fromJson(json)).toList();
     newAccountList.addAll(list);

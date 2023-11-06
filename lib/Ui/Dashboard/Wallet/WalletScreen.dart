@@ -145,6 +145,7 @@ class _WalletScreenState extends State<WalletScreen> {
       showTotalValue = sharedPreferences.getDouble('myBalance') ?? 0.00;
     });
 
+    // print("object selectedAccountId ${selectedAccountId}");
 
     if(selectedAccountId == "") {
       setState(() {
@@ -192,19 +193,17 @@ class _WalletScreenState extends State<WalletScreen> {
 
   // getToken for coin market cap
   getToken() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String? shareList = sharedPreferences.getString("defaultCoin");
     if (isNeeded == true) {
 
       // await DBTokenProvider.dbTokenProvider.deleteAccountToken(selectedAccountId);
       await DbAccountAddress.dbAccountAddress.getAccountAddress(selectedAccountId);
 
-      for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
+      // for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
         var data ={
           "id":"1,2,74,328,825,1027,1839,1958"
         };
-        await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-      }
+        await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', selectedAccountId);
+      // }
 
 
       if(mounted) {
@@ -212,7 +211,8 @@ class _WalletScreenState extends State<WalletScreen> {
           isNeeded = false;
         });
       }
-    }else {
+    }
+    else {
       await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
       setState(() {});
     }
@@ -254,11 +254,13 @@ class _WalletScreenState extends State<WalletScreen> {
                 await DBDefaultTokenProvider.dbTokenProvider.updateTokenBalance(
                   '${response["data"]["balance"]}',
                   '${response["data"]["id"]}',
+                    selectedAccountId
                 );
               }
             }
           }
 
+          // print("Socket ac id $selectedAccountId");
 
           await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
           setState(() {});

@@ -90,63 +90,36 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
       isLoaded = false;
-
       selectedAccountId = sharedPreferences.getString('accountId') ?? "";
       selectedAccountName = sharedPreferences.getString('accountName') ?? "";
-      // selectedAccountPrivateAddress = sharedPreferences.getString('accountPrivateAddress') ?? "";
-
     });
 
     await DbAccountAddress.dbAccountAddress.getAccountAddress(selectedAccountId);
-
-
     await DbNetwork.dbNetwork.getNetwork();
 
-
-    if(widget.sendTokenId != ""){
+    setState(() {
+      sendTokenName = widget.sendTokenName;
       sendTokenAddress = widget.sendTokenAddress;
       sendTokenNetworkId = widget.sendTokenNetworkId;
-      sendTokenName = widget.sendTokenName;
       sendTokenSymbol = widget.sendTokenSymbol;
       selectTokenMarketId = widget.selectTokenMarketId;
       sendTokenImage  = widget.sendTokenImage;
       sendTokenBalance  = widget.sendTokenBalance;
       sendTokenId  = widget.sendTokenId;
       sendTokenUsd  = widget.sendTokenUsd;
+    });
 
 
-      await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, sendTokenNetworkId);
+    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, sendTokenNetworkId);
 
-      setState(() {
-        selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-        selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
-      });
+    setState(() {
+      selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+      selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
+    });
 
 
-    }else{
 
-      List<AccountTokenList> listData = DBTokenProvider.dbTokenProvider.tokenList.where((element) => element.marketId == 1839).toList();
 
-      sendTokenAddress = listData[0].address;
-      sendTokenNetworkId = "${listData[0].networkId}";
-      sendTokenName =  listData[0].name;
-      sendTokenSymbol =  listData[0].symbol;
-      selectTokenMarketId = "${listData[0].marketId}";
-      sendTokenImage  = listData[0].logo;
-      sendTokenBalance  = listData[0].balance;
-      sendTokenId  = "${listData[0].token_id}";
-      sendTokenUsd = "${listData[0].price}";
-      sendTokenUsd = "${listData[0].price}";
-      sendTokenDecimals = listData[0].decimals;
-
-      await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,sendTokenNetworkId);
-
-      setState(() {
-        selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-        selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
-      });
-
-    }
 
     networkList = DbNetwork.dbNetwork.networkList.where((element) => "${element.id}" == sendTokenNetworkId).toList();
 
@@ -263,7 +236,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         builder: (context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                print("object $sendTransactionFee");
+                // print("object $sendTransactionFee");
                 return Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
@@ -705,8 +678,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         // sendTokenUsd = "";
 
       });
-
     }
+
+    //unfair pact message plastic lunch drama comfort faint start board black job
     else {
       if (sendTokenNetworkId == "9" && transectionProvider.sendTokenData["status"] == false) {
         // ignore: use_build_context_synchronously

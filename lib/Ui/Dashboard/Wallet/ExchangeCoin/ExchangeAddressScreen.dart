@@ -58,7 +58,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
 
     } else {
 
-      print("else print ---> ");
+      // print("else print ---> ");
       // ignore: use_build_context_synchronously
       Helper.dialogCall.showToast(context, "Something is wrong please try again.");
 
@@ -153,7 +153,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
         ),
       )
           :
-      exchangeProvider.createExLoading
+      exchangeProvider.createExLoading || exchangeProvider.statusLoading
           ?
       SizedBox(
         height: 50,

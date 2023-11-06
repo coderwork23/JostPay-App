@@ -50,7 +50,7 @@ class _QrScannerPageState extends State<QrScannerPage> {
               if(capture.barcodes.length < 2) {
                 final barcodes = capture.barcodes[0];
                 var result = barcodes;
-                  print(result.rawValue.toString());
+                  // print(result.rawValue.toString());
                 if (result != null) {
                   Navigator.pop(context, result.rawValue.toString());
                 }

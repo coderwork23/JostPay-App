@@ -4,7 +4,7 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Security/SecurityScreen.dart';
 import 'WalletConnect/WalletConnectScreen.dart';
-import 'WalletsPages/WalletsScreen.dart';
+import 'WalletsPages/WalletsListingScreen.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -40,13 +40,8 @@ class _SettingScreenState extends State<SettingScreen> {
           padding: EdgeInsets.only(top: 4.0),
           child: Text(
             "Settings",
-            // style:MyStyle.tx22RWhite.copyWith(
-            //     fontSize: 24,
-            //   color: MyColor.mainWhiteColor
-            // ),
           ),
         ),
-
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 15),
@@ -56,13 +51,14 @@ class _SettingScreenState extends State<SettingScreen> {
 
             //Wallets
             InkWell(
-              onTap: () {
-                Navigator.push(
+              onTap: () async{
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const WalletsScreen(),
+                    builder: (context) => const WalletsListingScreen(),
                   )
                 );
+               getWalletName();
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),

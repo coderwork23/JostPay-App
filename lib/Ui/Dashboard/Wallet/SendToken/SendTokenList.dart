@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Default_Token_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -39,8 +39,8 @@ class _SendTokenListState extends State<SendTokenList> {
   getCoin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
-      setState(() {});
+    await DBDefaultTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+    setState(() {});
   }
 
 
@@ -124,16 +124,16 @@ class _SendTokenListState extends State<SendTokenList> {
         // coin list
         Expanded(
           child : ListView.builder(
-            itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
+            itemCount: DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
 
-              var list = DBTokenProvider.dbTokenProvider.tokenList[index];
+              var list = DBDefaultTokenProvider.dbTokenProvider.tokenDefaultList[index];
 
               return InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
+                onTap: () async {
+                  // print(list.balance);
+                 await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => SendCoinScreen(
@@ -150,6 +150,8 @@ class _SendTokenListState extends State<SendTokenList> {
                       ),
                     )
                   );
+
+                 Navigator.pop(context);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 15),

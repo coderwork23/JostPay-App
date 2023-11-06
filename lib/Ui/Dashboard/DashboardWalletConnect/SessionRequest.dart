@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
@@ -35,12 +36,36 @@ class _SessionRequestState extends State<SessionRequest> {
   late TokenProvider tokenProvider;
 
 
+  void checkNetwork()async {
+
+    await DbNetwork.dbNetwork.getNetwork();
+    final item = widget.proposal.requiredNamespaces.entries.elementAt(0);
+
+    int value = DbNetwork.dbNetwork.networkList.indexWhere((element) {
+      // print(element.chain);
+      return "${element.chain}" == item.value.chains.first
+          .split(":").last && element.isEVM == 1 && element.swapEnable == 1;
+    });
+
+    if (value != -1) {
+      chinId = item.value.chains.first
+          .split(":")
+          .last;
+    } else {
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Network not implemented!!");
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+    }
+  }
+
 
   @override
   void initState() {
     tokenProvider = Provider.of<TokenProvider>(context,listen: false);
     _metadata = widget.proposal.proposer.metadata;
     super.initState();
+    checkNetwork();
   }
 
   var chinId = "0";
@@ -71,7 +96,7 @@ class _SessionRequestState extends State<SessionRequest> {
           //"Add Token",
         ),
       ),
-      body: Container(
+      body: SizedBox(
         width: width,
         height: height,
         child: SafeArea(
@@ -132,50 +157,75 @@ class _SessionRequestState extends State<SessionRequest> {
                   ],
                 ),
               ),
-
-              ListView.separated(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                itemBuilder: (_, idx) {
-                  final item = widget.proposal.requiredNamespaces.entries.elementAt(idx);
-                  print(item.value.toJson());
-                  print(item.key);
-                  print(item.value.chains);
-                  print("check ---> ");
-                  print(DbNetwork.dbNetwork.networkList.length);
-
-
-
-                  int value = DbNetwork.dbNetwork.networkList.indexWhere((element) {
-                    print("element.chain -----> ${element.chain}");
-                    return "${element.chain}" == item.value.chains.first.split(":").last && element.isEVM == 1;
-                  });
-
-                  print("value ---->  $value");
-                  print("chain name ---> ${item.value.chains.first.split(":").last}");
-
-                  if(value != -1){
-                    // print("test val"+value.toString());
-                    chinId = item.value.chains.first.split(":").last;
-                    // print("test chain id"+chinId);
-                  }else{
-                    // print("check 2 ---> ");
-                   Helper.dialogCall.showToast(context, "Network not implemented!!");
-                    Navigator.pop(context);
-                  }
-
-                  return NamespaceView(
-                    type: item.key,
-                    accountAddress: widget.account1,
-                    namespace: item.value,
-                  );
-                },
-                separatorBuilder: (_, __) =>
-                const Divider(height: 1.5, thickness: 1.5),
-                itemCount: widget.proposal.requiredNamespaces.entries.length,
+              NamespaceView(
+                type: widget.proposal.requiredNamespaces.entries.elementAt(0).key,
+                accountAddress: widget.account1,
+                namespace: widget.proposal.requiredNamespaces.entries.elementAt(0).value,
               ),
 
-              const Spacer(),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: DbNetwork.dbNetwork.networkList.where((element) => element.isEVM == 1 && element.swapEnable == 1).toList().length,
+                  itemBuilder: (context, index) {
+                    var data = DbNetwork.dbNetwork.networkList.where((element) => element.isEVM == 1 && element.swapEnable == 1).toList()[index];
+                   // print("${data.symbol}");
+                    return data.symbol != "BNB" && data.symbol != "ETH"
+                        ?
+                    SizedBox()
+                        :
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(20,0,20,10),
+                      padding: const EdgeInsets.all(12),
+
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: Colors.black45
+                          )
+                      ),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(300),
+                            child: CachedNetworkImage(
+                              imageUrl: data.symbol == "BNB"
+                                  ?
+                              "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png"
+                                  :
+                              "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+                              width: 35,
+                              height:35,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data.name,
+                                    style:  MyStyle.tx18RWhite.copyWith(
+                                        fontSize: 16
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+
+                                  Text(
+                                    "${widget.account1.substring(0,6)}....${widget.account1.substring(widget.account1.length-6,widget.account1.length)}",
+                                    style:  MyStyle.tx18RWhite.copyWith(
+                                        fontSize: 12
+                                    ),
+                                  ),
+                                ],
+                              )
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16),
@@ -272,17 +322,22 @@ class _NamespaceViewState extends State<NamespaceView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-             "Review Permissions",
-            style:  MyStyle.tx18RWhite.copyWith(
-                fontSize: 16
+          Padding(
+            padding: const EdgeInsets.only(left: 22),
+            child: Text(
+               "Review Permissions",
+              style:  MyStyle.tx18RWhite.copyWith(
+                  fontSize: 16
+              ),
             ),
           ),
-          const SizedBox(height: 8.0),
+           SizedBox(height: 8.0,
+              width: MediaQuery.of(context).size.width
+          ),
           ...widget.namespace.chains
               .map((chain) => Container(
-            margin: const EdgeInsets.only(bottom: 8.0),
-            padding: const EdgeInsets.all(16.0),
+            margin: const EdgeInsets.only(bottom: 8.0,left: 20),
+            padding: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(
               color:  MyColor.darkGrey01Color,
               borderRadius: BorderRadius.circular(12.0),
@@ -336,31 +391,7 @@ class _NamespaceViewState extends State<NamespaceView> {
             ),
           )).toList(),
 
-          Padding(
-            padding: EdgeInsets.only(top: 8.0,bottom: 8),
-            child: Text(
-              "Selected Account",
-              style:  MyStyle.tx18RWhite.copyWith(
-                  fontSize: 16
-              ),
-            ),
-          ),
 
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: MyColor.darkGrey01Color,
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Text(
-              '${widget.accountAddress.substring(0, 6)}...${widget.accountAddress.substring(widget.accountAddress.length - 6)}',
-              style:  MyStyle.tx18RWhite.copyWith(
-                  fontSize: 14
-              ),
-            ),
-          )
         ],
       ),
     );

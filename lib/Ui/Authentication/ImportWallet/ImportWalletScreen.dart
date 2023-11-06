@@ -267,19 +267,19 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
   }
 
   newAccount(String acId) async {
-    await DBAccountProvider.dbAccountProvider.getAllAccount();
+    // await DBAccountProvider.dbAccountProvider.getAllAccount();
     newGetToken(acId);
   }
 
   newGetToken(String accountId) async {
-    await DbAccountAddress.dbAccountAddress.getAccountAddress(accountId);
+    // await DbAccountAddress.dbAccountAddress.getAccountAddress(accountId);
 
-    for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
+    // for (int i = 0; i < DbAccountAddress.dbAccountAddress.allAccountAddress.length; i++) {
       var data ={
         "id":"1,2,74,328,825,1027,1839,1958"
       };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-    }
+      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', accountId);
+    // }
 
     // ignore: use_build_context_synchronously
     Navigator.pop(context,"refresh");

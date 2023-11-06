@@ -171,13 +171,13 @@ class ExchangeProvider with ChangeNotifier{
     estimateLoading = true;
     notifyListeners();
 
-    print("object--->  $url");
-    print("object--->  $params");
+    // print("object--->  $url");
+    // print("object--->  $params");
 
     await ApiHandler.getExchangeParams(url, params).then((responseData){
       var value = json.decode(responseData.body);
 
-      print("estimate object --->  $value");
+      // print("estimate object --->  $value");
 
       if(responseData.statusCode == 200) {
 
@@ -217,10 +217,10 @@ class ExchangeProvider with ChangeNotifier{
         validUntil = value["validUntil"];
         trxId = value["id"];
         amount = value["amount"];
-        print("object ---> $value");
+        // print("object ---> $value");
         createExLoading = false;
         createExSuccess = true;
-        print("createExSuccess $createExSuccess");
+        // print("createExSuccess $createExSuccess");
         notifyListeners();
       }
       else{
@@ -242,7 +242,7 @@ class ExchangeProvider with ChangeNotifier{
     await ApiHandler.getExchange(url).then((responseData) async {
       var value = json.decode(responseData.body);
       // print("object url ---> $url");
-      print("transactionStatus ---> $value");
+      // print("transactionStatus ---> $value");
 
       if(responseData.statusCode == 200) {
 
@@ -284,8 +284,8 @@ class ExchangeProvider with ChangeNotifier{
 
     await ApiHandler.getExchangeParams(url, params).then((responseData){
       var value = json.decode(responseData.body);
-      print("object url ---> $params");
-      print("object ---> $value");
+      // print("object url ---> $params");
+      // print("object ---> $value");
 
       if(responseData.statusCode == 200) {
         isAddressVerify = value["result"];
