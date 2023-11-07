@@ -111,7 +111,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
       "explorer_url":networkList.first.explorerUrl,
       "symbol":networkList.first.symbol
     };
-    // print(json.encode(data));
+    print(json.encode(data));
     await transectionProvider.getTransection(data,'/getTransactions');
     //print(transectionProvider.transectionList.length);
     setState(() {

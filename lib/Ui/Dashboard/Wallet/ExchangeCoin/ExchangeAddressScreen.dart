@@ -91,7 +91,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
     }
   }
 
-  addressVerification() async {
+  addressVerification(context) async {
     var params = {
       "currency":exchangeProvider.receiveCoin.symbol.toLowerCase().trim(),
       "address":addressController.text.trim()
@@ -133,7 +133,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
       InkWell(
         onTap: () {
           if(addressController.text.isNotEmpty) {
-            addressVerification();
+            addressVerification(context);
           }else{
             Helper.dialogCall.showToast(context, "Please enter receive address");
           }
@@ -270,7 +270,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
                                     FocusScope.of(context).unfocus();
                                   });
 
-                                  addressVerification();
+                                  addressVerification(context);
                                 });
                               },
                               child: SizedBox(

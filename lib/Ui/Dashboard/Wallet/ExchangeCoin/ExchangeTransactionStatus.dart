@@ -8,6 +8,7 @@ import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
+import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -34,10 +35,12 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
 
 
   late ExchangeProvider exchangeProvider;
+  late TokenProvider tokenProvider;
+
   var selectedAccountId = "";
   bool isLoading = false;
 
-  NetworkList? sendNetwork, receiveNetwork ;
+  dynamic sendNetwork, receiveNetwork ;
 
   getTxsStatus()async{
     setState(() {
@@ -47,14 +50,70 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
     await DbExTransaction.dbExTransaction.getTrxStatus(selectedAccountId,widget.statusId);
 
+    var data = {
+      "search_term": "",
+    };
+    await tokenProvider.getSearchToken(data,'/getTokens');
+
     setState(() {
 
-     sendNetwork = DbNetwork.dbNetwork.networkList.where((element) {
-       return element.symbol.toLowerCase() == DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency;
-     }).toList().first;
-     receiveNetwork = DbNetwork.dbNetwork.networkList.where((element) {
-       return element.symbol.toLowerCase() == DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency;
-     }).toList().first;
+      // set send token
+      if(DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency == "usdtbsc"){
+        sendNetwork = {
+          "logo":"http://139.59.88.239/api/img/token/bsc_usdt.png",
+          "name":"Tether USD",
+          "symbol":"USDT"
+        };
+      }
+      else if(DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency == "usdttrc20"){
+        sendNetwork = {
+          "logo":"http://139.59.88.239/api/img/token/trx_usdt.png",
+          "name":"Tether USD",
+          "symbol":"USDT"
+        };
+      }
+      else{
+        final temp = DbNetwork.dbNetwork.networkList.where((element) {
+          return element.symbol.toLowerCase() == DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency;
+        }).toList().first;
+
+        sendNetwork = {
+          "logo":temp.logo,
+          "name":temp.name,
+          "symbol":temp.symbol
+
+        };
+      }
+
+
+      // set receive token
+      if(DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency == "usdtbsc"){
+        receiveNetwork = {
+          "logo":"http://139.59.88.239/api/img/token/bsc_usdt.png",
+          "name":"Tether USD",
+          "symbol":"USDT"
+        };
+      }
+      else if(DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency == "usdttrc20"){
+        receiveNetwork = {
+          "logo":"http://139.59.88.239/api/img/token/trx_usdt.png",
+          "name":"Tether USD",
+          "symbol":"USDT"
+        };
+      }
+      else{
+        final temp = DbNetwork.dbNetwork.networkList.where((element) {
+          return element.symbol.toLowerCase() == DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency;
+        }).toList().first;
+
+        receiveNetwork = {
+          "logo":temp.logo,
+          "name":temp.name,
+          "symbol":temp.symbol
+        };
+      }
+
+
      isLoading = false;
 
     });
@@ -64,6 +123,8 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
   @override
   void initState() {
     exchangeProvider = Provider.of<ExchangeProvider>(context,listen: false);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: false);
+
     super.initState();
     getTxsStatus();
   }
@@ -95,6 +156,8 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
   @override
   Widget build(BuildContext context) {
     exchangeProvider = Provider.of<ExchangeProvider>(context,listen: true);
+    tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -151,27 +214,11 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                         // from coin details
                         Row(
                           children: [
-                            sendNetwork!.symbol == "usdtbsc" || sendNetwork!.symbol == "usdttrc20"
-                                ?
-                            Image.asset(
-                              sendNetwork!.symbol == "usdtbsc"
-                                  ?
-                              "assets/images/bsc_usdt.png"
-                                  :
-                              sendNetwork!.symbol == "usdttrc20"
-                                  ?
-                              "assets/images/trx_usdt.png"
-                                  :
-                              "assets/images/bitcoin.png",
-                              height: 25,
-                              width: 25,
-                            )
-                                :
                             CachedNetworkImage(
                               height: 25,
                               width: 25,
                               fit: BoxFit.fill,
-                              imageUrl: sendNetwork!.logo,
+                              imageUrl: sendNetwork["logo"],
                               placeholder: (context, url) {
                                 return const Center(
                                   child: CircularProgressIndicator(
@@ -197,7 +244,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                sendNetwork!.name,
+                                  sendNetwork["name"],
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
@@ -205,7 +252,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                             ),
                             Text(
                               "~${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData!.expectedSendAmount}")} "
-                                  "${sendNetwork!.symbol}",
+                                  "${sendNetwork['symbol']}",
                               style: MyStyle.tx18RWhite.copyWith(
                                   fontSize: 16
                               ),
@@ -234,27 +281,11 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                         // to coin details
                         Row(
                           children: [
-                            receiveNetwork!.symbol == "usdtbsc" || receiveNetwork!.symbol == "usdttrc20"
-                                ?
-                            Image.asset(
-                              receiveNetwork!.symbol == "usdtbsc"
-                                  ?
-                              "assets/images/bsc_usdt.png"
-                                  :
-                              receiveNetwork!.symbol == "usdttrc20"
-                                  ?
-                              "assets/images/trx_usdt.png"
-                                  :
-                              "assets/images/bitcoin.png",
-                              height: 25,
-                              width: 25,
-                            )
-                                :
                             CachedNetworkImage(
                               height: 25,
                               width: 25,
                               fit: BoxFit.fill,
-                              imageUrl: exchangeProvider.receiveCoin.logo,
+                              imageUrl: receiveNetwork["logo"],
                               placeholder: (context, url) {
                                 return const Center(
                                   child: CircularProgressIndicator(
@@ -280,7 +311,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                receiveNetwork!.name,
+                                receiveNetwork["name"],
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
@@ -288,7 +319,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                             ),
                             Text(
                               "~${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData!.expectedReceiveAmount}")} "
-                                  "${receiveNetwork!.symbol}",
+                                  "${receiveNetwork['symbol']}",
                               style: MyStyle.tx18RWhite.copyWith(
                                   fontSize: 16
                               ),
@@ -408,7 +439,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                     child: Text(
                       "Note: Please send "
                           "${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData?.expectedSendAmount}")} "
-                          "(${sendNetwork!.symbol}) with in valid time period.If you send after that result is permanent loss of your token.",
+                          "(${sendNetwork['symbol']}) with in valid time period.If you send after that result is permanent loss of your token.",
                       textAlign: TextAlign.center,
                       style:MyStyle.tx18RWhite.copyWith(
                           fontSize: 12,

@@ -91,22 +91,7 @@ class _ExChangeTokenListState extends State<ExChangeTokenList> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(100),
-                    child:  list.type == "BEP20" || list.type == "TRX20"
-                        ?
-                    Image.asset(
-                      list.type == "BEP20"
-                          ?
-                      "assets/images/bsc_usdt.png"
-                          :
-                      list.type == "TRX20"
-                          ?
-                      "assets/images/trx_usdt.png"
-                          :
-                      "assets/images/bitcoin.png",
-                      height: 45,
-                      width: 45,
-                    )
-                        :
+                    child:
                     CachedNetworkImage(
                       height: 35,
                       width: 35,

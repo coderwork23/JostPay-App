@@ -114,7 +114,7 @@ class DBTokenProvider{
   getTokenById(acId,id) async {
     // print("object $id");
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM Token Where accountId = '$acId' AND id='$id'");
+    final res = await db!.rawQuery("SELECT * FROM Token Where accountId = '$acId' AND market_id='$id'");
     return res.isEmpty ? null :res[0];
   }
 

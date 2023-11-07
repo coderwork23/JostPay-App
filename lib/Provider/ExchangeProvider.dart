@@ -132,11 +132,12 @@ class ExchangeProvider with ChangeNotifier{
       AccountTokenList copiedToken = AccountTokenList.fromJson(newToken.toJson(),id);
       sendCoin = copiedToken;
 
-      if (newToken.type == "TRX20") {
+      if (newToken.type == "TRC20") {
         sendCoin.symbol = "usdttrc20";
       } else if (newToken.type == "BEP20") {
         sendCoin.symbol = "usdtbsc";
       }
+      print(sendCoin.toJson());
 
       notifyListeners();
     } else {
@@ -151,11 +152,12 @@ class ExchangeProvider with ChangeNotifier{
       AccountTokenList copiedToken = AccountTokenList.fromJson(newToken.toJson(),id);
       receiveCoin = copiedToken;
 
-      if (newToken.type == "TRX20") {
+      if (newToken.type == "TRC20") {
         receiveCoin.symbol = "usdttrc20";
       } else if (newToken.type == "BEP20") {
         receiveCoin.symbol = "usdtbsc";
       }
+
       notifyListeners();
 
     }else{
@@ -286,16 +288,22 @@ class ExchangeProvider with ChangeNotifier{
       var value = json.decode(responseData.body);
       // print("object url ---> $params");
       // print("object ---> $value");
+      // print("statusCode ---> ${responseData.statusCode}");
 
-      if(responseData.statusCode == 200) {
+      if(responseData.statusCode == 200 && value["result"] == true) {
         isAddressVerify = value["result"];
         verifyAddressLoading = false;
         notifyListeners();
       }else{
+        // print("result 0");
+
         if(value["result"] != null) {
+          // print("result 1");
           isAddressVerify = value["result"];
           Helper.dialogCall.showToast(context, "${value['message']}");
         }else{
+          // print("result 2");
+          isAddressVerify = value["result"];
           Helper.dialogCall.showToast(context, "Address is not valid");
         }
         verifyAddressLoading = false;

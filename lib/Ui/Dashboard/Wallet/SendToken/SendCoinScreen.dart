@@ -581,9 +581,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                       )
                           :
                       InkWell(
-                        onTap: (){
+                        onTap: () async {
+                          await confirmSend();
                           setState((){});
-                          confirmSend();
                         },
                         child: Center(
                           child: Container(
@@ -685,7 +685,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       if (sendTokenNetworkId == "9" && transectionProvider.sendTokenData["status"] == false) {
         // ignore: use_build_context_synchronously
         Helper.dialogCall.showToast(context,"Insufficient fees balance");
-
+        setState(() {
+          isLoading = false;
+        });
       } else {
 
         // ignore: use_build_context_synchronously
@@ -696,6 +698,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         isLoading = false;
       });
     }
+
   }
 
   Web3Client? _web3client;

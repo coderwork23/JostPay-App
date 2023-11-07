@@ -334,27 +334,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
             // middle send coin value and price
             Row(
               children: [
-                // Text(
-                //   "1BTC ~ ",
-                //   style: MyStyle.tx18RWhite.copyWith(
-                //     color: MyColor.textGreyColor,
-                //     fontSize: 14
-                //   ),
-                // ),
-                // Container(
-                //   padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 4),
-                //   decoration: BoxDecoration(
-                //     borderRadius: BorderRadius.circular(4),
-                //     color:MyColor.darkGreenColor
-                //   ),
-                //   child: Text(
-                //     "18.5266582 ETH",
-                //     style: MyStyle.tx18RWhite.copyWith(
-                //         fontSize: 14,
-                //         color: MyColor.greenColor
-                //     ),
-                //   ),
-                // ),
+
                 const Spacer(),
                 InkWell(
                   onTap: () {
@@ -370,7 +350,9 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                       color: MyColor.mainWhiteColor,
                     ),
                   ),
-                )
+                ),
+                const SizedBox(width: 15),
+
               ],
             ),
 
