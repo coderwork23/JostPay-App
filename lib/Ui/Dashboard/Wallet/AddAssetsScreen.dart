@@ -168,7 +168,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
         "token_id": DBTokenProvider.dbTokenProvider.tokenList[index].id,
       };
 
-      print(data);
+      // print(data);
       await tokenProvider.deleteToken(data,'/deleteAccountToken');
 
       // ignore: use_build_context_synchronously

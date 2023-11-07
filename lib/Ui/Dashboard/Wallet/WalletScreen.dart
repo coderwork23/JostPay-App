@@ -249,7 +249,7 @@ class _WalletScreenState extends State<WalletScreen> {
     socket!.onConnect((_) {
 
       socket!.on("getTokenBalance", (response) async {
-        print(json.encode(response));
+        // print(json.encode(response));
         if(mounted) {
           if (response["status"] == true) {
             if ("${response["data"]["balance"]}" != "0") {
@@ -286,7 +286,7 @@ class _WalletScreenState extends State<WalletScreen> {
         "network_url":networkList.isEmpty ? "" : networkList.first.url,
       };
 
-      print("socket emit ==>  $data");
+      // print("socket emit ==>  $data");
       socket!.emit("getTokenBalance", jsonEncode(data));
     }
 

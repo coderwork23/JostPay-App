@@ -56,7 +56,7 @@ class TransectionProvider with ChangeNotifier{
     await ApiHandler.post(data,url).then((responseData){
 
       var value = json.decode(responseData.body);
-      print("Send Token => $value");
+      // print("Send Token => $value");
       sendTokenData = value;
 
       if(responseData.statusCode == 200 && value["status"] == true) {
