@@ -63,7 +63,7 @@ class _WalletSignState extends State<WalletSign> {
     var width = MediaQuery.of(context).size.width;
     return  Scaffold(
       appBar: AppBar(
-        elevation: 0,
+        centerTitle: true,
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);

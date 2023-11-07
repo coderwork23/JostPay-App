@@ -57,8 +57,17 @@ class _SignTransactionState extends State<SignTransaction> {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        automaticallyImplyLeading: true,
+        centerTitle: true,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_ios_new,
+            color: MyColor.mainWhiteColor,
+            size: 20,
+          ),
+        ),
         title: const Text(
           "Transactions",
         ),

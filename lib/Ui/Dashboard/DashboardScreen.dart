@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:eth_sig_util/util/utils.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -117,6 +118,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     selectedAccountId =  sharedPreferences.getString('accountId')??"";
     await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,"2");
     await DbNetwork.dbNetwork.getNetwork();
+    await DbNetwork.dbNetwork.getNetwork();
 
     setState((){
       selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
@@ -154,12 +156,12 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
       projectId: "73801621aec60dfaa2197c7640c15858",
       relayUrl: "wss://relay.walletconnect.com",
       metadata: const AppMetadata(
-        name: 'CatenaWallet',
+        name: 'JostPay Wallet',
         description: 'Wallet for WalletConnect',
         url: 'https://walletconnect.com/',
         icons: ['https://avatars.githubusercontent.com/u/37784886'],
       ),
-      database: 'cateCoinWallet_test.db',
+      database: 'jostPayWallet.db',
     );
 
     signClient!.on(SignClientEvent.SESSION_PROPOSAL.value, (data) async {
@@ -177,7 +179,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                 var index =  DbNetwork.dbNetwork.networkList.indexWhere((element) {
                   return "${element.chain}" == chain.first.split(":").last;
                 });
-                // print(tokenProvider.networkList[index].toJson());
+                // print(DbNetwork.dbNetwork.networkList[index].toJson());
                 final params = SessionApproveParams(
                   id: eventData.id!,
                   namespaces: namespaces,
@@ -212,9 +214,17 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
       final eventData = data as SignClientEventParams<RequestSessionRequest>;
 
-      // log('SESSION_REQUEST:'+ eventData.id.toString());
+      // log('SESSION_REQUEST:${eventData.id}');
       // print("object my check session");
       final session = signClient!.session.get(eventData.topic!);
+      String sessionChainId = "0";
+      var tokenChainList = DbNetwork.dbNetwork.networkList.where((element) => "${element.chain}" == eventData.params!.chainId).toList();
+
+      if(tokenChainList.isNotEmpty){
+        sessionChainId = tokenChainList.first.id.toString();
+        setState(() {});
+      }
+
 
       switch (eventData.params!.request.method.toEip155Method()) {
 
@@ -224,13 +234,15 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
           final dataToSign = requestParams[0];
           final address = requestParams[1];
+
+          // print("check this ----> $address");
           final message = WCEthereumSignMessage(
             data: dataToSign,
             address: address,
             type: WCSignType.PERSONAL_MESSAGE,
           );
 
-          await DbAccountAddress.dbAccountAddress.getDataByAddress(address);
+          await DbAccountAddress.dbAccountAddress.getDataByAddress(address,sessionChainId);
 
           // ignore: use_build_context_synchronously
           Navigator.push(
@@ -259,9 +271,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             address: address,
             type: WCSignType.MESSAGE,
           );
-
-          await DbAccountAddress.dbAccountAddress.getDataByAddress(address);
-
+          await DbAccountAddress.dbAccountAddress.getDataByAddress(address,sessionChainId);
           // ignore: use_build_context_synchronously
           Navigator.push(
               context,
@@ -288,8 +298,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             address: address,
             type: WCSignType.TYPED_MESSAGE_V4,
           );
-
-          await DbAccountAddress.dbAccountAddress.getDataByAddress(address);
+          await DbAccountAddress.dbAccountAddress.getDataByAddress(address,sessionChainId);
 
           // ignore: use_build_context_synchronously
           Navigator.push(
@@ -318,9 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             address: address,
             type: WCSignType.TYPED_MESSAGE_V3,
           );
-
-          await DbAccountAddress.dbAccountAddress.getDataByAddress(address);
-
+          await DbAccountAddress.dbAccountAddress.getDataByAddress(address,sessionChainId);
           // ignore: use_build_context_synchronously
           Navigator.push(
               context,
@@ -348,8 +355,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             type: WCSignType.TYPED_MESSAGE_V4,
           );
 
-          await DbAccountAddress.dbAccountAddress.getDataByAddress(address);
-
+          await DbAccountAddress.dbAccountAddress.getDataByAddress(address,sessionChainId);
           // ignore: use_build_context_synchronously
           Navigator.push(
               context,
@@ -370,13 +376,6 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
         // print("ETH_SIGN_TRANSACTION");
           final ethereumTransaction = WCEthereumTransaction.fromJson(
               eventData.params!.request.params.first);
-          // return _onSignTransaction(
-          //   eventData.id!,
-          //   int.parse(eventData.params!.chainId.split(':').last),
-          //   session,
-          //   ethereumTransaction,
-          // );
-
 
           var index =  DbNetwork.dbNetwork.networkList.indexWhere((element) {
             return "${element.chain}" == "${int.parse(eventData.params!.chainId.split(':').last)}";
@@ -385,8 +384,8 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
           _web3client = Web3Client(DbNetwork.dbNetwork.networkList[index].url, http.Client());
           final gasPrice = await _web3client.getGasPrice();
 
-          await DbAccountAddress.dbAccountAddress.getDataByAddress(ethereumTransaction.from!);
 
+          await DbAccountAddress.dbAccountAddress.getDataByAddress(ethereumTransaction.from!,sessionChainId);
           // ignore: use_build_context_synchronously
           Navigator.push(
               context,
@@ -403,6 +402,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                     final privateKey =  DbAccountAddress.dbAccountAddress.selectPrivateAdd != "" ? DbAccountAddress.dbAccountAddress.selectPrivateAdd : selectedAccountPrivateAddress;
                     final creds = EthPrivateKey.fromHex(privateKey);
 
+
                     try {
                       final signedTx = await _web3client.signTransaction(
                         creds,
@@ -414,8 +414,6 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                       );
                       final signedTxHex = bytesToHex(signedTx, include0x: true);
 
-
-                      // print("ETH_SIGN_TRANSACTION object ---> $signedTxHex");
                       signClient!.respond(
                         SessionRespondParams(
                           topic: session.topic,
@@ -432,11 +430,20 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                         });
                         Navigator.pop(context);
                       });
-                    } catch(e){
 
-                      // ignore: use_build_context_synchronously
-                      Helper.dialogCall.showToast(_scaffoldKey.currentState!.context, "Some Thing wrong please reconnect your wallet!");
+                    }catch(e){
 
+                      if(e.toString().contains("-32000")){
+                        Fluttertoast.showToast(
+                            msg: "Insufficient ${DbNetwork.dbNetwork.networkList[index].symbol} for cover gas fees",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                      }
                     }
                   },
                   onReject: () {
@@ -456,12 +463,16 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
               )
           );
 
-
         case Eip155Methods.ETH_SEND_TRANSACTION:
         // print("ETH_SEND_TRANSACTION");
         // print(eventData.params!.request.params.first['value']);
+
           final ethereumTransaction = WCEthereumTransaction.fromJson(
               eventData.params!.request.params.first);
+          // ethereumTransaction.gas = "0x7fae5";
+
+
+
 
 
           var index =  DbNetwork.dbNetwork.networkList.indexWhere((element) {
@@ -471,7 +482,9 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
           _web3client = Web3Client(DbNetwork.dbNetwork.networkList[index].url, http.Client());
           final gasPrice = await _web3client.getGasPrice();
 
-          await DbAccountAddress.dbAccountAddress.getDataByAddress(ethereumTransaction.from!);
+
+          // final address = requestParams[0];
+          await DbAccountAddress.dbAccountAddress.getDataByAddress(ethereumTransaction.from!,sessionChainId);
 
           // ignore: use_build_context_synchronously
           Navigator.push(
@@ -486,41 +499,48 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                   ethereumTransaction: ethereumTransaction,
                   title: 'Send Transaction',
                   onConfirm: () async {
-
                     final privateKey = DbAccountAddress.dbAccountAddress.selectPrivateAdd != "" ? DbAccountAddress.dbAccountAddress.selectPrivateAdd : selectedAccountPrivateAddress;
+                    // print(ethereumTransaction.from!);
+                    //  print(privateKey);
                     final creds = EthPrivateKey.fromHex(privateKey);
-
 
                     try {
                       final txHash = await _web3client.sendTransaction(
                         creds,
                         _wcEthTxToWeb3Tx(ethereumTransaction),
-                        chainId: int.parse(eventData.params!
-                            .chainId.split(':').last),
+                        chainId: int.parse(eventData.params!.chainId.split(':').last),
                       );
 
                       signClient!.respond(
                         SessionRespondParams(
                           topic: session.topic,
                           response: JsonRpcResult<String>(
-                            id: eventData.id!,
+                            id:  eventData.id!,
                             result: txHash,
                           ),
                         ),
                       ).then((value) {
-                        createSignT(ethereumTransaction.toString(), "Approved",
-                            session.topic);
+                        createSignT(ethereumTransaction.toString(),"Approved",session.topic);
                         setState(() {
                           Utils.wcUrlVal = "";
                         });
                         Navigator.pop(context);
                       });
-                    }catch(e){
-                      // print("checkk error ----> $e");
 
-                      // ignore: use_build_context_synchronously
-                      Helper.dialogCall.showToast(_scaffoldKey.currentState!.context, "Some Thing wrong please reconnect your wallet!");
+                    }catch(e){
+                      if(e.toString().contains("-32000")){
+                        Fluttertoast.showToast(
+                            msg: "insufficient ${DbNetwork.dbNetwork.networkList[index].symbol} for cover gas fees",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                      }
                     }
+
                   },
                   onReject: () {
                     signClient!

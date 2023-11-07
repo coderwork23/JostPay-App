@@ -83,9 +83,9 @@ class DbAccountAddress{
   }
 
   String selectPrivateAdd = "";
-  getDataByAddress(String address) async {
+  getDataByAddress(String address,String networkId) async {
     final db = await database;
-    final res = await db!.rawQuery("SELECT privateAddress FROM AccountAddress Where LOWER(publicAddress) = '${address.toLowerCase()}' AND networkId = '2'");
+    final res = await db!.rawQuery("SELECT privateAddress FROM AccountAddress Where LOWER(publicAddress) = '${address.toLowerCase()}' AND networkId = '$networkId'");
     if(res.isNotEmpty) {
       selectPrivateAdd = "${res[0]["privateAddress"]}";
     }

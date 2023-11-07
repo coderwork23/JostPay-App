@@ -55,6 +55,7 @@ class _WalletTransactionState extends State<WalletTransaction> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
@@ -80,7 +81,7 @@ class _SessionRequestState extends State<SessionRequest> {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
+        centerTitle: true,
         leading: InkWell(
           onTap: () {
             Navigator.pop(context);
@@ -157,31 +158,20 @@ class _SessionRequestState extends State<SessionRequest> {
                   ],
                 ),
               ),
-              NamespaceView(
-                type: widget.proposal.requiredNamespaces.entries.elementAt(0).key,
-                accountAddress: widget.account1,
-                namespace: widget.proposal.requiredNamespaces.entries.elementAt(0).value,
-              ),
-
               Expanded(
                 child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: DbNetwork.dbNetwork.networkList.where((element) => element.isEVM == 1 && element.swapEnable == 1).toList().length,
                   itemBuilder: (context, index) {
                     var data = DbNetwork.dbNetwork.networkList.where((element) => element.isEVM == 1 && element.swapEnable == 1).toList()[index];
-                   // print("${data.symbol}");
-                    return data.symbol != "BNB" && data.symbol != "ETH"
-                        ?
-                    SizedBox()
-                        :
-                    Container(
+                    return Container(
                       margin: const EdgeInsets.fromLTRB(20,0,20,10),
                       padding: const EdgeInsets.all(12),
 
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                              color: Colors.black45
+                              color: MyColor.boarderColor
                           )
                       ),
                       child: Row(
@@ -189,13 +179,25 @@ class _SessionRequestState extends State<SessionRequest> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(300),
                             child: CachedNetworkImage(
-                              imageUrl: data.symbol == "BNB"
-                                  ?
-                              "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png"
-                                  :
-                              "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+                              imageUrl:data.logo,
                               width: 35,
                               height:35,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(color: MyColor.greenColor),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Container(
+                                    height: 35,
+                                    width: 35,
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      color: MyColor.whiteColor,
+                                    ),
+                                    child: Image.asset(
+                                      "assets/images/bitcoin.png",
+                                    ),
+                                  ),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -239,11 +241,24 @@ class _SessionRequestState extends State<SessionRequest> {
                         ),
                         onPressed: () {
                           final SessionNamespaces params = {};
-                          for (final entry
-                          in widget.proposal.requiredNamespaces.entries) {
-                            final List<String> accounts = [];
 
-                            accounts.add("eip155:$chinId:"+widget.account1);
+                          // final List<String> accounts = [];
+                          //
+
+
+                          for (final entry in widget.proposal.requiredNamespaces.entries) {
+                            final List<String> accounts = [];
+                            List<NetworkList> evmList = DbNetwork.dbNetwork.networkList.where((element) {
+                              return element.isEVM == 1 && element.swapEnable == 1;
+                            }).toList();
+
+                            for(int i=0;i<evmList.length; i++){
+                              accounts.add("eip155:${evmList[i].chain}:${widget.account1}");
+                            }
+
+                            // accounts.add("eip155:$chinId:${widget.account1}");
+
+                            // print("check this -----> ${accounts.toString()}");
                             // print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"+accounts.toString());
                             params[entry.key] = SessionNamespace(
                               accounts: accounts,
@@ -254,7 +269,6 @@ class _SessionRequestState extends State<SessionRequest> {
                           }
                           // widget.onApprove(params);
                           widget.onApprove(params,widget.proposal.requiredNamespaces.entries.first.value.chains);
-
                         },
                         child: Text(
                           'Approve',
