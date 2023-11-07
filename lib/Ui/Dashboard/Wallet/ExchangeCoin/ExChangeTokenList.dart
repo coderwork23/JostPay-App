@@ -76,13 +76,6 @@ class _ExChangeTokenListState extends State<ExChangeTokenList> {
               }else{
                 exchangeProvider.changeReceiveToken(list,context,selectedAccountId);
               }
-              Navigator.pop(context);
-
-              await exchangeProvider.getMinMax(
-                  "v1/exchange-range/fixed-rate/${exchangeProvider.sendCoin.symbol.toLowerCase()}_${exchangeProvider.receiveCoin.symbol.toLowerCase()}",
-                  {"api_key":Utils.apiKey}
-              );
-
 
             },
             child : Padding(

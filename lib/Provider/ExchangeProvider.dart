@@ -127,7 +127,7 @@ class ExchangeProvider with ChangeNotifier{
   }
 
   changeSendToken(AccountTokenList newToken, context, id) async {
-    if (sendCoin.id != newToken.id) {
+    if (receiveCoin.id != newToken.id) {
       // Create a copy of newToken
       AccountTokenList copiedToken = AccountTokenList.fromJson(newToken.toJson(),id);
       sendCoin = copiedToken;
@@ -137,7 +137,12 @@ class ExchangeProvider with ChangeNotifier{
       } else if (newToken.type == "BEP20") {
         sendCoin.symbol = "usdtbsc";
       }
-      print(sendCoin.toJson());
+      Navigator.pop(context);
+
+      await getMinMax(
+          "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
+          {"api_key":Utils.apiKey}
+      );
 
       notifyListeners();
     } else {
@@ -148,7 +153,7 @@ class ExchangeProvider with ChangeNotifier{
   changeReceiveToken(AccountTokenList newToken,context,id) async {
 
 
-    if(receiveCoin.id != newToken.id ) {
+    if(sendCoin.id != newToken.id ) {
       AccountTokenList copiedToken = AccountTokenList.fromJson(newToken.toJson(),id);
       receiveCoin = copiedToken;
 
@@ -157,6 +162,14 @@ class ExchangeProvider with ChangeNotifier{
       } else if (newToken.type == "BEP20") {
         receiveCoin.symbol = "usdtbsc";
       }
+
+      Navigator.pop(context);
+
+      await getMinMax(
+          "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
+          {"api_key":Utils.apiKey}
+      );
+
 
       notifyListeners();
 
