@@ -5,6 +5,8 @@ class LoginModel {
   String accessToken;
   String info;
   List<RatesInfo> ratesInfo;
+  List<String> banks;
+  List<String> sellBanks;
 
   LoginModel({
     required this.accountExists,
@@ -13,6 +15,8 @@ class LoginModel {
     required this.accessToken,
     required this.info,
     required this.ratesInfo,
+    required this.banks,
+    required this.sellBanks,
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json,List<RatesInfo> rateList) => LoginModel(
@@ -22,6 +26,8 @@ class LoginModel {
     accessToken: json["access_token"],
     info: json["info"],
     ratesInfo: rateList,
+    banks: List<String>.from(json["banks"].map((x) => x)),
+    sellBanks: List<String>.from(json["sell_banks"].map((x) => x)),
   );
 
   Map<String, dynamic> toJson() => {

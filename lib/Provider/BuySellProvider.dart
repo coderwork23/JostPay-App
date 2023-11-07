@@ -57,7 +57,7 @@ class BuySellProvider with ChangeNotifier{
 
   bool isLoginLoader = false;
   LoginModel? loginModel;
-  getLogIn(params,context)async{
+  getLogIn(params,context,email)async{
     isLoginLoader = true;
     notifyListeners();
 
@@ -65,9 +65,6 @@ class BuySellProvider with ChangeNotifier{
       ApiHandler.getInstantApi(params).then((responseData) async {
 
         var value = json.decode(responseData.body);
-
-        // print("getLogIn->  ${value[0].}");
-        // json[0]["1"].keys.forEach((key){ print(key); });
 
         if (responseData.statusCode == 200 && value['error'] == null) {
 
@@ -90,6 +87,7 @@ class BuySellProvider with ChangeNotifier{
           // print("check value here");
           SharedPreferences sharedPre = await SharedPreferences.getInstance();
           sharedPre.setString("accessToken","${value['access_token']}");
+          sharedPre.setString("email","$email");
           accessToken = value['access_token'];
 
           await getExRate({"action":"exchange_rate"},context);
@@ -201,5 +199,24 @@ class BuySellProvider with ChangeNotifier{
     }
   }
 
+  dynamic getValidData;
+  bool isValidBuyLoading = true;
+  validateBuyOrder(params)async{
+    isValidBuyLoading = true;
+    getValidData = null;
+    notifyListeners();
 
+    ApiHandler.getInstantApi(params).then((responseData){
+      var value = json.decode(responseData.body);
+
+      if (responseData.statusCode == 200) {
+        isValidBuyLoading = false;
+        getValidData = value;
+        notifyListeners();
+      }else{
+        isValidBuyLoading = false;
+        notifyListeners();
+      }
+    });
+  }
 }

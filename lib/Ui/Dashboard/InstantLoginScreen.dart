@@ -42,7 +42,7 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
       "mail_verification_code":emailCodeController.text.trim(),
       "auth":"p1~\$*)Ze(@"
     };
-    await buySellProvider.getLogIn(params, context);
+    await buySellProvider.getLogIn(params, context,emailController.text.trim());
 
   }
 
@@ -201,10 +201,10 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
 
                 // login button
 
-                buySellProvider.getOtpBool || buySellProvider.isLoginLoader
-                    ?
-                Helper.dialogCall.showLoader()
-                    :
+                // buySellProvider.getOtpBool || buySellProvider.isLoginLoader
+                //     ?
+                // Helper.dialogCall.showLoader()
+                //     :
                 InkWell(
                   onTap: () {
                     FocusScope.of(context).unfocus();
