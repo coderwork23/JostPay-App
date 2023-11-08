@@ -86,11 +86,11 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
       )
             :
       InkWell(
-        onTap: () {
+        onTap: () async {
           if(showSendError || exchangeProvider.getCoinController.text.isEmpty || sendCoinController.text.isEmpty){
             Helper.dialogCall.showToast(context, "Please provide all details");
           }else {
-            Navigator.push(
+            await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
@@ -99,6 +99,11 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                       ),
                 )
             );
+
+            setState(() {
+              sendCoinController.clear();
+              exchangeProvider.getCoinController.clear();
+            });
           }
         },
         child: Container(
@@ -189,7 +194,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                         TextFormField(
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
-                            if(double.parse(value) < exchangeProvider.minAmount){
+                            if(double.parse(value.isEmpty ? "0" : value) < exchangeProvider.minAmount){
                               setState(() {
                                 showSendError = true;
                                 sendError = "Amount must be more then ${exchangeProvider.minAmount}";
@@ -250,6 +255,10 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                             ),
                           )
                         );
+                        setState(() {
+                          sendCoinController.clear();
+                          exchangeProvider.getCoinController.clear();
+                        });
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 5.0),
@@ -427,7 +436,10 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                             ),
                           )
                         );
-
+                        setState(() {
+                          sendCoinController.clear();
+                          exchangeProvider.getCoinController.clear();
+                        });
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 5.0),
