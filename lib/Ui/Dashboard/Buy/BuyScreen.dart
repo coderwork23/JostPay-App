@@ -4,6 +4,7 @@ import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyHistory.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/InstantLoginScreen.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
@@ -83,6 +84,7 @@ class _BuyScreenState extends State<BuyScreen> {
   @override
   Widget build(BuildContext context) {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
+    // print("object ${selectedCoin!.name}");
 
     return  Scaffold(
       body: isLoading
@@ -106,11 +108,31 @@ class _BuyScreenState extends State<BuyScreen> {
                     const SizedBox(height: 17),
 
                     // buy text
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        "Buy",
-                        style: MyStyle.tx18BWhite,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              "Buy",
+                              style: MyStyle.tx18BWhite,
+                            ),
+                          ),
+                          InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const BuyHistory(),
+                                    )
+                                );
+                              },
+                              child: const Icon(
+                                Icons.history,
+                                color: MyColor.mainWhiteColor,
+                              )
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 15),
@@ -118,6 +140,7 @@ class _BuyScreenState extends State<BuyScreen> {
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 15),
 
@@ -157,12 +180,17 @@ class _BuyScreenState extends State<BuyScreen> {
                               onChanged: (RatesInfo? value) async {
 
                                 var index = DbNetwork.dbNetwork.networkList.indexWhere((element) => element.name == value!.name);
-                                networkFees = null;
+                                setState(() {
+                                  networkFees = null;
+                                  selectedCoin = null;
+                                  priceController.clear();
+                                });
 
                                 if(index != -1){
                                   await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, DbNetwork.dbNetwork.networkList[index].id);
                                   setState(() {
                                     currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                                    selectedCoin = value;
                                     networkFees = selectedCoin!.networkFees[0];
                                   });
                                 }
@@ -180,9 +208,7 @@ class _BuyScreenState extends State<BuyScreen> {
                                   setState(() {
                                     currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
                                     selectedCoin = value;
-
                                     networkFees = selectedCoin!.networkFees[0];
-
                                   });
                                 }
                                 else if(value.name == "Binance Coin BSC"){
@@ -190,10 +216,18 @@ class _BuyScreenState extends State<BuyScreen> {
                                   setState(() {
                                     currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
                                     selectedCoin = value;
-                                    networkFees = "${selectedCoin!.networkFees[0]}";
+                                    networkFees = selectedCoin!.networkFees[0];
+                                  });
+                                }else if(value.name == "TRON - TRX"){
+                                  await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 9);
+                                  setState(() {
+                                    currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+                                    selectedCoin = value;
+                                    networkFees = selectedCoin!.networkFees[0];
                                   });
                                 }
                                 else{
+                                  // print("object ${value.name}");
                                   currencyAcController.clear();
                                   // ignore: use_build_context_synchronously
                                   Helper.dialogCall.showToast(context, "Selected Network is not implemented");
@@ -411,15 +445,55 @@ class _BuyScreenState extends State<BuyScreen> {
                             const SizedBox(height: 40),
 
                             // process button
+                            selectedCoin == null || priceController.text.isEmpty || networkFees == null
+                                || bankName ==null
+                                || double.parse(priceController.text) < selectedCoin!.minBuyAmount
+                                ?
+                            Container(
+                              alignment: Alignment.center,
+                              height: 45,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration:
+                              selectedCoin == null || priceController.text.isEmpty || networkFees == null
+                                  || bankName ==null
+                                  || double.parse(priceController.text) < selectedCoin!.minBuyAmount
+                                  ?
+                              MyStyle.invalidDecoration
+                                  :
+                              MyStyle.buttonDecoration,
+
+                              child: Text(
+                                  "Continue",
+                                  style:  MyStyle.tx18BWhite.copyWith(
+                                     color: selectedCoin == null
+                                         || priceController.text.isEmpty
+                                         || networkFees == null
+                                         || bankName ==null
+                                         ||double.parse(priceController.text) < selectedCoin!.minBuyAmount
+                                          ?
+                                     MyColor.mainWhiteColor.withOpacity(0.4)
+                                         :
+                                     MyColor.mainWhiteColor
+                                  )
+                              ),
+                            )
+                                :
                             InkWell(
                               onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => BuyValidationPage(
-                                  amount: priceController.text.trim(),
-                                  bank: bankName!,
-                                  itemCode: selectedCoin!.itemCode,
-                                  receivingAddress: currencyAcController.text.trim(),
-                                  selectedCoin: selectedCoin,
-                                ),));
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => BuyValidationPage(
+                                          amount: priceController.text.trim(),
+                                          bank: bankName!,
+                                          itemCode: selectedCoin!.itemCode,
+                                          receivingAddress: currencyAcController.text.trim(),
+                                          selectedCoin: selectedCoin,
+                                          memo: memoController.text.trim(),
+                                          networkFess: networkFees!,
+                                        )
+                                    )
+                                );
                               },
                               child: Container(
                                 alignment: Alignment.center,

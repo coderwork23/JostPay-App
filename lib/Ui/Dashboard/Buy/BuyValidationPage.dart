@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
@@ -8,15 +9,18 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BuyValidationPage extends StatefulWidget {
-  String itemCode,amount,receivingAddress,bank;
-  RatesInfo? selectedCoin;
-  BuyValidationPage({
+  final String itemCode,amount,receivingAddress,bank,memo,networkFess;
+  final RatesInfo? selectedCoin;
+
+  const BuyValidationPage({
     super.key,
     required this.itemCode,
     required this.selectedCoin,
     required this.amount,
     required this.receivingAddress,
     required this.bank,
+    required this.memo,
+    required this.networkFess,
   });
 
   @override
@@ -26,6 +30,7 @@ class BuyValidationPage extends StatefulWidget {
 class _BuyValidationPageState extends State<BuyValidationPage> {
 
   late BuySellProvider buySellProvider;
+  bool acceptTerms = false;
 
   validateBuy() async {
 
@@ -55,6 +60,30 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
       validateBuy();
     });
   }
+
+  placeBuyOrder(context)async{
+    SharedPreferences sharedPre = await SharedPreferences.getInstance();
+    var email = sharedPre.getString("email");
+
+    String feeType = "${widget.selectedCoin!.networkFees.indexOf(widget.networkFess)+1}";
+    var params = {
+      "action":"place_buy_order",
+      "email":email,
+      "token":buySellProvider.loginModel!.accessToken,
+      "item_code":widget.itemCode,
+      "amount":widget.amount,
+      "receiving_account":widget.receivingAddress,
+      "bank":widget.bank,
+      "memo":widget.memo,
+      "network_fee_type":feeType,
+      "auth":"p1~\$*)Ze(@",
+    };
+    //
+    print(jsonEncode(params));
+    await buySellProvider.placeBuyOrder(params,context);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
@@ -62,7 +91,51 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
+
     return Scaffold(
+      bottomNavigationBar: buySellProvider.orderLoading
+          ?
+      const SizedBox(
+          height:52,
+          child: Center(
+              child: CircularProgressIndicator(
+                color: MyColor.greenColor,
+              )
+          )
+      )
+          :
+      InkWell(
+        onTap: () {
+          if(acceptTerms) {
+            placeBuyOrder(context);
+          }else{
+            Helper.dialogCall.showToast(context, "Please provider all details");
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(15,0,15,15),
+          alignment: Alignment.center,
+          height: 45,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: acceptTerms
+              ?
+          MyStyle.buttonDecoration
+              :
+          MyStyle.invalidDecoration,
+
+          child: Text(
+            "Place Order",
+            style:  MyStyle.tx18BWhite.copyWith(
+                color: acceptTerms
+                    ?
+                MyColor.mainWhiteColor
+                    :
+                MyColor.mainWhiteColor.withOpacity(0.4)
+            ),
+          ),
+        ),
+      ),
+
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -76,7 +149,7 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
           ),
         ),
         title: const Text(
-          "Validation Order",
+          "Place Order",
         ),
 
       ),
@@ -186,10 +259,35 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 15),
+
+                  SizedBox(height:buySellProvider.receiveValue.isNotEmpty ? 15 : 0),
 
 
+                  Visibility(
+                    visible: buySellProvider.receiveValue.isNotEmpty,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: width*0.4,
+                          child:  Text(
+                            "You Receive",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16
+                            ),
+                          ),
+                        ),
 
+                        Expanded(
+                          child: Text(
+                            buySellProvider.receiveValue,
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                 ],
               ),
@@ -350,13 +448,44 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
 
-            // Text(
-            //   "${buySellProvider.getValidData['info']}",
-            //   style: MyStyle.tx18RWhite.copyWith(
-            //       fontSize: 12
-            //   ),
-            // ),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  acceptTerms = !acceptTerms;
+                });
+              },
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 24,
+                    width: 24,
+                    decoration: BoxDecoration(
+                        color: acceptTerms ? MyColor.greenColor : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                            width: 1.5,
+                            color: acceptTerms ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
+                        )
+                    ),
+                    child: acceptTerms ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "It is important that you check through our terms and conditions especially if this is your first time within the last 30 days. Check the 'Accept Terms' box below if you accept out terms and conditions.",
+                      style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 12,
+                        color: MyColor.dotBoarderColor
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+
           ],
         ),
       ),

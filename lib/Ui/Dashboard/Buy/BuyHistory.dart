@@ -8,14 +8,15 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SellHistory extends StatefulWidget {
-  const SellHistory({super.key});
+class BuyHistory extends StatefulWidget {
+  const BuyHistory({super.key});
 
   @override
-  State<SellHistory> createState() => _SellHistoryState();
+  State<BuyHistory> createState() => _BuyHistoryState();
 }
 
-class _SellHistoryState extends State<SellHistory> {
+class _BuyHistoryState extends State<BuyHistory> {
+
   late BuySellProvider buySellProvider;
 
   String startData = DateFormat("yyyy-MM-dd").format(DateTime.now());
@@ -24,10 +25,10 @@ class _SellHistoryState extends State<SellHistory> {
 
   showMyCalender(dateType) async {
     DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(), //get today's date
-      firstDate:DateTime(2000), //DateTime.now() - not to allow to choose before today.
-      lastDate: DateTime.now(),
+        context: context,
+        initialDate: DateTime.now(), //get today's date
+        firstDate:DateTime(2000), //DateTime.now() - not to allow to choose before today.
+        lastDate: DateTime.now(),
 
     );
 
@@ -40,7 +41,7 @@ class _SellHistoryState extends State<SellHistory> {
         }else{
           endData = formattedDate;
         }
-        buySellProvider.sellHistoryList.clear();
+        buySellProvider.buyHistoryList.clear();
       });
 
       getHistory();
@@ -64,14 +65,15 @@ class _SellHistoryState extends State<SellHistory> {
       "auth":"p1~\$*)Ze(@",
     };
 
-    await buySellProvider.sellHistory(params);
+    await buySellProvider.buyHistory(params);
   }
+
 
   @override
   void initState() {
     super.initState();
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
-    buySellProvider.sellHistoryList.clear();
+    buySellProvider.buyHistoryList.clear();
     Future.delayed(Duration.zero,(){
       getHistory();
     });
@@ -80,6 +82,7 @@ class _SellHistoryState extends State<SellHistory> {
   @override
   Widget build(BuildContext context) {
 
+    var width = MediaQuery.of(context).size.width;
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
 
     return Scaffold(
@@ -95,7 +98,7 @@ class _SellHistoryState extends State<SellHistory> {
           ),
         ),
         title: const Text(
-          "Sell History",
+          "Buy History",
         ),
 
       ),
@@ -140,8 +143,8 @@ class _SellHistoryState extends State<SellHistory> {
               }).toList(),
               onChanged: (String? value) async {
                 setState(() {
+                  buySellProvider.buyHistoryList.clear();
                   statusType = value!;
-                  buySellProvider.sellHistoryList.clear();
                 });
 
                 getHistory();
@@ -164,11 +167,11 @@ class _SellHistoryState extends State<SellHistory> {
                       alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: MyColor.darkGrey01Color,
-                          border: Border.all(
-                            color: MyColor.boarderColor,
-                          )
+                        borderRadius: BorderRadius.circular(10),
+                        color: MyColor.darkGrey01Color,
+                        border: Border.all(
+                          color: MyColor.boarderColor,
+                        )
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -239,11 +242,11 @@ class _SellHistoryState extends State<SellHistory> {
             const SizedBox(height: 20),
 
             Expanded(
-              child: buySellProvider.sellHistoryLoading
+              child: buySellProvider.buyHistoryLoading
                   ?
               Helper.dialogCall.showLoader()
                   :
-              buySellProvider.sellHistoryList.isEmpty
+              buySellProvider.buyHistoryList.isEmpty
                   ?
               Center(
                 child: Text(
@@ -256,9 +259,9 @@ class _SellHistoryState extends State<SellHistory> {
                   :
               ListView.builder(
                 shrinkWrap: true,
-                itemCount: buySellProvider.sellHistoryList.length,
+                itemCount: buySellProvider.buyHistoryList.length,
                 itemBuilder: (context, index) {
-                  var list = buySellProvider.sellHistoryList[index];
+                  var list = buySellProvider.buyHistoryList[index];
                   var value = list.details.amount.split(" ");
                   var amount = ApiHandler.calculateLength3(value[0]);
                   var type = value[1];
@@ -267,11 +270,11 @@ class _SellHistoryState extends State<SellHistory> {
                     padding: const EdgeInsets.symmetric(horizontal: 18,vertical: 15),
                     margin: const EdgeInsets.only(bottom: 15),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: MyColor.darkGrey01Color,
-                        border: Border.all(
-                          color: MyColor.boarderColor,
-                        )
+                      borderRadius: BorderRadius.circular(10),
+                      color: MyColor.darkGrey01Color,
+                      border: Border.all(
+                        color: MyColor.boarderColor,
+                      )
                     ),
                     child: Column(
                       children: [
