@@ -8,9 +8,10 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// ignore: must_be_immutable
 class SellValidationPage extends StatefulWidget {
-
-  const SellValidationPage({super.key});
+  var params;
+  SellValidationPage({super.key,required this.params});
 
   @override
   State<SellValidationPage> createState() => _SellValidationPageState();
@@ -29,6 +30,19 @@ class _SellValidationPageState extends State<SellValidationPage> {
   }
 
 
+  var selectedAccountId = "";
+  placeSellOrder(context)async{
+    SharedPreferences sharedPre = await SharedPreferences.getInstance();
+    selectedAccountId = sharedPre.getString('accountId') ?? "";
+    var data = widget.params;
+    setState(() {
+      data['action'] = "place_sell_order";
+    });
+
+    print(jsonEncode(data));
+    await buySellProvider.sellOrder(widget.params, selectedAccountId, context);
+  }
+
   @override
   Widget build(BuildContext context) {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
@@ -38,7 +52,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
 
 
     return Scaffold(
-      bottomNavigationBar: buySellProvider.orderLoading
+      bottomNavigationBar: buySellProvider.sellOderLoading
           ?
       const SizedBox(
           height:52,
@@ -52,9 +66,9 @@ class _SellValidationPageState extends State<SellValidationPage> {
       InkWell(
         onTap: () {
           if(acceptTerms) {
-            // placeBuyOrder(context);
+            placeSellOrder(context);
           }else{
-            Helper.dialogCall.showToast(context, "Please provider all details");
+            Helper.dialogCall.showToast(context, "Review All Details.");
           }
         },
         child: Container(
@@ -98,339 +112,111 @@ class _SellValidationPageState extends State<SellValidationPage> {
         ),
 
       ),
-      body: buySellProvider.isValidBuyLoading
-          ?
-      Helper.dialogCall.showLoader()
-          :
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // const SizedBox(height: 20),
-            //
-            // Container(
-            //   padding: const EdgeInsets.all(15),
-            //   decoration: BoxDecoration(
-            //     color: MyColor.darkGrey01Color,
-            //     borderRadius: BorderRadius.circular(10),
-            //   ),
-            //   child: Column(
-            //     children: [
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child: Text(
-            //               "Type: ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Text(
-            //               "Buy",
-            //             style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const SizedBox(height: 15),
-            //
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child:  Text(
-            //               "Currency/Service: ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Text(
-            //               widget.selectedCoin!.name,
-            //             style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const SizedBox(height: 15),
-            //
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child:  Text(
-            //               "Amount ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Text(
-            //             "${widget.amount} USD",
-            //             style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const SizedBox(height: 15),
-            //
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child:  Text(
-            //               "You Pay ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Expanded(
-            //             child: Text(
-            //               "${(double.parse("${widget.selectedCoin!.buyPrice}") * double.parse(widget.amount) + 7.5 /100 * (5*double.parse(widget.amount)) + 50)} NGN",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //
-            //       SizedBox(height:buySellProvider.receiveValue.isNotEmpty ? 15 : 0),
-            //
-            //
-            //       Visibility(
-            //         visible: buySellProvider.receiveValue.isNotEmpty,
-            //         child: Row(
-            //           children: [
-            //             SizedBox(
-            //               width: width*0.4,
-            //               child:  Text(
-            //                 "You Receive",
-            //                 style: MyStyle.tx18RWhite.copyWith(
-            //                     fontSize: 16
-            //                 ),
-            //               ),
-            //             ),
-            //
-            //             Expanded(
-            //               child: Text(
-            //                 buySellProvider.receiveValue,
-            //                 style: MyStyle.tx18RWhite.copyWith(
-            //                     fontSize: 16
-            //                 ),
-            //               ),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //
-            //     ],
-            //   ),
-            // ),
-            // const SizedBox(height: 20),
-            //
-            // Container(
-            //   padding: const EdgeInsets.all(15),
-            //   decoration: BoxDecoration(
-            //     color: MyColor.darkGrey01Color,
-            //     borderRadius: BorderRadius.circular(10),
-            //   ),
-            //   child: Column(
-            //     children: [
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child:  Text(
-            //               "VAT",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Expanded(
-            //             child: Text(
-            //               "${7.5 /100 * (5*double.parse(widget.amount))} NGN",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const SizedBox(height: 5),
-            //
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //           ),
-            //
-            //           Expanded(
-            //             child: Text(
-            //               "(including 7.5% VAT)",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 12
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const SizedBox(height: 5),
-            //
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child:  Text(
-            //               "Stamp Duty: ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Text(
-            //             "50 NGN",
-            //             style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //
-            //     ],
-            //   ),
-            // ),
-            // const SizedBox(height: 20),
-            //
-            // Container(
-            //   padding: const EdgeInsets.all(15),
-            //   decoration: BoxDecoration(
-            //     color: MyColor.darkGrey01Color,
-            //     borderRadius: BorderRadius.circular(10),
-            //   ),
-            //   child: Column(
-            //     children: [
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child: Text(
-            //               "Currency Account: ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Expanded(
-            //             child: Text(
-            //                 "${widget.receivingAddress.substring(0,4)}...${widget.receivingAddress.substring(widget.receivingAddress.length-4,widget.receivingAddress.length)}",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const SizedBox(height: 15),
-            //
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child:  Text(
-            //               "Payment Method: ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Text(
-            //               "Bank",
-            //             style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const SizedBox(height: 15),
-            //
-            //       Row(
-            //         children: [
-            //           SizedBox(
-            //             width: width*0.4,
-            //             child:  Text(
-            //               "Bank Name: ",
-            //               style: MyStyle.tx18RWhite.copyWith(
-            //                   fontSize: 16
-            //               ),
-            //             ),
-            //           ),
-            //
-            //           Text(
-            //             widget.bank,
-            //             style: MyStyle.tx18RWhite.copyWith(
-            //                 fontSize: 16
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //
-            //     ],
-            //   ),
-            // ),
-            // const SizedBox(height: 20),
-            //
-            // InkWell(
-            //   onTap: () {
-            //     setState(() {
-            //       acceptTerms = !acceptTerms;
-            //     });
-            //   },
-            //   child: Row(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       Container(
-            //         height: 24,
-            //         width: 24,
-            //         decoration: BoxDecoration(
-            //             color: acceptTerms ? MyColor.greenColor : Colors.transparent,
-            //             borderRadius: BorderRadius.circular(6),
-            //             border: Border.all(
-            //                 width: 1.5,
-            //                 color: acceptTerms ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
-            //             )
-            //         ),
-            //         child: acceptTerms ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
-            //       ),
-            //       const SizedBox(width: 10),
-            //       Expanded(
-            //         child: Text(
-            //           "It is important that you check through our terms and conditions especially if this is your first time within the last 30 days. Check the 'Accept Terms' box below if you accept out terms and conditions.",
-            //           style: MyStyle.tx18RWhite.copyWith(
-            //             fontSize: 12,
-            //             color: MyColor.dotBoarderColor
-            //           ),
-            //         ),
-            //       )
-            //     ],
-            //   ),
-            // ),
 
+            Text(
+              "Note: ${buySellProvider.getSellValidation['info']}".split("\n").first,
+              style: MyStyle.tx18RWhite.copyWith(
+                fontSize: 14,
+                color: MyColor.dotBoarderColor
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Text(
+                    "Note: ${buySellProvider.getSellValidation['info']}".split("\n")[2],
+                    style: MyStyle.tx18RWhite.copyWith(
+                      fontSize: 16
+                    )
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                      "Note: ${buySellProvider.getSellValidation['info']}".split("\n")[3].split(" ").last,
+                      style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                      )
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+                "${buySellProvider.getSellValidation['info']}".split("\n")[4],
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 16
+                )
+            ),
+            const SizedBox(height: 8),
+            Text(
+                "${buySellProvider.getSellValidation['info']}".split("\n")[5],
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 16
+                )
+            ),
+
+            const SizedBox(height: 8),
+            Text(
+                "${buySellProvider.getSellValidation['info']}".split("\n")[6],
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 16
+                )
+            ),
+
+            const SizedBox(height: 8),
+            Text(
+                "${buySellProvider.getSellValidation['info']}".split("\n")[7],
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 16
+                )
+            ),
+
+            const SizedBox(height: 20),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  acceptTerms = !acceptTerms;
+                });
+              },
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  Container(
+                    height: 24,
+                    width: 24,
+                    decoration: BoxDecoration(
+                        color: acceptTerms ? MyColor.greenColor : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                            width: 1.5,
+                            color: acceptTerms ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
+                        )
+                    ),
+                    child: acceptTerms ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
+                  ),
+                  const SizedBox(width: 10),
+
+                  Expanded(
+                    child: Text(
+                        "${buySellProvider.getSellValidation['info'].split("\n")[8]}",
+                        style: MyStyle.tx18RWhite.copyWith(
+                            fontSize: 16,
+                            color: acceptTerms ? MyColor.whiteColor : MyColor.dotBoarderColor
+                        )
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

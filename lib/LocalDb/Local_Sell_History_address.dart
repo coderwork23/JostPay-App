@@ -35,27 +35,26 @@ class DbSellHistory{
               'invoice_url TEXT,'
               'time INTEGER,'
               'type TEXT,'
+              'payin_address TEXT,'
               'payin_amount TEXT,'
               'payout_amount TEXT,'
               'payout_address TEXT,'
-              'payin_url TEXT'
+              'accountId TEXT'
               ')');
         },
     );
   }
 
   createSellHistory(SellHistoryModel newToken) async{
-    // print("object newtoken ${newToken.id}");
     final db= await database;
     final res = await db!.insert('SellHistory', newToken.toJson());
-    // print("data add here $res");
     return res;
   }
 
-  updateSellHistory(SellHistoryModel newToken,tokenId,id) async{
+  updateSellHistory(SellHistoryModel newToken,invoice,id) async{
     final db= await database;
 
-    final res = await db!.update('SellHistory', newToken.toJson(), where: "id = ? AND accountId = ? ",whereArgs: [tokenId,id]);
+    final res = await db!.update('SellHistory', newToken.toJson(), where: "invoice = ? AND accountId = ? ",whereArgs: [invoice,id]);
     getSellHistory(id);
     return res;
   }
@@ -63,10 +62,13 @@ class DbSellHistory{
   List<SellHistoryModel> sellHistoryList = [];
   getSellHistory(String accountId) async {
 
+    print("accountId ------> $accountId");
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId'");
+    final res = await db!.rawQuery("SELECT * FROM SellHistory ");
 
+    print("object--- $res");
     List<SellHistoryModel> list = res.map((c) {
+      print(c);
       return SellHistoryModel.fromJson(
         c,
         accountId,
@@ -78,10 +80,10 @@ class DbSellHistory{
 
 
   SellHistoryModel? getTrxStatusData;
-  getTrxStatus(String accountId,String id) async {
+  getTrxStatus(String accountId,String invoiceNo) async {
 
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId' AND id = '$id'");
+    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId' OR invoice = '$invoiceNo'");
 
     if(res.isNotEmpty) {
       getTrxStatusData = SellHistoryModel.fromJson(

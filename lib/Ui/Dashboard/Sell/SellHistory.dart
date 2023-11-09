@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'SellStatusPage.dart';
 
 class SellHistory extends StatefulWidget {
   const SellHistory({super.key});
@@ -18,54 +21,23 @@ class SellHistory extends StatefulWidget {
 class _SellHistoryState extends State<SellHistory> {
   late BuySellProvider buySellProvider;
 
-  String startData = DateFormat("yyyy-MM-dd").format(DateTime.now());
-  String endData = DateFormat("yyyy-MM-dd").format(DateTime.now());
-  String statusType = "Pending";
+  String selectedAccountId ="";
+  bool isLoading = false;
 
-  showMyCalender(dateType) async {
-    DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(), //get today's date
-      firstDate:DateTime(2000), //DateTime.now() - not to allow to choose before today.
-      lastDate: DateTime.now(),
+  getAllSellHistory() async {
+    setState(() {
+      isLoading = true;
+    });
 
-    );
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    await DbSellHistory.dbSellHistory.getSellHistory(selectedAccountId);
 
-    if(pickedDate != null ){
-      String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
-
-      setState(() {
-        if(dateType == "start") {
-          startData = formattedDate;
-        }else{
-          endData = formattedDate;
-        }
-        buySellProvider.sellHistoryList.clear();
-      });
-
-      getHistory();
-    }
+    setState(() {
+      isLoading = false;
+    });
   }
 
-  int pageCount = 1;
-  getHistory() async {
-
-    SharedPreferences sharedPre = await SharedPreferences.getInstance();
-    var email = sharedPre.getString("email");
-
-    var params = {
-      "action":"get_transactions",
-      "email":email,
-      "token":buySellProvider.loginModel!.accessToken,
-      "p":"$pageCount",
-      "status":statusType,
-      "start_date":startData,
-      "end_date":endData,
-      "auth":"p1~\$*)Ze(@",
-    };
-
-    await buySellProvider.sellHistory(params);
-  }
 
   @override
   void initState() {
@@ -73,7 +45,7 @@ class _SellHistoryState extends State<SellHistory> {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
     buySellProvider.sellHistoryList.clear();
     Future.delayed(Duration.zero,(){
-      getHistory();
+      getAllSellHistory();
     });
   }
 
@@ -103,147 +75,14 @@ class _SellHistoryState extends State<SellHistory> {
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
           children: [
-            DropdownButtonFormField<String>(
-              value: statusType,
-              isExpanded: true,
-              decoration: MyStyle.textInputDecoration.copyWith(
-                contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-              ),
-              icon: const Icon(
-                Icons.keyboard_arrow_down_sharp,
-                color: MyColor.greenColor,
-              ),
-              hint: Text(
-                "Select Bank",
-                style:MyStyle.tx22RWhite.copyWith(
-                    fontSize: 18,
-                    color: MyColor.whiteColor.withOpacity(0.7)
-                ),
-              ),
-              dropdownColor: MyColor.backgroundColor,
-              style: MyStyle.tx18RWhite.copyWith(
-                  fontSize: 16
-              ),
 
-              items: ["Pending","Cancelled","Completed"].map((String category) {
-                return DropdownMenuItem(
-                    value: category,
-                    child: Text(
-                      category,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 16
-                      ),
-                    )
-                );
-              }).toList(),
-              onChanged: (String? value) async {
-                setState(() {
-                  statusType = value!;
-                  buySellProvider.sellHistoryList.clear();
-                });
-
-                getHistory();
-
-              },
-            ),
-            const SizedBox(height: 15),
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-
-                // start data
-                Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      showMyCalender("start");
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: MyColor.darkGrey01Color,
-                          border: Border.all(
-                            color: MyColor.boarderColor,
-                          )
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.calendar_month,
-                            color: MyColor.whiteColor,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              startData,
-                              textAlign: TextAlign.center,
-                              style: MyStyle.tx18RWhite,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    "To",
-                    style: MyStyle.tx18RWhite,
-                  ),
-                ),
-
-                // end data
-                Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      showMyCalender("end");
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: MyColor.darkGrey01Color,
-                          border: Border.all(
-                            color: MyColor.boarderColor,
-                          )
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_month,
-                            color: MyColor.whiteColor,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              endData,
-                              textAlign: TextAlign.center,
-                              style: MyStyle.tx18RWhite,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
 
             Expanded(
-              child: buySellProvider.sellHistoryLoading
+              child: isLoading
                   ?
               Helper.dialogCall.showLoader()
                   :
-              buySellProvider.sellHistoryList.isEmpty
+              DbSellHistory.dbSellHistory.sellHistoryList.isEmpty
                   ?
               Center(
                 child: Text(
@@ -256,150 +95,58 @@ class _SellHistoryState extends State<SellHistory> {
                   :
               ListView.builder(
                 shrinkWrap: true,
-                itemCount: buySellProvider.sellHistoryList.length,
+                itemCount: DbSellHistory.dbSellHistory.sellHistoryList.length,
                 itemBuilder: (context, index) {
-                  var list = buySellProvider.sellHistoryList[index];
-                  var value = list.details.amount.split(" ");
-                  var amount = ApiHandler.calculateLength3(value[0]);
-                  var type = value[1];
-
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18,vertical: 15),
-                    margin: const EdgeInsets.only(bottom: 15),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: MyColor.darkGrey01Color,
-                        border: Border.all(
-                          color: MyColor.boarderColor,
-                        )
-                    ),
-                    child: Column(
-                      children: [
+                  var list = DbSellHistory.dbSellHistory.sellHistoryList[index];
 
 
-                        Row(
-                          children: [
-                            Text(
-                              "status:",
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SellStatusPage(invoiceNo: list.invoice),
+                          )
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18,vertical: 15),
+                      margin: const EdgeInsets.only(bottom: 15),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: MyColor.darkGrey01Color,
+                          border: Border.all(
+                            color: MyColor.boarderColor,
+                          )
+                      ),
+                      child: Column(
+                        children: [
 
-                            const SizedBox(width: 5),
-                            Text(
-                              list.status,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-                            const Spacer(),
 
-                            Text(
-                              "Type: ",
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-
-                            const SizedBox(width: 5),
-                            Text(
-                              list.details.transactionType,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-
-                        // invoice and status
-                        Row(
-                          children: [
-                            Text(
-                              "Invoice no: ",
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              list.invoiceNo,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-
-                        // date
-                        Row(
-                          children: [
-                            Text(
-                              "date: ",
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-
-                            const SizedBox(width: 5),
-                            Text(
-                              list.date,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-
-                        // buy Currency name
-                        Row(
-                          children: [
-                            Text(
-                              "Token name:",
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-
-                            Expanded(
-                              child: Text(
-                                list.details.currency,
-                                textAlign: TextAlign.start,
+                          Row(
+                            children: [
+                              Text(
+                                "status:",
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
 
-                        Row(
-                          children: [
-                            Text(
-                              "Amount: ",
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-
-                            Expanded(
-                              child: Text(
-                                "$amount $type",
+                              const SizedBox(width: 5),
+                              Text(
+                                list.orderStatus,
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                              const Spacer(),
 
-                      ],
+                            ],
+                          ),
+
+
+                        ],
+                      ),
                     ),
                   );
                 },

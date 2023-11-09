@@ -109,7 +109,7 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
           if(acceptTerms) {
             placeBuyOrder(context);
           }else{
-            Helper.dialogCall.showToast(context, "Please provider all details");
+            Helper.dialogCall.showToast(context, "Accept all term and condition.");
           }
         },
         child: Container(

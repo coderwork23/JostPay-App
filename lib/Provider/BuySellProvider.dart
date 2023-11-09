@@ -3,11 +3,21 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/BuySellHistoryModel.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyHistory.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellStatusPage.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellValidationPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Models/SellHistoryModel.dart';
 
 class BuySellProvider with ChangeNotifier{
 
@@ -327,30 +337,139 @@ class BuySellProvider with ChangeNotifier{
   }
 
 
-  bool sellValidOrder = false,isValidSuccess = false;
+  bool sellValidOrder = true,isValidSuccess = false;
   dynamic getSellValidation;
+  List<dynamic> sellRateList = [];
+  List<String> sellBankList = [];
 
-  validateSellOrder(params)async{
+  validateSellOrder(params,accountId,context)async{
     sellValidOrder = true;
     isValidSuccess = false;
     getSellValidation = null;
-    receiveValue = "";
     notifyListeners();
 
-    ApiHandler.getInstantApi(params).then((responseData){
+    ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
+      // print("object $value");
 
       if (responseData.statusCode == 200 && value["info"]!= null) {
+
         sellValidOrder = false;
         isValidSuccess = true;
         getSellValidation = value;
 
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SellValidationPage(params:params),)
+        );
         notifyListeners();
-      }else{
 
+      }else{
+        sellBankList.clear();
+        sellRateList.clear();
+
+        // if(value['error'] == null) {
+          if (value['rates_info'] != null) {
+            await DBTokenProvider.dbTokenProvider.getAccountToken(accountId);
+            value['rates_info'].keys.forEach((key) {
+              int findToken = DBTokenProvider.dbTokenProvider.tokenList
+                  .indexWhere((element) {
+                if (key == "USDTTRC20") {
+                  return element.type.toLowerCase() == "TRC20".toLowerCase();
+                }
+                if (key == "USDTBEP20") {
+                  return element.type.toLowerCase() == "BEP20".toLowerCase();
+                }
+                if (key == "BNBBEP20") {
+                  return element.symbol.toLowerCase() == "BNB".toLowerCase();
+                } else {
+                  return element.symbol.toLowerCase() ==
+                      key.toString().toLowerCase();
+                }
+              });
+
+              List<AccountTokenList> tokenList = DBTokenProvider.dbTokenProvider
+                  .tokenList;
+
+              if (findToken != -1) {
+                var amount = double.parse(tokenList[findToken].balance) *
+                    tokenList[findToken].price;
+                var data = {
+                  "amount": ApiHandler.calculateLength(
+                      "${amount == 0 ? "0.0" : amount}"),
+                  "name": value['rates_info'][key]['name'],
+                  "symbol": key,
+                  "type": tokenList[findToken].type,
+                  "logo": tokenList[findToken].logo,
+                  "sellPrice": value['rates_info'][key]['sell_price'],
+                  "minSellAmount": value['rates_info'][key]['min_sell_amount'],
+                };
+
+                sellRateList.add(data);
+              }
+            });
+          }
+
+          if (value['sell_banks'] != null) {
+            List<String> list = List<String>.from(
+                value['sell_banks'].map((x) => x));
+            sellBankList.addAll(list);
+          }
+        // }else{
+        //   Helper.dialogCall.showToast(context, value['error']);
+        // }
         sellValidOrder = false;
         notifyListeners();
       }
     });
+  }
+
+
+  bool sellOderLoading = false;
+  sellOrder(params,accountId,context){
+    sellOderLoading = true;
+    notifyListeners();
+    ApiHandler.getInstantApi(params).then((responseData) async {
+      var value = json.decode(responseData.body);
+
+      // print("value $value");
+      if (responseData.statusCode == 200) {
+        print("object id ---> $accountId");
+        await DbSellHistory.dbSellHistory.getSellHistory(accountId);
+
+        var trxIndex = DbSellHistory.dbSellHistory.sellHistoryList.indexWhere((element) => element.invoice == "${value['invoice']}");
+
+        if(trxIndex == -1) {
+          await DbSellHistory.dbSellHistory.createSellHistory(
+              SellHistoryModel.fromJson(value, accountId)
+          );
+        }else{
+          await DbSellHistory.dbSellHistory.updateSellHistory(
+              SellHistoryModel.fromJson(value, accountId),
+              value["invoice"],
+              accountId
+          );
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SellStatusPage(invoiceNo: value["invoice"]),
+          )
+        );
+        Helper.dialogCall.showToast(context, "Your order placed successfully.");
+        sellOderLoading = false;
+
+        notifyListeners();
+
+      }else{
+
+        Helper.dialogCall.showToast(context, "something is wrong please try again.");
+        sellOderLoading = false;
+        notifyListeners();
+      }
+    });
+
   }
 }
