@@ -20,7 +20,7 @@ class ExchangeProvider with ChangeNotifier{
 
   bool isLoading = true;
 
-  getTokenList(String url)async{
+  getTokenList(String url,context)async{
     isLoading = true;
     exTokenList.clear();
     notifyListeners();
@@ -42,7 +42,8 @@ class ExchangeProvider with ChangeNotifier{
 
     await getExchangeMinMax(
         "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
-        {"api_key":Utils.apiKey}
+        {"api_key":Utils.apiKey},
+        context
     );
     notifyListeners();
 
@@ -78,7 +79,7 @@ class ExchangeProvider with ChangeNotifier{
 
   double minAmount = 0,maxAmount = 0;
   bool exRateLoading= true;
-  getExchangeMinMax(String url,params)async{
+  getExchangeMinMax(String url,params,context)async{
     exRateLoading = true;
     notifyListeners();
 
@@ -94,6 +95,7 @@ class ExchangeProvider with ChangeNotifier{
         exRateLoading = false;
         notifyListeners();
       }else{
+        Helper.dialogCall.showToast(context, "Not valid fixed rate pair");
         exRateLoading = false;
         notifyListeners();
 
@@ -109,7 +111,7 @@ class ExchangeProvider with ChangeNotifier{
 
     await ApiHandler.getExchangeParams(url, params).then((responseData){
       var value = json.decode(responseData.body);
-      // print("object ---> $value");
+      // print("object getMinMax ---> $value");
 
       if(responseData.statusCode == 200) {
 
@@ -126,7 +128,7 @@ class ExchangeProvider with ChangeNotifier{
     });
   }
 
-  changeSendToken(AccountTokenList newToken, context, id) async {
+  changeSendToken(AccountTokenList newToken, context, id,valueType) async {
     if (receiveCoin.id != newToken.id) {
       // Create a copy of newToken
       AccountTokenList copiedToken = AccountTokenList.fromJson(newToken.toJson(),id);
@@ -137,7 +139,11 @@ class ExchangeProvider with ChangeNotifier{
       } else if (newToken.type == "BEP20") {
         sendCoin.symbol = "usdtbsc";
       }
-      Navigator.pop(context);
+      if(valueType == "") {
+
+        Navigator.pop(context);
+      }
+
 
       await getMinMax(
           "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
@@ -182,17 +188,17 @@ class ExchangeProvider with ChangeNotifier{
   bool estimateLoading = false;
   double estimatedAmount =0;
   TextEditingController getCoinController = TextEditingController();
-  estimateExchangeAmount(String url,params)async{
+  estimateExchangeAmount(String url,params,context)async{
     estimateLoading = true;
     notifyListeners();
 
-    // print("object--->  $url");
-    // print("object--->  $params");
+    print("object--->  $url");
+    print("object--->  $params");
 
     await ApiHandler.getExchangeParams(url, params).then((responseData){
       var value = json.decode(responseData.body);
 
-      // print("estimate object --->  $value");
+      print("estimate object --->  $value");
 
       if(responseData.statusCode == 200) {
 
@@ -203,6 +209,7 @@ class ExchangeProvider with ChangeNotifier{
 
       }else{
         estimateLoading = false;
+        Helper.dialogCall.showToast(context, "Not valid fixed rate pair");
         notifyListeners();
         print(" =====> exchange estimate Exchange Amount api error <====");
       }

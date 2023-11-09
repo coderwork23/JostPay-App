@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
@@ -13,7 +14,11 @@ import 'ExchangeAddressScreen.dart';
 import 'ExchangeHistory.dart';
 
 class ExchangeScreen extends StatefulWidget {
-  const ExchangeScreen({super.key});
+  final AccountTokenList? tokenList;
+  const ExchangeScreen({
+    super.key,
+     this.tokenList
+  });
 
   @override
   State<ExchangeScreen> createState() => _ExchangeScreenState();
@@ -31,17 +36,23 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
   getExToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await exchangeProvider.getTokenList("/v1/currencies");
+    await exchangeProvider.getTokenList("/v1/currencies",context);
+
+    if(widget.tokenList != null){
+      setState(() {
+        exchangeProvider.changeSendToken(widget.tokenList!, context, selectedAccountId,"oldValue");
+      });
+    }
   }
 
   // get receive token animate amount
-  estimateExchangeAmount()async{
+  estimateExchangeAmount(context)async{
     String sendSymbol = exchangeProvider.sendCoin.symbol.toLowerCase();
     String receiveSymbol = exchangeProvider.receiveCoin.symbol.toLowerCase();
     var data = {
       "api_key":Utils.apiKey
     };
-    await exchangeProvider.estimateExchangeAmount("v1/exchange-amount/fixed-rate/${sendCoinController.text.trim()}/${sendSymbol}_$receiveSymbol",data);
+    await exchangeProvider.estimateExchangeAmount("v1/exchange-amount/fixed-rate/${sendCoinController.text.trim()}/${sendSymbol}_$receiveSymbol",data,context);
   }
 
   // swap UpDown methods
@@ -50,9 +61,9 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
     var tempReceive = exchangeProvider.receiveCoin;
 
     exchangeProvider.changeReceiveToken(tempSend, context, selectedAccountId);
-    exchangeProvider.changeSendToken(tempReceive, context, selectedAccountId);
+    exchangeProvider.changeSendToken(tempReceive, context, selectedAccountId,"");
 
-    estimateExchangeAmount();
+    estimateExchangeAmount(context);
   }
 
   @override
@@ -209,7 +220,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                                 showSendError = false;
                                 sendError = "";
                               });
-                              estimateExchangeAmount();
+                              estimateExchangeAmount(context);
 
                             }
                           },

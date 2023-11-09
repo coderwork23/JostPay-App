@@ -33,7 +33,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
   getAcAddress() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,exchangeProvider.receiveCoin.networkId);
+    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,exchangeProvider.receiveCoin.networkId);
     addressController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
     setState(() {});
   }
@@ -106,7 +106,8 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
     exchangeProvider.isAddressVerify = false;
     exchangeProvider.createExSuccess = false;
     exchangeProvider.statusLoading = false;
-
+    DbAccountAddress.dbAccountAddress.selectAccountPublicAddress = "";
+    DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress = "";
     super.initState();
     getAcAddress();
   }

@@ -557,7 +557,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ExchangeScreen(),
+                      builder: (context) =>  const ExchangeScreen(tokenList: null),
                     )
                   );
                 },
@@ -647,6 +647,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
                            await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,list.networkId);
                            selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+
 
                              // ignore: use_build_context_synchronously
                            var value = await Navigator.push(

@@ -72,7 +72,7 @@ class _ExChangeTokenListState extends State<ExChangeTokenList> {
           return InkWell(
             onTap: () async {
               if(widget.pageType == "send"){
-                exchangeProvider.changeSendToken(list,context,selectedAccountId);
+                exchangeProvider.changeSendToken(list,context,selectedAccountId,"");
               }else{
                 exchangeProvider.changeReceiveToken(list,context,selectedAccountId);
               }

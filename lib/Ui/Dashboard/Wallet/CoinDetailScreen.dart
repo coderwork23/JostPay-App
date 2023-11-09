@@ -6,8 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
+import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
@@ -54,6 +56,7 @@ class CoinDetailScreen extends StatefulWidget {
 class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
   late TransectionProvider transectionProvider;
+  late ExchangeProvider exchangeProvider;
 
   String tokenId = "",tokenName = "",tokenNatewokrkId = "",
       tokenSymbol = "",tokenImage = "",tokenUsd = "",
@@ -67,6 +70,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     super.initState();
     transectionProvider = Provider.of<TransectionProvider>(context, listen: false);
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
+    exchangeProvider = Provider.of<ExchangeProvider>(context, listen: false);
+
     transectionProvider.transectionList.clear();
 
     tokenId = widget.tokenId;
@@ -76,6 +81,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     tokenImage = widget.tokenImage;
     tokenBalance = widget.tokenBalance;
     sendTokenType = widget.tokenType;
+    tokenMarketId = widget.tokenMarketId;
     tokenUsd = "${widget.tokenUsdPrice}";
 
     getNetWork();
@@ -166,6 +172,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   Widget build(BuildContext context) {
     final dashProvider = Provider.of<DashboardProvider>(context);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+    exchangeProvider = Provider.of<ExchangeProvider>(context, listen: true);
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
@@ -440,10 +447,18 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     //Exchange
                     InkWell(
                       onTap: () {
+
+                        var data = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
+                          return "${element.marketId}" == tokenMarketId;
+                        });
+
+
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ExchangeScreen(),
+                              builder: (context) => ExchangeScreen(
+                                tokenList: DBTokenProvider.dbTokenProvider.tokenList[data],
+                              ),
                             )
                         );
                       },
