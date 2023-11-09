@@ -472,4 +472,34 @@ class BuySellProvider with ChangeNotifier{
     });
 
   }
+
+
+  bool checkOrderLoading = false;
+  checkOrderStatus(params,accountId,context){
+    checkOrderLoading = true;
+    notifyListeners();
+    ApiHandler.getInstantApi(params).then((responseData) async {
+      var value = json.decode(responseData.body);
+
+      print("checkOrderStatus $value");
+      if (responseData.statusCode == 200) {
+        await DbSellHistory.dbSellHistory.getSellHistory(accountId);
+        await DbSellHistory.dbSellHistory.updateStatus(
+            value["order_status"],
+            value["invoice"],
+            accountId
+        );
+
+        checkOrderLoading = false;
+
+        notifyListeners();
+
+      }else{
+        print("--------> check order status api error <--------");
+        checkOrderLoading = false;
+        notifyListeners();
+      }
+    });
+
+  }
 }

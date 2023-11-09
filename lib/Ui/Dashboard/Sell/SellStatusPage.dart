@@ -95,9 +95,15 @@ class _SellStatusPageState extends State<SellStatusPage> {
   }
 
 
-  checkOrderStatus()async{
+  checkOrderStatus(context)async{
 
+    var params = {
+      "action":"check_order_status",
+      "invoice":widget.invoiceNo,
+      "auth":"p1~\$*)Ze(@",
+    };
 
+    await buySellProvider.checkOrderStatus(params,selectedAccountId,context);
 
     setState(() {
       _showRefresh = false;
@@ -111,7 +117,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
       _showRefresh = true;
     });
 
-    checkOrderStatus();
+    checkOrderStatus(context);
     getTxsStatus();
   }
 

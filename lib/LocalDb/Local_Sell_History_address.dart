@@ -60,6 +60,14 @@ class DbSellHistory{
     return res;
   }
 
+  updateStatus(String order_status,invoice,id) async{
+    final db= await database;
+    final res = await db!.rawQuery("UPDATE SellHistory SET order_status = '$order_status' WHERE invoice = '$id' AND accountId ='$id'");
+
+    getSellHistory(id);
+    return res;
+  }
+
   List<SellHistoryModel> sellHistoryList = [];
   getSellHistory(String accountId) async {
 

@@ -29,13 +29,11 @@ class _SellScreenState extends State<SellScreen> {
 
   String? selectedBank,selectedAccountId = "",networkFees,sellBank;
   bool isLoading = false;
-  var usdError = "";
+  var usdError = "",emailError = "";
 
   dynamic selectedCoin;
 
   late BuySellProvider buySellProvider;
-
-
 
   sellValidateOrder(context)async{
 
@@ -361,6 +359,12 @@ class _SellScreenState extends State<SellScreen> {
                       controller: emailController,
                       cursorColor: MyColor.greenColor,
                        onChanged: (value) {
+                         RegExp checkMail =  RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                         if(!checkMail.hasMatch(value)){
+                           emailError = "Please enter valid email id.";
+                         }else{
+                           emailError = "";
+                         }
                          setState(() {});
                        },
                        style: MyStyle.tx18RWhite.copyWith(
@@ -374,6 +378,19 @@ class _SellScreenState extends State<SellScreen> {
                       ),
 
                     ),
+                    Visibility(
+                        visible: emailError.isNotEmpty,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 12.0,left: 10),
+                          child: Text(
+                            emailError,
+                            style: MyStyle.tx18BWhite.copyWith(
+                                color: MyColor.redColor,
+                                fontSize: 14
+                            ),
+                          ),
+                        )
+                    ),
                     const SizedBox(height: 40),
 
                     // Proceed button
@@ -383,8 +400,8 @@ class _SellScreenState extends State<SellScreen> {
                     Helper.dialogCall.showLoader()
                         :
                     selectedCoin == null || priceController.text.isEmpty
-                        || sellBank == null
-                        // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                        || sellBank == null || emailError.isNotEmpty
+                        || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                         || phoneNoController.text.isEmpty
                         || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                         ?
@@ -403,8 +420,8 @@ class _SellScreenState extends State<SellScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration:
                         selectedCoin == null || priceController.text.isEmpty || sellBank == null
-                            ||  phoneNoController.text.isEmpty
-                            // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                            ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
+                            || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                             || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                             ?
                         MyStyle.invalidDecoration
@@ -416,7 +433,7 @@ class _SellScreenState extends State<SellScreen> {
                             style:  MyStyle.tx18BWhite.copyWith(
                                 color:  selectedCoin == null || priceController.text.isEmpty || sellBank == null
                                     || phoneNoController.text.isEmpty
-                                    // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                                    || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                                     || acNameController.text.isEmpty || bankNoController.text.isEmpty
                                     || emailController.text.isEmpty
                                     ?
