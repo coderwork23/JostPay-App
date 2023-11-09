@@ -95,7 +95,7 @@ class ExchangeProvider with ChangeNotifier{
         exRateLoading = false;
         notifyListeners();
       }else{
-        Helper.dialogCall.showToast(context, "Not valid fixed rate pair");
+        Helper.dialogCall.showToast(context, "Please change receive coin this is InValid pair");
         exRateLoading = false;
         notifyListeners();
 
@@ -105,7 +105,7 @@ class ExchangeProvider with ChangeNotifier{
 
 
   bool exMinMaxLoading= false;
-  getMinMax(String url,params)async{
+  getMinMax(String url,params,context)async{
     exMinMaxLoading = true;
     notifyListeners();
 
@@ -121,6 +121,7 @@ class ExchangeProvider with ChangeNotifier{
         exMinMaxLoading = false;
         notifyListeners();
       }else{
+        Helper.dialogCall.showToast(context, "Please change receive coin this is InValid pair");
         exMinMaxLoading = false;
         notifyListeners();
 
@@ -147,7 +148,8 @@ class ExchangeProvider with ChangeNotifier{
 
       await getMinMax(
           "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
-          {"api_key":Utils.apiKey}
+          {"api_key":Utils.apiKey},
+          context
       );
 
       notifyListeners();
@@ -173,7 +175,8 @@ class ExchangeProvider with ChangeNotifier{
 
       await getMinMax(
           "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
-          {"api_key":Utils.apiKey}
+          {"api_key":Utils.apiKey},
+          context
       );
 
 
@@ -209,7 +212,7 @@ class ExchangeProvider with ChangeNotifier{
 
       }else{
         estimateLoading = false;
-        Helper.dialogCall.showToast(context, "Not valid fixed rate pair");
+        Helper.dialogCall.showToast(context, "Please change receive coin this is InValid pair");
         notifyListeners();
         print(" =====> exchange estimate Exchange Amount api error <====");
       }
