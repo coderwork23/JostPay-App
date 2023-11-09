@@ -1,8 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:declarative_refresh_indicator/declarative_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
@@ -49,6 +50,36 @@ class _SellStatusPageState extends State<SellStatusPage> {
     await tokenProvider.getSearchToken(data,'/getTokens');
 
     setState(() {
+
+      var dbSymbol = DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount.split(" ").last;
+      if(dbSymbol.toLowerCase() == "usdtbsc"){
+        sendNetwork = {
+          "logo":"http://139.59.88.239/api/img/token/bsc_usdt.png",
+          "name":"Tether USD",
+          "symbol":"USDT"
+        };
+      }
+      else if(dbSymbol.toLowerCase() == "usdttrc20"){
+        sendNetwork = {
+          "logo":"http://139.59.88.239/api/img/token/trx_usdt.png",
+          "name":"Tether USD",
+          "symbol":"USDT"
+        };
+      }
+      else{
+        final temp = DbNetwork.dbNetwork.networkList.where((element) {
+          print(dbSymbol.trim().toLowerCase());
+          return element.symbol.toLowerCase() == dbSymbol.trim().toLowerCase();
+        }).toList().first;
+
+        sendNetwork = {
+          "logo":temp.logo,
+          "name":temp.name,
+          "symbol":temp.symbol
+
+        };
+      }
+
       isLoading = false;
     });
 
@@ -64,7 +95,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
   }
 
 
-  getSellStatusApi()async{
+  checkOrderStatus()async{
 
 
 
@@ -80,7 +111,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
       _showRefresh = true;
     });
 
-    getSellStatusApi();
+    checkOrderStatus();
     getTxsStatus();
   }
 
@@ -107,7 +138,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
           ),
         ),
         title: const Text(
-            "Transaction Status"
+            "Sell Transaction Status"
         ),
       ),
 
@@ -131,65 +162,64 @@ class _SellStatusPageState extends State<SellStatusPage> {
                 children: [
                   const SizedBox(height: 10),
 
-                  // coin details
-                  // Container(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
-                  //   decoration: BoxDecoration(
-                  //       color: MyColor.darkGrey01Color,
-                  //       borderRadius: BorderRadius.circular(10)
-                  //   ),
-                  //   child: Row(
-                  //     children: [
-                  //       CachedNetworkImage(
-                  //         height: 25,
-                  //         width: 25,
-                  //         fit: BoxFit.fill,
-                  //         imageUrl: sendNetwork["logo"],
-                  //         placeholder: (context, url) {
-                  //           return const Center(
-                  //             child: CircularProgressIndicator(
-                  //                 color: MyColor.greenColor
-                  //             ),
-                  //           );
-                  //         },
-                  //         errorWidget: (context, url, error) {
-                  //           return Container(
-                  //             height: 25,
-                  //             width: 25,
-                  //             padding: const EdgeInsets.all(3),
-                  //             decoration: BoxDecoration(
-                  //               borderRadius: BorderRadius.circular(14),
-                  //               color: MyColor.whiteColor,
-                  //             ),
-                  //             child: Image.asset(
-                  //               "assets/images/bitcoin.png",
-                  //             ),
-                  //           );
-                  //         },
-                  //       ),
-                  //       const SizedBox(width: 12),
-                  //       Expanded(
-                  //         child: Text(
-                  //           sendNetwork["name"],
-                  //           style: MyStyle.tx18RWhite.copyWith(
-                  //               fontSize: 16
-                  //           ),
-                  //         ),
-                  //       ),
-                  //       Text(
-                  //         "~${ApiHandler.calculateLength3("${DbSellHistory.dbSellHistory.getTrxStatusData!.expectedSendAmount}")} "
-                  //             "${sendNetwork['symbol']}",
-                  //         style: MyStyle.tx18RWhite.copyWith(
-                  //             fontSize: 16
-                  //         ),
-                  //       ),
-                  //
-                  //     ],
-                  //   ),
-                  // ),
+                 // coin details
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                    decoration: BoxDecoration(
+                        color: MyColor.darkGrey01Color,
+                        borderRadius: BorderRadius.circular(10)
+                    ),
+                    child: Row(
+                      children: [
+                        CachedNetworkImage(
+                          height: 25,
+                          width: 25,
+                          fit: BoxFit.fill,
+                          imageUrl: sendNetwork["logo"],
+                          placeholder: (context, url) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                  color: MyColor.greenColor
+                              ),
+                            );
+                          },
+                          errorWidget: (context, url, error) {
+                            return Container(
+                              height: 25,
+                              width: 25,
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(14),
+                                color: MyColor.whiteColor,
+                              ),
+                              child: Image.asset(
+                                "assets/images/bitcoin.png",
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            sendNetwork["name"],
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "~${DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount}",
+                          style: MyStyle.tx18RWhite.copyWith(
+                              fontSize: 16
+                          ),
+                        ),
+
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 15),
 
-                  // transaction id and validity time
+                  // invoice id and date time
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
                     decoration: BoxDecoration(
@@ -199,6 +229,28 @@ class _SellStatusPageState extends State<SellStatusPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        const SizedBox(height: 10),
+
+                        Row(
+                          children: [
+
+                            Expanded(
+                              child: Text(
+                                "We Pay: ",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ),
+                            Text(
+                              "${DbSellHistory.dbSellHistory.getTrxStatusData!.amountPayableNgn} NGN",
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                            ),
+
+                          ],
+                        ),
                         const SizedBox(height: 10),
 
                         Row(
@@ -223,28 +275,29 @@ class _SellStatusPageState extends State<SellStatusPage> {
                         ),
                         const SizedBox(height: 10),
 
-                        // transaction id
+                        // invoice id
                         InkWell(
                           onTap: () {
-                            FlutterClipboard.copy(DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address).then((value) {
-                              Helper.dialogCall.showToast(context, "Transaction ID Copied");
+                            FlutterClipboard.copy(DbSellHistory.dbSellHistory.getTrxStatusData!.invoice).then((value) {
+                              Helper.dialogCall.showToast(context, "Invoice No Copied");
                             });
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
+                              Text(
+                                "Invoice No: ",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
                               Expanded(
                                 child: Text(
-                                  "invoice ID: ",
+                                  DbSellHistory.dbSellHistory.getTrxStatusData!.invoice,
+                                  textAlign: TextAlign.end,
                                   style: MyStyle.tx18RWhite.copyWith(
                                       fontSize: 16
                                   ),
-                                ),
-                              ),
-                              Text(
-                                DbSellHistory.dbSellHistory.getTrxStatusData!.invoice,
-                                style: MyStyle.tx18RWhite.copyWith(
-                                    fontSize: 16
                                 ),
                               ),
                               const SizedBox(width: 5),
@@ -264,18 +317,19 @@ class _SellStatusPageState extends State<SellStatusPage> {
                         Row(
                           children: [
 
+                            Text(
+                              "Date: ",
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                            ),
                             Expanded(
                               child: Text(
-                                "Valid Until: ",
+                                DateFormat("dd MMM yyyy hh:mm a").format(DateTime.fromMillisecondsSinceEpoch(DbSellHistory.dbSellHistory.getTrxStatusData!.time * 1000)),
+                                textAlign: TextAlign.end,
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
-                              ),
-                            ),
-                            Text(
-                              DateFormat("dd MMM yyyy h:mma").format(DateTime.fromMicrosecondsSinceEpoch(DbSellHistory.dbSellHistory.getTrxStatusData!.time)),
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
                               ),
                             ),
 
@@ -292,9 +346,10 @@ class _SellStatusPageState extends State<SellStatusPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Text(
-                      "Note: Please send "
-                          "${ApiHandler.calculateLength3(DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount.split(" ").first)} "
-                          "(${DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount.split(" ").last}) with in valid time period.If you send after that result is permanent loss of your token.",
+                      "Note: Your order has been submitted. Your transaction invoice no. is"
+                          " ${DbSellHistory.dbSellHistory.getTrxStatusData!.invoice} "
+                          " To complete this transaction, please send exactly"
+                          " ${DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount} To",
                       textAlign: TextAlign.center,
                       style:MyStyle.tx18RWhite.copyWith(
                           fontSize: 12,

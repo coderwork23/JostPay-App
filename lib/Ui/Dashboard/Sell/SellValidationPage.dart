@@ -39,7 +39,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
       data['action'] = "place_sell_order";
     });
 
-    print(jsonEncode(data));
+    // print(jsonEncode(data));
     await buySellProvider.sellOrder(widget.params, selectedAccountId, context);
   }
 

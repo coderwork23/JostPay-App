@@ -47,6 +47,7 @@ class DbSellHistory{
 
   createSellHistory(SellHistoryModel newToken) async{
     final db= await database;
+    // print(newToken.toJson());
     final res = await db!.insert('SellHistory', newToken.toJson());
     return res;
   }
@@ -62,13 +63,13 @@ class DbSellHistory{
   List<SellHistoryModel> sellHistoryList = [];
   getSellHistory(String accountId) async {
 
-    print("accountId ------> $accountId");
+    // print("accountId ------> $accountId");
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM SellHistory ");
+    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId'");
 
-    print("object--- $res");
+    // print("object--- $res");
     List<SellHistoryModel> list = res.map((c) {
-      print(c);
+      // print(c);
       return SellHistoryModel.fromJson(
         c,
         accountId,
@@ -83,7 +84,7 @@ class DbSellHistory{
   getTrxStatus(String accountId,String invoiceNo) async {
 
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId' OR invoice = '$invoiceNo'");
+    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId' AND invoice = '$invoiceNo'");
 
     if(res.isNotEmpty) {
       getTrxStatusData = SellHistoryModel.fromJson(
