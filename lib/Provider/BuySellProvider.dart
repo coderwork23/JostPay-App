@@ -33,7 +33,7 @@ class BuySellProvider with ChangeNotifier{
     notifyListeners();
 
     try {
-      ApiHandler.getInstantApi(params).then((responseData) {
+      await ApiHandler.getInstantApi(params).then((responseData) {
         // print(responseData);
 
         var value = json.decode(responseData.body);
@@ -75,7 +75,7 @@ class BuySellProvider with ChangeNotifier{
     notifyListeners();
 
     try {
-      ApiHandler.getInstantApi(params).then((responseData) async {
+      await ApiHandler.getInstantApi(params).then((responseData) async {
 
         var value = json.decode(responseData.body);
 
@@ -148,7 +148,7 @@ class BuySellProvider with ChangeNotifier{
 
     try {
 
-      ApiHandler.getInstantApi(params).then((responseData) async {
+      await ApiHandler.getInstantApi(params).then((responseData) async {
         var value = json.decode(responseData.body);
 
         if (responseData.statusCode == 200) {
@@ -220,7 +220,7 @@ class BuySellProvider with ChangeNotifier{
     receiveValue = "";
     notifyListeners();
 
-    ApiHandler.getInstantApi(params).then((responseData){
+    await ApiHandler.getInstantApi(params).then((responseData){
       var value = json.decode(responseData.body);
 
       // print("${value['info'].toString()}");
@@ -245,7 +245,7 @@ class BuySellProvider with ChangeNotifier{
     orderLoading = true;
     notifyListeners();
 
-    ApiHandler.getInstantApi(params).then((responseData){
+    await ApiHandler.getInstantApi(params).then((responseData){
       // var value = json.decode(responseData.body);
       if (responseData.statusCode == 200) {
         orderLoading = false;
@@ -278,7 +278,7 @@ class BuySellProvider with ChangeNotifier{
     List<BuySellHistoryModel> list = [];
 
 
-    ApiHandler.getInstantApi(params).then((responseData){
+    await ApiHandler.getInstantApi(params).then((responseData){
       var value = json.decode(responseData.body);
       if (responseData.statusCode == 200) {
         buyHistoryLoading = false;
@@ -311,7 +311,7 @@ class BuySellProvider with ChangeNotifier{
     List<BuySellHistoryModel> list = [];
 
 
-    ApiHandler.getInstantApi(params).then((responseData){
+    await ApiHandler.getInstantApi(params).then((responseData){
       var value = json.decode(responseData.body);
       if (responseData.statusCode == 200) {
 
@@ -348,7 +348,7 @@ class BuySellProvider with ChangeNotifier{
     getSellValidation = null;
     notifyListeners();
 
-    ApiHandler.getInstantApi(params).then((responseData) async {
+    await ApiHandler.getInstantApi(params).then((responseData) async {
       try {
         var value = json.decode(responseData.body);
         // print("object $value");
@@ -357,12 +357,7 @@ class BuySellProvider with ChangeNotifier{
           sellValidOrder = false;
           isValidSuccess = true;
           getSellValidation = value;
-
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SellValidationPage(params: params),)
-          );
+          // print(getSellValidation);
           notifyListeners();
         }
         else {
@@ -436,10 +431,10 @@ class BuySellProvider with ChangeNotifier{
 
 
   bool sellOderLoading = false;
-  sellOrder(params,accountId,context){
+  sellOrder(params,accountId,context) async {
     sellOderLoading = true;
     notifyListeners();
-    ApiHandler.getInstantApi(params).then((responseData) async {
+    await ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
 
       // print("value $value");
@@ -461,7 +456,8 @@ class BuySellProvider with ChangeNotifier{
           );
         }
 
-        Navigator.pushReplacement(
+        Navigator.pop(context,"refresh");
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => SellStatusPage(invoiceNo: value["invoice"]),
@@ -484,10 +480,10 @@ class BuySellProvider with ChangeNotifier{
 
 
   bool checkOrderLoading = false;
-  checkOrderStatus(params,accountId,context){
+  checkOrderStatus(params,accountId,context) async {
     checkOrderLoading = true;
     notifyListeners();
-    ApiHandler.getInstantApi(params).then((responseData) async {
+    await ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
 
       print("checkOrderStatus $value");

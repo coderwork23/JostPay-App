@@ -41,6 +41,8 @@ class _SellValidationPageState extends State<SellValidationPage> {
 
     // print(jsonEncode(data));
     await buySellProvider.sellOrder(widget.params, selectedAccountId, context);
+
+
   }
 
   @override

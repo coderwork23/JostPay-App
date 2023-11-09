@@ -10,6 +10,8 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'SellValidationPage.dart';
+
 class SellScreen extends StatefulWidget {
 
   const SellScreen({
@@ -83,12 +85,31 @@ class _SellScreenState extends State<SellScreen> {
         }
       }
 
-      setState(() {
-        print(selectedCoin);
-      });
-
       emailController.text = email;
     });
+
+    print(buySellProvider.getSellValidation);
+
+    if(buySellProvider.getSellValidation != null){
+
+     var value =  await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SellValidationPage(params: params),)
+      );
+
+     // print("object value --> ${value}");
+     if(value != null) {
+       setState(() {
+         priceController.text = "0";
+         phoneNoController.clear();
+         bankNoController.clear();
+         acNameController.clear();
+         selectedCoin = null;
+         sellBank = null;
+       });
+     }
+    }
 
   }
 
@@ -513,7 +534,7 @@ class _SellScreenState extends State<SellScreen> {
                         :
                     selectedCoin == null || priceController.text.isEmpty
                         || sellBank == null || emailError.isNotEmpty
-                        || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                        // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                         || phoneNoController.text.isEmpty
                         || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                         ?
@@ -533,7 +554,7 @@ class _SellScreenState extends State<SellScreen> {
                         decoration:
                         selectedCoin == null || priceController.text.isEmpty || sellBank == null
                             ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
-                            || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                            // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                             || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                             ?
                         MyStyle.invalidDecoration
@@ -545,7 +566,7 @@ class _SellScreenState extends State<SellScreen> {
                             style:  MyStyle.tx18BWhite.copyWith(
                                 color:  selectedCoin == null || priceController.text.isEmpty || sellBank == null
                                     || phoneNoController.text.isEmpty
-                                    || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                                    // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                                     || acNameController.text.isEmpty || bankNoController.text.isEmpty
                                     || emailController.text.isEmpty
                                     ?
