@@ -83,7 +83,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
           MyStyle.invalidDecoration,
 
           child: Text(
-            "Place Order",
+            "Place Sell Order",
             style:  MyStyle.tx18BWhite.copyWith(
                 color: acceptTerms
                     ?

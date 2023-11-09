@@ -26,8 +26,8 @@ class LoginModel {
     accessToken: json["access_token"],
     info: json["info"],
     ratesInfo: rateList,
-    banks: List<String>.from(json["banks"].map((x) => x)),
-    sellBanks: List<String>.from(json["sell_banks"].map((x) => x)),
+    banks: json["banks"] == null ? [] : List<String>.from(json["banks"].map((x) => x)),
+    sellBanks: json["sell_banks"] == null ? [] : List<String>.from(json["sell_banks"].map((x) => x)),
   );
 
   Map<String, dynamic> toJson() => {

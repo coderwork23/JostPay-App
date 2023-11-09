@@ -349,27 +349,27 @@ class BuySellProvider with ChangeNotifier{
     notifyListeners();
 
     ApiHandler.getInstantApi(params).then((responseData) async {
-      var value = json.decode(responseData.body);
-      // print("object $value");
+      try {
+        var value = json.decode(responseData.body);
+        // print("object $value");
 
-      if (responseData.statusCode == 200 && value["info"]!= null) {
+        if (responseData.statusCode == 200 && value["info"] != null) {
+          sellValidOrder = false;
+          isValidSuccess = true;
+          getSellValidation = value;
 
-        sellValidOrder = false;
-        isValidSuccess = true;
-        getSellValidation = value;
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SellValidationPage(params: params),)
+          );
+          notifyListeners();
+        }
+        else {
+          sellBankList.clear();
+          sellRateList.clear();
 
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SellValidationPage(params:params),)
-        );
-        notifyListeners();
-
-      }else{
-        sellBankList.clear();
-        sellRateList.clear();
-
-        // if(value['error'] == null) {
+          // if(value['error'] == null) {
           if (value['rates_info'] != null) {
             await DBTokenProvider.dbTokenProvider.getAccountToken(accountId);
             value['rates_info'].keys.forEach((key) {
@@ -416,13 +416,19 @@ class BuySellProvider with ChangeNotifier{
                 value['sell_banks'].map((x) => x));
             sellBankList.addAll(list);
           }
-        // }else{
-        //   Helper.dialogCall.showToast(context, value['error']);
-        // }
+          // }else{
+          //   Helper.dialogCall.showToast(context, value['error']);
+          // }
+          sellValidOrder = false;
+          notifyListeners();
+        }
+      }catch(e){
+        // print("e----> $e");
         sellValidOrder = false;
         notifyListeners();
       }
     });
+
   }
 
 

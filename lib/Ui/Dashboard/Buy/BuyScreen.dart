@@ -3,7 +3,6 @@ import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
-import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyHistory.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/InstantLoginScreen.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
@@ -11,7 +10,6 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'BuyValidationPage.dart';
 
 class BuyScreen extends StatefulWidget {
@@ -33,33 +31,7 @@ class _BuyScreenState extends State<BuyScreen> {
   String? selectedNetwork,networkFees,bankName;
 
   String errorMessage = "",selectedAccountId = "";
-
   var usdError = "";
-
-  // getAccessToken()async{
-  //
-  //   setState(() {
-  //     isLoading = true;
-  //   });
-  //
-  //   // SharedPreferences sharedPre = await SharedPreferences.getInstance();
-  //   // buySellProvider.accessToken = sharedPre.getString("accessToken")??"";
-  //   getExchangeRat();
-  //
-  //   setState(() {
-  //     isLoading = false;
-  //   });
-  // }
-
-  // getExchangeRat() async {
-  //
-  //   var params = {
-  //     "action":"exchange_rate",
-  //   };
-  //
-  //   await buySellProvider.getExRate(params,context);
-  // }
-
 
   getSelectedAccount()async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -67,7 +39,6 @@ class _BuyScreenState extends State<BuyScreen> {
     await DbNetwork.dbNetwork.getNetwork();
     setState(() {});
   }
-
 
 
   @override
@@ -449,32 +420,42 @@ class _BuyScreenState extends State<BuyScreen> {
                                 || bankName ==null
                                 || double.parse(priceController.text) < selectedCoin!.minBuyAmount
                                 ?
-                            Container(
-                              alignment: Alignment.center,
-                              height: 45,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration:
-                              selectedCoin == null || priceController.text.isEmpty || networkFees == null
-                                  || bankName ==null
-                                  || double.parse(priceController.text) < selectedCoin!.minBuyAmount
-                                  ?
-                              MyStyle.invalidDecoration
-                                  :
-                              MyStyle.buttonDecoration,
+                            InkWell(
+                              onTap:  () {
+                                // print(buySellProvider.loginModel!.accountVerified);
+                                if(buySellProvider.loginModel!.accountVerified == "no"){
+                                  Helper.dialogCall.showToast(context, "Your account is not verified yet");
+                                }else{
+                                  Helper.dialogCall.showToast(context, "Please provide all details.");
+                                }
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                height: 45,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration:
+                                selectedCoin == null || priceController.text.isEmpty || networkFees == null
+                                    || bankName ==null
+                                    || double.parse(priceController.text) < selectedCoin!.minBuyAmount
+                                    ?
+                                MyStyle.invalidDecoration
+                                    :
+                                MyStyle.buttonDecoration,
 
-                              child: Text(
-                                  "Continue",
-                                  style:  MyStyle.tx18BWhite.copyWith(
-                                     color: selectedCoin == null
-                                         || priceController.text.isEmpty
-                                         || networkFees == null
-                                         || bankName ==null
-                                         ||double.parse(priceController.text) < selectedCoin!.minBuyAmount
-                                          ?
-                                     MyColor.mainWhiteColor.withOpacity(0.4)
-                                         :
-                                     MyColor.mainWhiteColor
-                                  )
+                                child: Text(
+                                    "Continue",
+                                    style:  MyStyle.tx18BWhite.copyWith(
+                                       color: selectedCoin == null
+                                           || priceController.text.isEmpty
+                                           || networkFees == null
+                                           || bankName ==null
+                                           ||double.parse(priceController.text) < selectedCoin!.minBuyAmount
+                                            ?
+                                       MyColor.mainWhiteColor.withOpacity(0.4)
+                                           :
+                                       MyColor.mainWhiteColor
+                                    )
+                                ),
                               ),
                             )
                                 :

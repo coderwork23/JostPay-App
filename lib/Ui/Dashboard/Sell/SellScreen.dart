@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellValidationPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -46,10 +43,11 @@ class _SellScreenState extends State<SellScreen> {
     var params = {
       "action":"validate_sell_order",
       "email":emailController.text.isEmpty ? "a@gmail.com" : emailController.text.trim(),
-      "token":buySellProvider.loginModel== null ? "" : buySellProvider.loginModel!.accessToken,
+      "token":"",
+      // "token":buySellProvider.loginModel== null ? "" : buySellProvider.loginModel!.accessToken,
       "item_code":selectedCoin == null ? "" : selectedCoin['symbol'],
       "amount":priceController.text.trim(),
-      "bank":sellBank,
+      "bank":sellBank ?? "",
       "account_no":bankNoController.text.trim(),
       "account_name":acNameController.text.trim(),
       "phone":phoneNoController.text,
@@ -190,7 +188,7 @@ class _SellScreenState extends State<SellScreen> {
                           networkFees = null;
                           selectedCoin = null;
                           selectedCoin = value;
-                          print(value['amount']);
+                          // print(value['amount']);
                           priceController.clear();
                         });
 
