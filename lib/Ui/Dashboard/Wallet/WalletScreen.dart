@@ -265,7 +265,9 @@ class _WalletScreenState extends State<WalletScreen> {
           // print("Socket ac id $selectedAccountId");
 
           await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
-          setState(() {});
+          if(mounted) {
+            setState(() {});
+          }
           getAccountTotal();
         }
 
@@ -515,6 +517,7 @@ class _WalletScreenState extends State<WalletScreen> {
               // withdraw
               InkWell(
                 onTap: () {
+                  dashProvider.changeDefaultCoin("");
                   dashProvider.changeBottomIndex(2);
                 },
                 child: Column(

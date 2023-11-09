@@ -378,12 +378,15 @@ class BuySellProvider with ChangeNotifier{
                 if (key == "USDTTRC20") {
                   return element.type.toLowerCase() == "TRC20".toLowerCase();
                 }
-                if (key == "USDTBEP20") {
+                else if (key == "USDTBEP20") {
                   return element.type.toLowerCase() == "BEP20".toLowerCase();
                 }
-                if (key == "BNBBEP20") {
+
+                else if (key == "BNBBEP20") {
                   return element.symbol.toLowerCase() == "BNB".toLowerCase();
-                } else {
+                }
+
+                else {
                   return element.symbol.toLowerCase() ==
                       key.toString().toLowerCase();
                 }
@@ -508,4 +511,6 @@ class BuySellProvider with ChangeNotifier{
     });
 
   }
+
+
 }

@@ -809,6 +809,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
               child: InkWell(
                 onTap: () {
                   dashProvider.changeBottomIndex(2);
+                  dashProvider.changeDefaultCoin("");
                 },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,

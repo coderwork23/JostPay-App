@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
+import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
@@ -10,7 +11,10 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SellScreen extends StatefulWidget {
-  const SellScreen({super.key});
+
+  const SellScreen({
+    super.key,
+  });
 
   @override
   State<SellScreen> createState() => _SellScreenState();
@@ -28,9 +32,10 @@ class _SellScreenState extends State<SellScreen> {
   bool isLoading = false;
   var usdError = "",emailError = "";
 
-  dynamic selectedCoin;
+  var selectedCoin;
 
   late BuySellProvider buySellProvider;
+  late DashboardProvider dashboardProvider;
 
   sellValidateOrder(context)async{
 
@@ -59,6 +64,29 @@ class _SellScreenState extends State<SellScreen> {
     await buySellProvider.validateSellOrder(params,selectedAccountId,context);
 
     setState(() {
+      if(dashboardProvider.defaultCoin != "" && buySellProvider.sellRateList.isNotEmpty){
+        if (dashboardProvider.defaultCoin == "TRC20") {
+          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "USDTTRC20");
+          selectedCoin = buySellProvider.sellRateList[index];
+        }
+        else if (dashboardProvider.defaultCoin == "BEP20") {
+          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "USDTBEP20");
+          selectedCoin = buySellProvider.sellRateList[index];
+        }
+
+        else if (dashboardProvider.defaultCoin == "BNB") {
+          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "BNBBEP20");
+          selectedCoin = buySellProvider.sellRateList[index];
+        }else{
+          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == dashboardProvider.defaultCoin);
+          selectedCoin = buySellProvider.sellRateList[index];
+        }
+      }
+
+      setState(() {
+        print(selectedCoin);
+      });
+
       emailController.text = email;
     });
 
@@ -67,6 +95,7 @@ class _SellScreenState extends State<SellScreen> {
   @override
   void initState() {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
+    dashboardProvider = Provider.of<DashboardProvider>(context,listen: false);
     buySellProvider.accessToken = "";
     super.initState();
     Future.delayed(Duration.zero,(){
@@ -79,6 +108,9 @@ class _SellScreenState extends State<SellScreen> {
   @override
   Widget build(BuildContext context) {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
+    dashboardProvider = Provider.of<DashboardProvider>(context,listen: true);
+
+    // print(selectedCoin);
     return Scaffold(
         appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -122,7 +154,7 @@ class _SellScreenState extends State<SellScreen> {
 
                     // coin drop down
                     DropdownButtonFormField<dynamic>(
-                      value: selectedCoin,
+                      // value: selectedCoin,
                       decoration: MyStyle.textInputDecoration.copyWith(
                         contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
                       ),
@@ -130,7 +162,46 @@ class _SellScreenState extends State<SellScreen> {
                         Icons.keyboard_arrow_down_sharp,
                         color: MyColor.greenColor,
                       ),
-                      hint: Text(
+                      hint: selectedCoin != null
+                          ?
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: CachedNetworkImage(
+                              height: 25,
+                              width: 25,
+                              fit: BoxFit.fill,
+                              imageUrl:  selectedCoin['logo'],
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(color: MyColor.greenColor),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Container(
+                                    height: 25,
+                                    width: 25,
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      color: MyColor.whiteColor,
+                                    ),
+                                    child: Image.asset(
+                                      "assets/images/bitcoin.png",
+                                    ),
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            selectedCoin['name'],
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16
+                            ),
+                          ),
+                        ],
+                      )
+                          :
+                      Text(
                         "Select coin",
                         style:MyStyle.tx22RWhite.copyWith(
                             fontSize: 18,
@@ -142,9 +213,52 @@ class _SellScreenState extends State<SellScreen> {
                       style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
                       ),
+                      selectedItemBuilder: (BuildContext context) {
+                        return buySellProvider.sellRateList.map<Widget>((value) {
+                          return  Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: CachedNetworkImage(
+                                  height: 25,
+                                  width: 25,
+                                  fit: BoxFit.fill,
+                                  imageUrl:  value['logo'],
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(color: MyColor.greenColor),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        height: 25,
+                                        width: 25,
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(14),
+                                          color: MyColor.whiteColor,
+                                        ),
+                                        child: Image.asset(
+                                          "assets/images/bitcoin.png",
+                                        ),
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                value['name'],
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList();
+                      },
+
                       items: buySellProvider.sellRateList.map((dynamic tokenData) {
+                        // print("dropDown value $tokenData");
                         return DropdownMenuItem(
                             value: tokenData,
+
                             child: Row(
                               children: [
                                 ClipRRect(
@@ -188,7 +302,7 @@ class _SellScreenState extends State<SellScreen> {
                           networkFees = null;
                           selectedCoin = null;
                           selectedCoin = value;
-                          // print(value['amount']);
+                          // print(selectedCoin);
                           priceController.clear();
                         });
 

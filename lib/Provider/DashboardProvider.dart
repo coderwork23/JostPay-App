@@ -13,4 +13,10 @@ class DashboardProvider with ChangeNotifier{
     notifyListeners();
   }
 
+  String defaultCoin = "";
+  changeDefaultCoin(String newValue){
+    defaultCoin = newValue;
+    notifyListeners();
+  }
+
 }
