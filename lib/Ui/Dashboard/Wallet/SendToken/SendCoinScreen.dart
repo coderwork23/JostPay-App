@@ -289,7 +289,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                 child: CachedNetworkImage(
                                   width: 40,height: 40,
                                   fit: BoxFit.fill,
-                                  imageUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/${widget.selectTokenMarketId}.png",
+                                  imageUrl: sendTokenImage,
                                   placeholder: (context, url) => const Center(
                                     child: CircularProgressIndicator(color: MyColor.greenColor),
                                   ),
@@ -945,7 +945,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                           },
                           child: Center(
                             child: Text(
-                              "Past",
+                              "Paste",
                               textAlign: TextAlign.center,
                               style: MyStyle.tx18BWhite.copyWith(
                                   fontSize: 14,
