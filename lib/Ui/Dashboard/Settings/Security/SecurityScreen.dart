@@ -66,7 +66,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
   final passcodeFormKey = GlobalKey<FormState>();
 
   bool isLoading = false;
-  changePasswordApi(bool passwordChange) async {
+  changePasswordApi(bool passwordChange,context) async {
     setState(() {
       isLoading = true;
     });
@@ -112,8 +112,11 @@ class _SecurityScreenState extends State<SecurityScreen> {
         savePasscode = sharedPreferences.getString('passcode')?? "";
         setState(() {
           passwordType = true;
+          sharedPreferences.setBool('passwordType',passwordType);
+
           pinNotSave = false;
         });
+        Helper.dialogCall.showToast(context, "A New Passcode has been set");
       }
     }
 
@@ -248,6 +251,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                           valueFontSize: 0.0,
                           borderRadius: 30.0,
                           inactiveColor: MyColor.boarderColor,
+                          inactiveToggleColor: MyColor.greenColor,
                           activeColor: MyColor.greenColor,
                           value: passwordType,
                           showOnOff: false,
@@ -266,7 +270,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             else{
                               setState(() {
                                 passwordType = val;
-                                changePasswordApi(false);
+                                changePasswordApi(false,context);
                               });
                             }
 
@@ -305,6 +309,9 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                 validator: (value) {
                                   if(value!.isEmpty){
                                     newPassMess = "Enter your passcode";
+                                    return "";
+                                  }else if(setPassCodeController.text.length < 6){
+                                    newRePassMess = "Passcode must be 6 digit";
                                     return "";
                                   }else if(value != setRePassCodeController.text){
                                     newRePassMess = "Passcode not matched!";
@@ -390,6 +397,9 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                 validator: (value) {
                                     if(value!.isEmpty){
                                       newRePassMess = "Enter your passcode";
+                                      return "";
+                                    }else if(setPassCodeController.text.length < 6){
+                                      newRePassMess = "Passcode must be 6 digit";
                                       return "";
                                     }else if(setPassCodeController.text != value){
                                       newRePassMess = "Passcode not matched!";
@@ -919,8 +929,8 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       child: InkWell(
                         onTap: () {
                           if(pinNotSave){
-                            if(newPassMess.isNotEmpty && newRePassMess.isNotEmpty){
-                              changePasswordApi(true);
+                            if(newPassCodeKey.currentState!.validate()){
+                              changePasswordApi(true,context);
                             }else{
                               Helper.dialogCall.showToast(context, "Please filed all details first");
                             }
@@ -928,16 +938,17 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             if(passwordType){
                               if(passcodeFormKey.currentState!.validate()) {
                                 if (oldCodeError.isNotEmpty && newCodeError.isNotEmpty && reNewCodeError.isNotEmpty) {
-                                  changePasswordApi(true);
+                                  changePasswordApi(true,context);
                                 } else {
                                   Helper.dialogCall.showToast(context, "Please filed all details first");
                                 }
-                              }else{
+                              }
+                              else{
                               Helper.dialogCall.showToast(context, "Please filed all details first");
                             }
                             }else{
-                              if(oldPassError.isNotEmpty && newPassError.isNotEmpty && reNewPassError.isNotEmpty){
-                                changePasswordApi(true);
+                              if(passwordFormKey.currentState!.validate()){
+                                changePasswordApi(true,context);
                               }else{
                                 Helper.dialogCall.showToast(context, "Please filed all details first");
                               }

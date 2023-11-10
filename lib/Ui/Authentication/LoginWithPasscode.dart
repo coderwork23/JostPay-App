@@ -43,7 +43,6 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
   bool fingerOn = false;
   String isLogin = "";
 
-  var errorText = "";
   bool isLoading = false;
 
   getDeviceId() async {
@@ -161,7 +160,6 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
   autologin() async {
     Helper.dialogCall.showAlertDialog(context);
     setState((){
-      errorText = "";
       isLoading = true;
     });
 
@@ -185,7 +183,6 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
       Helper.dialogCall.showToast(context, "Incorrect Password !!");
       Navigator.pop(context);
       setState((){
-        errorText = "Incorrect Password";
         isLoading = false;
       });
 
@@ -203,15 +200,20 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
   }
 
   getToken() async {
-    DBTokenProvider.dbTokenProvider.deleteAccountToken(DBAccountProvider.dbAccountProvider.newAccountList[0].id);
-
     for (int i = 0; i < DBAccountProvider.dbAccountProvider.newAccountList.length; i++) {
-      var data ={
-        "id":"1,2,74,328,825,1027,1839,1958"
-      };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', DBAccountProvider.dbAccountProvider.newAccountList[i].id);
-    }
 
+      await DbAccountAddress.dbAccountAddress.getAccountAddress(DBAccountProvider.dbAccountProvider.newAccountList[i].id);
+
+      var data = {};
+
+      for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+        data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+      }
+
+
+      await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,);
+
+    }
 
     // ignore: use_build_context_synchronously
     Navigator.pushReplacement(
@@ -233,7 +235,6 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     deviceId = sharedPreferences.getString('deviceId')!;
     // print("object --> $deviceId");
     setState(() {
-      errorText = "";
       isLoading = true;
     });
 
@@ -251,12 +252,10 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
         setState(() {
           isLoading = false;
         });
-        errorText = "Incorrect Password!!";
         Helper.dialogCall.showToast(context, "Incorrect Password!!");
         Navigator.pop(context);
       }
     }catch(e){
-      errorText = "Incorrect Password!!";
       Helper.dialogCall.showToast(context, "Incorrect Password!!");
       Navigator.pop(context);
 
@@ -506,9 +505,19 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
                   }
                 },
               ),
+              const SizedBox(height: 30),
 
+              InkWell(
+                onTap: (){
+                  deleteAlert();
+                },
+                child: const Text(
+                    "Reset wallet",
+                    style: MyStyle.tx18RWhite
+                ),
+              ),
 
-              const SizedBox(height: 30)
+              const SizedBox(height: 50)
             ],
           ),
         ),
