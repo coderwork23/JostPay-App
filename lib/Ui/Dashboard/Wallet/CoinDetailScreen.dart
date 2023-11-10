@@ -314,16 +314,19 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => SendCoinScreen(
-                                sendTokenAddress: widget.tokenAddress,
-                                sendTokenNetworkId: widget.tokenNetworkId,
-                                sendTokenName: widget.tokenName,
-                                sendTokenSymbol: widget.tokenSymbol,
-                                selectTokenMarketId: widget.tokenMarketId,
-                                sendTokenImage : widget.tokenImage,
-                                sendTokenBalance : widget.tokenBalance,
-                                sendTokenId : widget.tokenId,
-                                sendTokenUsd : "${widget.tokenFullPrice}",
-                                sendTokenDecimals:int.parse(widget.tokenDecimal)
+                              sendTokenAddress: widget.tokenAddress,
+                              sendTokenNetworkId: widget.tokenNetworkId,
+                              sendTokenName: widget.tokenName,
+                              sendTokenSymbol: widget.tokenSymbol,
+                              selectTokenMarketId: widget.tokenMarketId,
+                              sendTokenImage : widget.tokenImage,
+                              sendTokenBalance : widget.tokenBalance,
+                              sendTokenId : widget.tokenId,
+                              sendTokenUsd : "${widget.tokenFullPrice}",
+                              sendTokenDecimals:int.parse(widget.tokenDecimal),
+                              tokenUpDown:widget.tokenUpDown.toString() ,
+                              explorerUrl: widget.explorerUrl,
+                              selectTokenUSD: widget.tokenUsdPrice.toString(),
                             ),
                           )
                         );

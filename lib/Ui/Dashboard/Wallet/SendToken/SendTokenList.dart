@@ -132,6 +132,11 @@ class _SendTokenListState extends State<SendTokenList> {
               return InkWell(
                 onTap: () async {
                   // print(list.balance);
+
+                  var selectTokenUSD = 0.0;
+                  setState(() {
+                    selectTokenUSD = double.parse(list.balance) * list.price;
+                  });
                  await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -145,7 +150,10 @@ class _SendTokenListState extends State<SendTokenList> {
                           sendTokenBalance : list.balance,
                           sendTokenId : "${list.token_id}",
                           sendTokenUsd : "${list.price}",
-                          sendTokenDecimals:list.decimals
+                          sendTokenDecimals:list.decimals,
+                          explorerUrl:list.explorer_url,
+                        tokenUpDown: "${list.percentChange24H}",
+                        selectTokenUSD: "$selectTokenUSD",
                       ),
                     )
                   );

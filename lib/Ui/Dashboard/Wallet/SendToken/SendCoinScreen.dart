@@ -10,6 +10,7 @@ import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/CoinDetailScreen.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -27,9 +28,12 @@ class SendCoinScreen extends StatefulWidget {
       sendTokenName = "",
       sendTokenSymbol = "",
       selectTokenMarketId = "",
+      tokenUpDown = "",
       sendTokenImage = "",
+      selectTokenUSD = "",
       sendTokenBalance = "",
       sendTokenId = "",
+      explorerUrl = "",
       sendTokenUsd = "";
   int sendTokenDecimals;
 
@@ -41,9 +45,12 @@ class SendCoinScreen extends StatefulWidget {
     required this.sendTokenName,
     required this.sendTokenSymbol,
     required this.selectTokenMarketId,
+    required this.tokenUpDown,
     required this.sendTokenImage,
     required this.sendTokenBalance,
+    required this.selectTokenUSD,
     required this.sendTokenId,
+    required this.explorerUrl,
     required this.sendTokenUsd,
     required this.sendTokenDecimals,
   });
@@ -74,6 +81,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       sendTokenSymbol = "",
       selectTokenMarketId = "",
       sendTokenImage = "",
+      tokenUpDown = "",
+      selectTokenUSD = "",
+      explorerUrl = "",
       sendTokenBalance = "0",
       sendTokenId = "",
       sendTokenUsd = "0",
@@ -104,9 +114,12 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       sendTokenSymbol = widget.sendTokenSymbol;
       selectTokenMarketId = widget.selectTokenMarketId;
       sendTokenImage  = widget.sendTokenImage;
+      tokenUpDown  = widget.tokenUpDown;
       sendTokenBalance  = widget.sendTokenBalance;
       sendTokenId  = widget.sendTokenId;
       sendTokenUsd  = widget.sendTokenUsd;
+      explorerUrl  = widget.explorerUrl;
+      selectTokenUSD  = widget.selectTokenUSD;
     });
 
 
@@ -667,15 +680,30 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         toController.clear();
         sendTokenQuantity.clear();
 
-        // sendTokenAddress = "";
-        // sendTokenNetworkId = "";
-        // sendTokenName = "";
-        // sendTokenSymbol = "";
-        // selectTokenMarketId = "";
-        // sendTokenImage = "";
-        // sendTokenBalance = "";
-        // sendTokenId = "";
-        // sendTokenUsd = "";
+        Navigator.pop(context);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CoinDetailScreen(
+                selectedAccountAddress: selectedAccountAddress,
+                tokenDecimal: "$sendTokenDecimals",
+                tokenId: sendTokenId,
+                tokenNetworkId: sendTokenNetworkId,
+                tokenAddress: sendTokenAddress,
+                tokenName: sendTokenName,
+                tokenSymbol: sendTokenSymbol,
+                tokenBalance: sendTokenBalance,
+                tokenMarketId: selectTokenMarketId,
+                tokenType: tokenType,
+                tokenImage: sendTokenImage,
+                tokenUsdPrice: double.parse(selectTokenUSD),
+                tokenFullPrice: double.parse(sendTokenUsd),
+                tokenUpDown: double.parse(tokenUpDown),
+                token_transection_Id: sendTokenId,
+                explorerUrl: explorerUrl,
+              ),
+            )
+        );
 
       });
     }
@@ -684,7 +712,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     else {
       if (sendTokenNetworkId == "9" && transectionProvider.sendTokenData["status"] == false) {
         // ignore: use_build_context_synchronously
-        Helper.dialogCall.showToast(context,"Insufficient fees balance");
+        Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
         setState(() {
           isLoading = false;
         });
@@ -1035,14 +1063,22 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                     }
                     else {
 
-                      double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
+                      // print(sendTokenAddress);
+                      if(sendTokenAddress == "") {
+                        double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
 
-                      //print(tokenBalance.toStringAsFixed(3));
-                      setState(() {
-                        sendTokenQuantity = TextEditingController(
-                            text: tokenBalance.toStringAsFixed(6)
-                        );
-                      });
+                        //print(tokenBalance.toStringAsFixed(3));
+                        setState(() {
+                          sendTokenQuantity = TextEditingController(
+                              text: tokenBalance.toStringAsFixed(6)
+                          );
+                        });
+                      }else{
+                        // print("object");
+                        setState(() {
+                          sendTokenQuantity.text = sendTokenBalance;
+                        });
+                      }
                     }
                   },
                   child: SizedBox(
