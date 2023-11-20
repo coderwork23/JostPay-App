@@ -140,6 +140,7 @@ class _SellHistoryState extends State<SellHistory> {
                       );
                     },
                     child: Container(
+                      margin: EdgeInsets.only(bottom: 15),
                       padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
                       decoration: BoxDecoration(
                           color: MyColor.darkGrey01Color,
@@ -187,6 +188,7 @@ class _SellHistoryState extends State<SellHistory> {
                                 ),
                               ),
                               Text(
+                                DbSellHistory.dbSellHistory.getTrxStatusData == null ? "" :
                                 "~${DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount}",
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16

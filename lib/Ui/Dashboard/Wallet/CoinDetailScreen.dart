@@ -12,6 +12,7 @@ import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WalletWithdrawDetails.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
@@ -413,8 +414,26 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     InkWell(
                       onTap: () {
                         Navigator.pop(context);
-                        dashProvider.changeDefaultCoin(sendTokenType.isNotEmpty ? sendTokenType : tokenSymbol );
-                        dashProvider.changeBottomIndex(2);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WalletWithdrawDetails(
+                                sendTokenAddress: widget.tokenAddress,
+                                sendTokenNetworkId: widget.tokenNetworkId,
+                                sendTokenName: widget.tokenName,
+                                sendTokenSymbol: widget.tokenSymbol,
+                                selectTokenMarketId: widget.tokenMarketId,
+                                sendTokenImage : widget.tokenImage,
+                                sendTokenBalance : widget.tokenBalance,
+                                sendTokenId : widget.tokenId,
+                                sendTokenUsd : "${widget.tokenFullPrice}",
+                                sendTokenDecimals:int.parse(widget.tokenDecimal),
+                                tokenUpDown:widget.tokenUpDown.toString() ,
+                                explorerUrl: widget.explorerUrl,
+                                selectTokenUSD: widget.tokenUsdPrice.toString(),
+                              ),
+                            )
+                        );
                       },
                       child: Column(
                         children: [

@@ -14,6 +14,7 @@ import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/AddAssetsScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/ReceiveToken/ReceiveTokenList.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/SendToken/SendTokenList.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WithDrawTokenList.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
@@ -105,6 +106,30 @@ class _WalletScreenState extends State<WalletScreen> {
             maxHeight: MediaQuery.of(context).size.height*0.8
           ),
             child: const ReceiveTokenList()
+        );
+      },
+    );
+  }
+
+  showWithdrawTokenList(BuildContext context){
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: MyColor.darkGreyColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
+      ),
+      context: context,
+      builder: (context) {
+        return Container(
+            padding: const EdgeInsets.fromLTRB(20,22,20,10),
+            constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height/2,
+                maxHeight: MediaQuery.of(context).size.height*0.8
+            ),
+            child: const WithDrawTokenList()
         );
       },
     );
@@ -517,8 +542,7 @@ class _WalletScreenState extends State<WalletScreen> {
               // withdraw
               InkWell(
                 onTap: () {
-                  dashProvider.changeDefaultCoin("");
-                  dashProvider.changeBottomIndex(2);
+                  showWithdrawTokenList(context);
                 },
                 child: Column(
                   children: [

@@ -1,28 +1,59 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellValidationPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'SellValidationPage.dart';
 
-class SellScreen extends StatefulWidget {
+// ignore: must_be_immutable
+class WalletWithdrawDetails extends StatefulWidget {
+  String sendTokenAddress = "",
+      sendTokenNetworkId = "",
+      sendTokenName = "",
+      sendTokenSymbol = "",
+      selectTokenMarketId = "",
+      tokenUpDown = "",
+      sendTokenImage = "",
+      selectTokenUSD = "",
+      sendTokenBalance = "",
+      sendTokenId = "",
+      explorerUrl = "",
+      sendTokenUsd = "";
+  int sendTokenDecimals;
 
-  const SellScreen({
+  WalletWithdrawDetails({
     super.key,
+    required this.sendTokenAddress,
+    required this.sendTokenNetworkId,
+    required this.sendTokenName,
+    required this.sendTokenSymbol,
+    required this.selectTokenMarketId,
+    required this.tokenUpDown,
+    required this.sendTokenImage,
+    required this.sendTokenBalance,
+    required this.selectTokenUSD,
+    required this.sendTokenId,
+    required this.explorerUrl,
+    required this.sendTokenUsd,
+    required this.sendTokenDecimals,
   });
 
   @override
-  State<SellScreen> createState() => _SellScreenState();
+  State<WalletWithdrawDetails> createState() => _WalletWithdrawDetailsState();
 }
 
-class _SellScreenState extends State<SellScreen> {
+class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
+
 
   TextEditingController priceController = TextEditingController(text: "0");
   TextEditingController bankNoController = TextEditingController();
@@ -31,10 +62,8 @@ class _SellScreenState extends State<SellScreen> {
   TextEditingController emailController = TextEditingController();
 
   String? selectedBank,selectedAccountId = "",networkFees,sellBank;
-  bool isLoading = false;
+  bool isLoading = true;
   var usdError = "",emailError = "";
-
-  var selectedCoin;
 
   late BuySellProvider buySellProvider;
   late DashboardProvider dashboardProvider;
@@ -44,16 +73,29 @@ class _SellScreenState extends State<SellScreen> {
     SharedPreferences sharedPre = await SharedPreferences.getInstance();
     selectedAccountId = sharedPre.getString('accountId') ?? "";
     var email = sharedPre.getString("email")??"";
+    setState(() {
+      if(widget.sendTokenSymbol != "" && buySellProvider.sellRateList.isNotEmpty){
+        if (widget.sendTokenSymbol == "TRC20") {
+          sendTokenSymbol = "USDTTRC20";
+        }
+        else if (widget.sendTokenSymbol == "BEP20") {
+          sendTokenSymbol = "USDTBEP20";
+        }
+        else if (widget.sendTokenSymbol == "BNB") {
+          sendTokenSymbol = "BNBBEP20";
+        }
+      }
+    });
 
     await DbNetwork.dbNetwork.getNetwork();
+
 
     var params = {
       "action":"validate_sell_order",
       "email":emailController.text.isEmpty ? "a@gmail.com" : emailController.text.trim(),
       "token":"",
-      // "token":buySellProvider.loginModel== null ? "" : buySellProvider.loginModel!.accessToken,
-      "item_code":selectedCoin == null ? "" : selectedCoin['symbol'],
-      "amount":priceController.text.trim(),
+      "item_code":sendTokenSymbol,
+      "amount":usdAmount.toString(),
       "bank":sellBank ?? "",
       "account_no":bankNoController.text.trim(),
       "account_name":acNameController.text.trim(),
@@ -63,28 +105,15 @@ class _SellScreenState extends State<SellScreen> {
 
     // print("object ${jsonEncode(params)}");
 
-    await buySellProvider.validateSellOrder(params,selectedAccountId,context,"");
+    await buySellProvider.validateSellOrder(
+        params,
+        selectedAccountId,
+        context,
+        sendTokenSymbol
+    );
+
 
     setState(() {
-      if(dashboardProvider.defaultCoin != "" && buySellProvider.sellRateList.isNotEmpty){
-        if (dashboardProvider.defaultCoin == "TRC20") {
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "USDTTRC20");
-          selectedCoin = buySellProvider.sellRateList[index];
-        }
-        else if (dashboardProvider.defaultCoin == "BEP20") {
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "USDTBEP20");
-          selectedCoin = buySellProvider.sellRateList[index];
-        }
-
-        else if (dashboardProvider.defaultCoin == "BNB") {
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "BNBBEP20");
-          selectedCoin = buySellProvider.sellRateList[index];
-        }else{
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == dashboardProvider.defaultCoin);
-          selectedCoin = buySellProvider.sellRateList[index];
-        }
-      }
-
       emailController.text = email;
     });
 
@@ -92,41 +121,106 @@ class _SellScreenState extends State<SellScreen> {
 
     if(buySellProvider.getSellValidation != null){
 
-     var value =  await Navigator.push(
+      var sendData = {
+        "sendTokenDecimals":sendTokenDecimals,
+        "sendTokenName":sendTokenName,
+        "sendTokenAddress":sendTokenAddress,
+        "sendTokenNetworkId":sendTokenNetworkId,
+        "sendTokenSymbol":sendTokenSymbol,
+        "selectTokenMarketId":selectTokenMarketId,
+        "sendTokenImage":sendTokenImage,
+        "tokenUpDown":tokenUpDown,
+        "sendTokenBalance":sendTokenBalance,
+        "sendTokenId":sendTokenId,
+        "sendTokenUsd":sendTokenUsd,
+        "explorerUrl":explorerUrl,
+        "selectTokenUSD":selectTokenUSD,
+      };
+
+
+      var value =  await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => SellValidationPage(
               params: params,
-              coinName: selectedCoin['name'],
-              pageName: "",
-              sendData: {},
+              coinName: sendTokenName,
+              pageName: "send",
+              sendData: sendData,
             ),
+
           )
       );
 
-     // print("object value --> ${value}");
-     if(value != null) {
-       setState(() {
-         priceController.text = "0";
-         phoneNoController.clear();
-         bankNoController.clear();
-         acNameController.clear();
-         selectedCoin = null;
-         sellBank = null;
-       });
-     }
+      // print("object value --> ${value}");
+      if(value != null) {
+        setState(() {
+          priceController.text = "0";
+          phoneNoController.clear();
+          bankNoController.clear();
+          acNameController.clear();
+          sellBank = null;
+        });
+      }
     }
 
   }
 
+
+
+  storeData(){
+    setState(() {
+      isLoading = true;
+      sendTokenName = widget.sendTokenName;
+      sendTokenAddress = widget.sendTokenAddress;
+      sendTokenNetworkId = widget.sendTokenNetworkId;
+      sendTokenSymbol = widget.sendTokenSymbol;
+      selectTokenMarketId = widget.selectTokenMarketId;
+      sendTokenImage  = widget.sendTokenImage;
+      tokenUpDown  = widget.tokenUpDown;
+      sendTokenBalance  = widget.sendTokenBalance;
+      sendTokenId  = widget.sendTokenId;
+      sendTokenUsd  = widget.sendTokenUsd;
+      explorerUrl  = widget.explorerUrl;
+      selectTokenUSD  = widget.selectTokenUSD;
+      sendTokenDecimals  = widget.sendTokenDecimals;
+
+      isLoading = false;
+    });
+
+
+    sellValidateOrder(context);
+
+  }
+
+
+  double usdAmount = 0.0;
+
+  String sendTokenAddress = "",
+      sendTokenNetworkId = "",
+      sendTokenName = "",
+      sendTokenSymbol = "",
+      selectTokenMarketId = "",
+      sendTokenImage = "",
+      tokenUpDown = "",
+      selectTokenUSD = "",
+      explorerUrl = "",
+      sendTokenBalance = "0",
+      sendTokenId = "",
+      sendTokenUsd = "0",
+      tokenType = ""; int sendTokenDecimals = 0;
+
+
   @override
   void initState() {
-    buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
-    dashboardProvider = Provider.of<DashboardProvider>(context,listen: false);
-    buySellProvider.accessToken = "";
     super.initState();
-    Future.delayed(Duration.zero,(){
-      sellValidateOrder(context);
+    dashboardProvider = Provider.of<DashboardProvider>(context,listen: false);
+    buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
+    buySellProvider.accessToken = "";
+
+
+
+    Future.delayed(const Duration(milliseconds: 500),(){
+      storeData();
     });
 
 
@@ -137,40 +231,69 @@ class _SellScreenState extends State<SellScreen> {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
     dashboardProvider = Provider.of<DashboardProvider>(context,listen: true);
 
-    // print(selectedCoin);
     return Scaffold(
-        appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Padding(
-          padding: EdgeInsets.only(top: 4.0),
-          child: Text(
-            "Withdraw",
-          ),
-        ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SellHistory(),
-                    )
-                );
-              },
-              icon: const Icon(
-                Icons.history,
-                color: MyColor.mainWhiteColor,
-              )
-          )
-        ],
-      ),
 
-        body:buySellProvider.sellValidOrder
+        appBar: AppBar(
+          leading:  InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.arrow_back_ios_new,
+              color: MyColor.mainWhiteColor,
+              size: 20,
+            ),
+          ),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SellHistory(),
+                      )
+                  );
+                },
+                icon: const Icon(
+                  Icons.history,
+                  color: MyColor.mainWhiteColor,
+                )
+            )
+          ],
+        ),
+
+        body:isLoading || buySellProvider.sellValidOrder
             ?
         Helper.dialogCall.showLoader()
             :
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // sell and token name text
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Sell $sendTokenName",
+                    style: MyStyle.tx18BWhite.copyWith(
+                      fontSize: 16
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+
+                  Text(
+                    "Sell coin to any Bank in Nigeria Receive Naira",
+                    style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 12,
+                        color: MyColor.grey01Color
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
             Expanded(
               child: SingleChildScrollView(
@@ -179,79 +302,91 @@ class _SellScreenState extends State<SellScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    // coin drop down
-                /*    DropdownButtonFormField<dynamic>(
-                      // value: selectedCoin,
-                      decoration: MyStyle.textInputDecoration.copyWith(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+                    // token details name
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 15),
+                      decoration: BoxDecoration(
+                        color: MyColor.darkGrey01Color,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down_sharp,
-                        color: MyColor.greenColor,
-                      ),
-                      hint: Text(
-                        "Select coin",
-                        style:MyStyle.tx22RWhite.copyWith(
-                            fontSize: 18,
-                            color: MyColor.whiteColor.withOpacity(0.7)
-                        ),
-                      ),
-                      dropdownColor: MyColor.backgroundColor,
-                      isExpanded: true,
-                      style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 16
-                      ),
-                      selectedItemBuilder: (BuildContext context) {
-                        return buySellProvider.sellRateList.map<Widget>((value) {
-                          return  Text(
-                            value['name'],
-                            style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 16
-                            ),
-                          );
-                        }).toList();
-                      },
-
-                      items: buySellProvider.sellRateList.map((dynamic tokenData) {
-                        // print("dropDown value $tokenData");
-                        return DropdownMenuItem(
-                            // value: tokenData,
-
-                            child: Text(
-                              tokenData['name'],
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: CachedNetworkImage(
+                              height: 40,
+                              width: 40,
+                              fit: BoxFit.fill,
+                              imageUrl:  sendTokenImage,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(color: MyColor.greenColor),
                               ),
-                            )
-                        );
-                      }).toList(),
-                      onChanged: (dynamic value) async {
-                        setState(() {
-                          networkFees = null;
-                          selectedCoin = null;
-                          selectedCoin = value;
-                          // print(selectedCoin);
-                          priceController.clear();
-                        });
+                              errorWidget: (context, url, error) =>
+                                  Container(
+                                    height: 45,
+                                    width: 45,
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      color: MyColor.whiteColor,
+                                    ),
+                                    child: Image.asset(
+                                      "assets/images/bitcoin.png",
+                                    ),
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
 
+                          Expanded(
+                            child: Text(
+                              sendTokenName,
+                              style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 15
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
 
-                      },
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "${ApiHandler.calculateLength3(sendTokenBalance)} $sendTokenSymbol",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 15
+                                ),
+                              ),
+                              Text(
+                                "${ApiHandler.calculateLength3(selectTokenUSD)} \$",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 12,
+                                    color: MyColor.grey01Color
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 20),*/
+                    const SizedBox(height: 20),
 
                     // Withdraw amount
                     TextFormField(
                       keyboardType: TextInputType.number,
                       controller: priceController,
                       cursorColor: MyColor.greenColor,
-                       style: MyStyle.tx18RWhite.copyWith(
+                      style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
                       ),
                       onChanged: (value){
-                        if(double.parse(value) < selectedCoin['minSellAmount']){
-                          usdError = "Amount more then ${selectedCoin['minSellAmount']}";
-                        }else{
-                          usdError = "";
+                        if(value.isNotEmpty) {
+                          usdAmount = double.parse(value) * double.parse(sendTokenUsd);
+                          if (usdAmount < buySellProvider.minSellAmount) {
+                            usdError = "Amount more then ${buySellProvider.minSellAmount}";
+                          } else {
+                            usdError = "";
+                          }
                         }
                         setState(() {});
                       },
@@ -259,14 +394,42 @@ class _SellScreenState extends State<SellScreen> {
                           hintText: "Withdraw amount",
                           isDense: false,
                           contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                          suffixIcon: SizedBox(
-                            width: 80,
+                          suffixIcon: IntrinsicWidth(
                             child: Center(
-                              child: Text(
-                                "USD",
-                                style: MyStyle.tx18BWhite.copyWith(
-                                    fontSize: 16
-                                ),
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        priceController.text = double.parse(sendTokenBalance).toStringAsFixed(5);
+                                        usdAmount = double.parse(sendTokenBalance) * double.parse(sendTokenUsd);
+
+                                        if(usdAmount < buySellProvider.minSellAmount){
+                                          usdError = "Amount more then ${buySellProvider.minSellAmount}";
+                                        }else{
+                                          // print("object");
+                                          usdError = "";
+                                        }
+                                      });
+                                    },
+                                    child: Text(
+                                      "Max",
+                                      style: MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 14,
+                                        color: MyColor.greenColor
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    sendTokenSymbol,
+                                    style: MyStyle.tx18RWhite.copyWith(
+                                        fontSize: 14
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+
+                                ],
                               ),
                             ),
                           )
@@ -285,6 +448,19 @@ class _SellScreenState extends State<SellScreen> {
                           ),
                         )
                     ),
+                    const SizedBox(height: 08),
+
+                    // Amount in usd
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        "Amount in USD ~ ${usdAmount.toStringAsFixed(3)}",
+                        style: MyStyle.tx18BWhite.copyWith(
+                            fontSize: 13,
+                            color: MyColor.grey01Color
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 20),
 
                     // Bank Account No.
@@ -292,7 +468,7 @@ class _SellScreenState extends State<SellScreen> {
                       keyboardType: TextInputType.number,
                       controller: bankNoController,
                       cursorColor: MyColor.greenColor,
-                       style: MyStyle.tx18RWhite.copyWith(
+                      style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
                       ),
                       onChanged: (value) {
@@ -312,7 +488,7 @@ class _SellScreenState extends State<SellScreen> {
                     TextFormField(
                       controller: acNameController,
                       cursorColor: MyColor.greenColor,
-                       style: MyStyle.tx18RWhite.copyWith(
+                      style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
                       ),
                       onChanged: (value) {
@@ -377,7 +553,7 @@ class _SellScreenState extends State<SellScreen> {
                       keyboardType: TextInputType.number,
                       controller: phoneNoController,
                       cursorColor: MyColor.greenColor,
-                       style: MyStyle.tx18RWhite.copyWith(
+                      style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
                       ),
                       onChanged: (value) {
@@ -398,16 +574,16 @@ class _SellScreenState extends State<SellScreen> {
                       keyboardType: TextInputType.emailAddress,
                       controller: emailController,
                       cursorColor: MyColor.greenColor,
-                       onChanged: (value) {
-                         RegExp checkMail =  RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-                         if(!checkMail.hasMatch(value)){
-                           emailError = "Please enter valid email id.";
-                         }else{
-                           emailError = "";
-                         }
-                         setState(() {});
-                       },
-                       style: MyStyle.tx18RWhite.copyWith(
+                      onChanged: (value) {
+                        RegExp checkMail =  RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                        if(!checkMail.hasMatch(value)){
+                          emailError = "Please enter valid email id.";
+                        }else{
+                          emailError = "";
+                        }
+                        setState(() {});
+                      },
+                      style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
                       ),
                       decoration: MyStyle.textInputDecoration.copyWith(
@@ -439,7 +615,7 @@ class _SellScreenState extends State<SellScreen> {
                         ?
                     Helper.dialogCall.showLoader()
                         :
-                    selectedCoin == null || priceController.text.isEmpty
+                     priceController.text.isEmpty
                         || sellBank == null || emailError.isNotEmpty
                         // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                         || phoneNoController.text.isEmpty
@@ -447,7 +623,7 @@ class _SellScreenState extends State<SellScreen> {
                         ?
                     InkWell(
                       onTap: () {
-                        if(double.parse(selectedCoin['amount']) < double.parse(priceController.text)){
+                        if(buySellProvider.minSellAmount < double.parse(priceController.text)){
                           Helper.dialogCall.showToast(context, "Insufficient balance");
                         }else{
                           Helper.dialogCall.showToast(context, "Please provider all details");
@@ -459,7 +635,7 @@ class _SellScreenState extends State<SellScreen> {
                         height: 45,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration:
-                        selectedCoin == null || priceController.text.isEmpty || sellBank == null
+                         priceController.text.isEmpty || sellBank == null
                             ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
                             // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                             || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
@@ -471,7 +647,7 @@ class _SellScreenState extends State<SellScreen> {
                         child: Text(
                             "Continue",
                             style:  MyStyle.tx18BWhite.copyWith(
-                                color:  selectedCoin == null || priceController.text.isEmpty || sellBank == null
+                                color:   priceController.text.isEmpty || sellBank == null
                                     || phoneNoController.text.isEmpty
                                     // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
                                     || acNameController.text.isEmpty || bankNoController.text.isEmpty

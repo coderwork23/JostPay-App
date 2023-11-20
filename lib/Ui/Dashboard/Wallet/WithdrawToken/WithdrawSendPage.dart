@@ -5,12 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
-import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
+import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/CoinDetailScreen.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/SendToken/QrScannerPage.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WithdrawSuccessful.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -18,10 +18,10 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:web3dart/web3dart.dart';
-import 'QrScannerPage.dart';
+
 
 // ignore: must_be_immutable
-class SendCoinScreen extends StatefulWidget {
+class WithdrawSendPage extends StatefulWidget {
 
   String sendTokenAddress = "",
       sendTokenNetworkId = "",
@@ -34,13 +34,15 @@ class SendCoinScreen extends StatefulWidget {
       sendTokenBalance = "",
       sendTokenId = "",
       explorerUrl = "",
+      sellInvoice = "",
       sendTokenUsd = "";
   int sendTokenDecimals;
+  var params,sellResponce;
 
-
-  SendCoinScreen({
+  WithdrawSendPage({
     super.key,
     required this.sendTokenAddress,
+    required this.sellInvoice,
     required this.sendTokenNetworkId,
     required this.sendTokenName,
     required this.sendTokenSymbol,
@@ -49,6 +51,8 @@ class SendCoinScreen extends StatefulWidget {
     required this.sendTokenImage,
     required this.sendTokenBalance,
     required this.selectTokenUSD,
+    required this.params,
+    required this.sellResponce,
     required this.sendTokenId,
     required this.explorerUrl,
     required this.sendTokenUsd,
@@ -56,12 +60,12 @@ class SendCoinScreen extends StatefulWidget {
   });
 
   @override
-  State<SendCoinScreen> createState() => _SendCoinScreenState();
+  State<WithdrawSendPage> createState() => _WithdrawSendPageState();
 }
 
-class _SendCoinScreenState extends State<SendCoinScreen> {
-
+class _WithdrawSendPageState extends State<WithdrawSendPage> {
   TextEditingController toController = TextEditingController();
+  late BuySellProvider buySellProvider;
 
 
   GlobalKey<FormState> formKey = GlobalKey();
@@ -134,13 +138,15 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
 
 
-
     networkList = DbNetwork.dbNetwork.networkList.where((element) => "${element.id}" == sendTokenNetworkId).toList();
+    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,networkList[0].id);
 
     setState(() {
+      fromAddressController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
       networkSymbol = networkList[0].symbol;
       isTxfees = networkList[0].isTxfees;
-      fromAddressController = TextEditingController(text: selectedAccountAddress);
+      toController = TextEditingController(text: widget.sellResponce['payin_address']);
+      sendTokenQuantity.text = widget.sellResponce['payin_amount'].toString().split(" ").first;
     });
 
   }
@@ -153,10 +159,13 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
   @override
   void initState() {
     transectionProvider = Provider.of<TransectionProvider>(context, listen: false);
+    buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
     super.initState();
     selectedAccount();
   }
+
+
 
 
 
@@ -280,7 +289,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                       const Padding(
                         padding: EdgeInsets.only(left: 5,bottom: 10),
                         child: Text(
-                           "Asset",
+                            "Asset",
                             style : MyStyle.tx18BWhite
                         ),
                       ),
@@ -346,7 +355,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 10),
                                 child: Text(
-                                   "From address",
+                                    "From address",
                                     style: MyStyle.tx18BWhite.copyWith(
                                         fontSize: 16
                                     )
@@ -368,7 +377,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                 child: Text(
                                     "To address",
                                     style: MyStyle.tx18BWhite.copyWith(
-                                      fontSize: 16
+                                        fontSize: 16
                                     )
                                 ),
                               ),
@@ -389,10 +398,10 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 10),
                                 child: Text(
-                                   "Token quantity",
-                                  style: MyStyle.tx18BWhite.copyWith(
-                                      fontSize: 14
-                                  )
+                                    "Token quantity",
+                                    style: MyStyle.tx18BWhite.copyWith(
+                                        fontSize: 14
+                                    )
                                 ),
                               ),
 
@@ -413,17 +422,17 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                     ),
 
                                     Text(
-                                      double.parse("${double.parse(sendTokenQuantity.text)*double.parse(sendTokenUsd)}").toStringAsFixed(2),
+                                        double.parse("${double.parse(sendTokenQuantity.text)*double.parse(sendTokenUsd)}").toStringAsFixed(2),
                                         style: MyStyle.tx18RWhite.copyWith(
                                             fontSize: 14
                                         )
                                     ),
 
                                     Text(
-                                      " USD",
-                                      style: MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 14
-                                      )
+                                        " USD",
+                                        style: MyStyle.tx18RWhite.copyWith(
+                                            fontSize: 14
+                                        )
                                     ),
 
                                   ],
@@ -454,16 +463,16 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
                                   Expanded(
                                     child: Text(
-                                      "Network Fee",
-                                      style:MyStyle.tx18BWhite.copyWith(
-                                          fontSize: 14
-                                      )
+                                        "Network Fee",
+                                        style:MyStyle.tx18BWhite.copyWith(
+                                            fontSize: 14
+                                        )
                                     ),
                                   ),
 
                                   Text(
                                       isTxfees == 0 ? "0" :
-                                    "${ApiHandler.calculateLength3(sendTransactionFee)} $networkSymbol",
+                                      "${ApiHandler.calculateLength3(sendTransactionFee)} $networkSymbol",
                                       style: MyStyle.tx18RWhite.copyWith(
                                           fontSize: 14
                                       )
@@ -479,10 +488,10 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
                                   Expanded(
                                     child: Text(
-                                     "Max total",
-                                      style: MyStyle.tx18BWhite.copyWith(
-                                          fontSize: 14
-                                      )
+                                        "Max total",
+                                        style: MyStyle.tx18BWhite.copyWith(
+                                            fontSize: 14
+                                        )
                                     ),
                                   ),
 
@@ -539,7 +548,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                             children: [
 
                               Text(
-                               "I understand all the risk",
+                                "I understand all the risk",
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 14
                                 ),
@@ -556,7 +565,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                   Text(
                                     "Terms and Conditions",
                                     style: MyStyle.tx18RWhite.copyWith(
-                                      fontSize: 14
+                                        fontSize: 14
                                     ),
                                   )],
                               ),
@@ -587,7 +596,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                           ),
                           child: const Center(
                             child: Text(
-                               "Confirm send",
+                                "Confirm send",
                                 style: MyStyle.tx18RWhite
                             ),
                           ),
@@ -670,7 +679,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
 
       setState((){
-        isLoading = false;
 
         sendGasPrice = "";
         sendGas = "";
@@ -681,30 +689,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         toController.clear();
         sendTokenQuantity.clear();
 
-        Navigator.pop(context);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CoinDetailScreen(
-                selectedAccountAddress: selectedAccountAddress,
-                tokenDecimal: "$sendTokenDecimals",
-                tokenId: sendTokenId,
-                tokenNetworkId: sendTokenNetworkId,
-                tokenAddress: sendTokenAddress,
-                tokenName: sendTokenName,
-                tokenSymbol: sendTokenSymbol,
-                tokenBalance: sendTokenBalance,
-                tokenMarketId: selectTokenMarketId,
-                tokenType: tokenType,
-                tokenImage: sendTokenImage,
-                tokenUsdPrice: double.parse(selectTokenUSD),
-                tokenFullPrice: double.parse(sendTokenUsd),
-                tokenUpDown: double.parse(tokenUpDown),
-                token_transection_Id: sendTokenId,
-                explorerUrl: explorerUrl,
-              ),
-            )
-        );
+        notifyOrder(context);
 
       });
     }
@@ -728,6 +713,36 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       });
     }
 
+  }
+
+  notifyOrder(context)async{
+
+    var params = {
+      "action":"notify_payment_made",
+      "email":widget.params['email'],
+      "invoice":widget.sellInvoice.toString(),
+      "auth":"p1~\$*)Ze(@"
+    };
+
+    await buySellProvider.notifyOrder(params, context);
+
+    if(buySellProvider.placeNotifyOrder) {
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                WithdrawSuccessful(
+                    invoice: widget.sellInvoice
+                ),
+          )
+      );
+
+    }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Web3Client? _web3client;
@@ -791,6 +806,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
     transectionProvider = Provider.of<TransectionProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+    buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
 
     // print(networkList[0].isEVM);
     return Scaffold(
@@ -869,7 +885,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
               || double.parse(sendTokenQuantity.text) == 0
               || double.parse(sendTokenQuantity.text) < 0.00
               || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                  || toController.text.isEmpty
+              || toController.text.isEmpty
           ){
 
             // print("object");
@@ -894,7 +910,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                   ?
               MyColor.boarderColor
                   :
-               MyColor.greenColor
+              MyColor.greenColor
           ),
           child:  Text(
             "Next",
@@ -940,13 +956,13 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
             const SizedBox(height: 20),
 
 
-           // to address
+            // to address
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: Text(
                 "Recipient Address",
                 style: MyStyle.tx18RWhite.copyWith(
-                  fontSize: 16
+                    fontSize: 16
                 ),
               ),
             ),
@@ -961,15 +977,15 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                 setState(() {});
               },
               decoration: MyStyle.textInputDecoration2.copyWith(
-                suffixIcon: SizedBox(
-                  width: 90,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      InkWell(
+                  suffixIcon: SizedBox(
+                    width: 90,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        InkWell(
                           onTap: () {
                             FlutterClipboard.paste().then((value){
-                                toController.text = value;
+                              toController.text = value;
                             });
                           },
                           child: Center(
@@ -982,37 +998,37 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                               ),
                             ),
                           ),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () async {
-                          final value = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const QrScannerPage()
-                              )
-                          );
-
-                          if(value != null ){
-                            setState(() {
-                              toController.text = value;
-                            });
-                          }
-
-
-                        },
-                        child: Image.asset(
-                          "assets/images/dashboard/scan.png",
-                          height: 25,
-                          width: 25,
-                          color: MyColor.greenColor,
                         ),
-                      ),
-                      const SizedBox(width: 8),
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: () async {
+                            final value = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const QrScannerPage()
+                                )
+                            );
 
-                    ],
-                  ),
-                )
+                            if(value != null ){
+                              setState(() {
+                                toController.text = value;
+                              });
+                            }
+
+
+                          },
+                          child: Image.asset(
+                            "assets/images/dashboard/scan.png",
+                            height: 25,
+                            width: 25,
+                            color: MyColor.greenColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                      ],
+                    ),
+                  )
               ),
             ),
             const SizedBox(height: 15),
@@ -1041,61 +1057,61 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
               cursorColor: MyColor.greenColor,
               style: MyStyle.tx18RWhite,
               decoration: MyStyle.textInputDecoration2.copyWith(
-                isDense: false,
-                contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                suffixIcon: InkWell(
-                  onTap: () {
-                    if(networkList[0].isEVM == 1){
+                  isDense: false,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+                  suffixIcon: InkWell(
+                    onTap: () {
+                      if(networkList[0].isEVM == 1){
 
-                      if(toController.text != "") {
-                        setState((){
-                          FocusScope.of(context).unfocus();
-                          // maxButtonCall = true;
-                        });
-                        // addressValidator();
-                        getWeb3NetWorkFees();
+                        if(toController.text != "") {
+                          setState((){
+                            FocusScope.of(context).unfocus();
+                            // maxButtonCall = true;
+                          });
+                          // addressValidator();
+                          getWeb3NetWorkFees();
+                        }
+                        else{
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+
                       }
-                      else{
-                        setState(() {
-                          isLoading = false;
-                        });
+                      else {
+
+                        // print(sendTokenAddress);
+                        if(sendTokenAddress == "") {
+                          double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
+
+                          //print(tokenBalance.toStringAsFixed(3));
+                          setState(() {
+                            sendTokenQuantity = TextEditingController(
+                                text: tokenBalance.toStringAsFixed(6)
+                            );
+                          });
+                        }else{
+                          // print("object");
+                          setState(() {
+                            sendTokenQuantity.text = sendTokenBalance;
+                          });
+                        }
                       }
-
-                    }
-                    else {
-
-                      // print(sendTokenAddress);
-                      if(sendTokenAddress == "") {
-                        double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
-
-                        //print(tokenBalance.toStringAsFixed(3));
-                        setState(() {
-                          sendTokenQuantity = TextEditingController(
-                              text: tokenBalance.toStringAsFixed(6)
-                          );
-                        });
-                      }else{
-                        // print("object");
-                        setState(() {
-                          sendTokenQuantity.text = sendTokenBalance;
-                        });
-                      }
-                    }
-                  },
-                  child: SizedBox(
-                    width: 60,
-                    child: Center(
-                      child: Text(
-                        "Max",
-                        textAlign: TextAlign.center,
-                        style: MyStyle.tx18BWhite.copyWith(
-                          fontSize: 14,
-                          color: MyColor.greenColor
+                    },
+                    child: SizedBox(
+                      width: 60,
+                      child: Center(
+                        child: Text(
+                          "Max",
+                          textAlign: TextAlign.center,
+                          style: MyStyle.tx18BWhite.copyWith(
+                              fontSize: 14,
+                              color: MyColor.greenColor
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                )
+                  )
               ),
 
 
@@ -1105,10 +1121,10 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
             //Available Balance
             Text(
-                sendTokenBalance == "0"
-                    ?
+              sendTokenBalance == "0"
+                  ?
               "Available: 0.0 $sendTokenSymbol"
-                    :
+                  :
               "Available: ${ApiHandler.calculateLength3("${double.parse(sendTokenBalance) }")} $sendTokenSymbol",
               style:MyStyle.tx18RWhite.copyWith(
                   fontSize: 14,
@@ -1122,4 +1138,5 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
     );
   }
+
 }

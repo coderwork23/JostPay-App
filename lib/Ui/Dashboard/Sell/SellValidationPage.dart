@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WithdrawSendPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -10,8 +11,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
 class SellValidationPage extends StatefulWidget {
-  var params;
-  SellValidationPage({super.key,required this.params});
+  var params,coinName,pageName,sendData;
+  SellValidationPage({
+    super.key,
+    required this.params,
+    required this.coinName,
+    required this.pageName,
+    required this.sendData,
+  });
 
   @override
   State<SellValidationPage> createState() => _SellValidationPageState();
@@ -26,6 +33,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
   @override
   void initState() {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
+    buySellProvider.sellOderLoading = false;
     super.initState();
   }
 
@@ -39,10 +47,14 @@ class _SellValidationPageState extends State<SellValidationPage> {
       data['action'] = "place_sell_order";
     });
 
-    // print(jsonEncode(data));
-    await buySellProvider.sellOrder(widget.params, selectedAccountId, context);
-
-
+    var sendData = widget.sendData;
+    await buySellProvider.sellOrder(
+      widget.params,
+      selectedAccountId,
+      context,
+      "send",
+      sendData,
+    );
   }
 
   @override
@@ -54,142 +66,20 @@ class _SellValidationPageState extends State<SellValidationPage> {
 
 
     return Scaffold(
-      bottomNavigationBar: buySellProvider.sellOderLoading
-          ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
-              )
-          )
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(acceptTerms) {
-            placeSellOrder(context);
-          }else{
-            Helper.dialogCall.showToast(context, "Review All Details.");
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(15,0,15,15),
-          alignment: Alignment.center,
-          height: 45,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: acceptTerms
-              ?
-          MyStyle.buttonDecoration
-              :
-          MyStyle.invalidDecoration,
-
-          child: Text(
-            "Place Sell Order",
-            style:  MyStyle.tx18BWhite.copyWith(
-                color: acceptTerms
-                    ?
-                MyColor.mainWhiteColor
-                    :
-                MyColor.mainWhiteColor.withOpacity(0.4)
-            ),
-          ),
-        ),
-      ),
-
-      appBar: AppBar(
-        centerTitle: true,
-        leading:  InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.arrow_back_ios_new,
-            color: MyColor.mainWhiteColor,
-            size: 20,
-          ),
-        ),
-        title: const Text(
-          "Place Order",
-        ),
-
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(15,0,15,15),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-
-            Text(
-              "Note: ${buySellProvider.getSellValidation['info']}".split("\n").first,
-              style: MyStyle.tx18RWhite.copyWith(
-                fontSize: 14,
-                color: MyColor.dotBoarderColor
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Row(
-              children: [
-                Text(
-                    "Note: ${buySellProvider.getSellValidation['info']}".split("\n")[2],
-                    style: MyStyle.tx18RWhite.copyWith(
-                      fontSize: 16
-                    )
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                      "Note: ${buySellProvider.getSellValidation['info']}".split("\n")[3].split(" ").last,
-                      style: MyStyle.tx18RWhite.copyWith(
-                        fontSize: 16
-                      )
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            Text(
-                "${buySellProvider.getSellValidation['info']}".split("\n")[4],
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 16
-                )
-            ),
-            const SizedBox(height: 8),
-            Text(
-                "${buySellProvider.getSellValidation['info']}".split("\n")[5],
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 16
-                )
-            ),
-
-            const SizedBox(height: 8),
-            Text(
-                "${buySellProvider.getSellValidation['info']}".split("\n")[6],
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 16
-                )
-            ),
-
-            const SizedBox(height: 8),
-            Text(
-                "${buySellProvider.getSellValidation['info']}".split("\n")[7],
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 16
-                )
-            ),
-
-            const SizedBox(height: 20),
             InkWell(
               onTap: () {
-                setState(() {
-                  acceptTerms = !acceptTerms;
-                });
+               setState(() {
+                 acceptTerms = !acceptTerms;
+               });
               },
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
 
                   Container(
@@ -203,23 +93,163 @@ class _SellValidationPageState extends State<SellValidationPage> {
                             color: acceptTerms ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
                         )
                     ),
-                    child: acceptTerms ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
+                    child: acceptTerms
+                        ?
+                    const Center(
+                        child: Icon(
+                          Icons.check,
+                          size: 18,
+                          color: Colors.white,
+                        )
+                    )
+                        :
+                    const SizedBox(),
                   ),
                   const SizedBox(width: 10),
-
                   Expanded(
-                    child: Text(
-                        "${buySellProvider.getSellValidation['info'].split("\n")[8]}",
-                        style: MyStyle.tx18RWhite.copyWith(
-                            fontSize: 16,
-                            color: acceptTerms ? MyColor.whiteColor : MyColor.dotBoarderColor
-                        )
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text:"Accept ",
+                            style: MyStyle.tx18RWhite.copyWith(
+                                fontSize: 16,
+                            ),
+                          ),
+                          TextSpan(
+                            text:"Terms & Condition",
+                            style: MyStyle.tx18BWhite.copyWith(
+                                fontSize: 16,
+                                color: MyColor.greenColor
+                            ),
+                          ),
+                        ]
+                      ),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
+            const SizedBox(height: 10),
+
+            buySellProvider.sellOderLoading
+                ?
+            const SizedBox(
+                height:52,
+                child: Center(
+                    child: CircularProgressIndicator(
+                      color: MyColor.greenColor,
+                    )
+                )
+            )
+                :
+            InkWell(
+              onTap: () {
+                if(acceptTerms) {
+                  placeSellOrder(context);
+                }else{
+                  Helper.dialogCall.showToast(context, "Accept terms and condition.");
+                }
+              },
+              child: Container(
+                alignment: Alignment.center,
+                height: 45,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: acceptTerms
+                    ?
+                MyStyle.buttonDecoration
+                    :
+                MyStyle.invalidDecoration,
+
+                child: Text(
+                  "Proceed",
+                  style:  MyStyle.tx18BWhite.copyWith(
+                      color: acceptTerms
+                          ?
+                      MyColor.mainWhiteColor
+                          :
+                      MyColor.mainWhiteColor.withOpacity(0.4)
+                  ),
+                ),
+              ),
+            ),
           ],
+        ),
+      ),
+
+      appBar: AppBar(
+        leading:  InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_ios_new,
+            color: MyColor.mainWhiteColor,
+            size: 20,
+          ),
+        ),
+        title: const Text(
+          "Sell Order Preview",
+        ),
+
+      ),
+
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          child:Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: buySellProvider.getSellValidation['info'].split("\n").length,
+                itemBuilder: (context, index) {
+                  var list = buySellProvider.getSellValidation['info'].split("\n")[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                     index < buySellProvider.getSellValidation['info'].split("\n").length-1
+                          ?
+                      list
+                          :
+                      "You Get : ${list.toString().split(":").last.trim()}",
+                      style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 15
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              Text(
+                "Coin : ${widget.coinName}",
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 15
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              Text(
+                "Transaction type : Sell",
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 15
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              Text(
+                "Note: Please confirm your sell order and make sure all details"
+                    " provided are correct before you proceed",
+                style: MyStyle.tx18RWhite.copyWith(
+                    fontSize: 13,
+                    color: MyColor.grey01Color
+                ),
+              ),
+
+            ],
+          ),
+
         ),
       ),
     );

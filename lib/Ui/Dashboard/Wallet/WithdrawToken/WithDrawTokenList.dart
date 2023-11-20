@@ -1,11 +1,12 @@
 import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WalletWithdrawDetails.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'SendCoinScreen.dart';
 
 
 class Debouncer {
@@ -23,14 +24,15 @@ class Debouncer {
   }
 }
 
-class SendTokenList extends StatefulWidget {
-  const SendTokenList({super.key});
+
+class WithDrawTokenList extends StatefulWidget {
+  const WithDrawTokenList({super.key});
 
   @override
-  State<SendTokenList> createState() => _SendTokenListState();
+  State<WithDrawTokenList> createState() => _WithDrawTokenListState();
 }
 
-class _SendTokenListState extends State<SendTokenList> {
+class _WithDrawTokenListState extends State<WithDrawTokenList> {
 
   TextEditingController searchController = TextEditingController();
   final _debouncer = Debouncer(milliseconds: 500);
@@ -50,7 +52,6 @@ class _SendTokenListState extends State<SendTokenList> {
     getCoin();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return  Column(
@@ -68,9 +69,9 @@ class _SendTokenListState extends State<SendTokenList> {
         ),
         const SizedBox(height: 25),
 
-        // add assets text
+        // Select Assets text
         Text(
-          "Send",
+          "Select Assets",
           style: MyStyle.tx28RGreen.copyWith(
               color: MyColor.mainWhiteColor,
               fontFamily: "NimbusSanLBol",
@@ -138,28 +139,31 @@ class _SendTokenListState extends State<SendTokenList> {
                   setState(() {
                     selectTokenUSD = double.parse(list.balance) * list.price;
                   });
+
+                  // print(list.decimals);
+
                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SendCoinScreen(
-                        sendTokenAddress: list.address,
-                        sendTokenNetworkId: "${list.networkId}",
-                        sendTokenName: list.name,
-                        sendTokenSymbol: list.symbol,
-                        selectTokenMarketId: "${list.marketId}",
-                        sendTokenImage : list.logo,
-                        sendTokenBalance : list.balance,
-                        sendTokenId : "${list.token_id}",
-                        sendTokenUsd : "${list.price}",
-                        sendTokenDecimals:list.decimals,
-                        explorerUrl:list.explorer_url,
-                        tokenUpDown: "${list.percentChange24H}",
-                        selectTokenUSD: "$selectTokenUSD",
-                      ),
-                    )
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WalletWithdrawDetails(
+                          sendTokenAddress: list.address,
+                          sendTokenNetworkId: "${list.networkId}",
+                          sendTokenName: list.name,
+                          sendTokenSymbol: list.symbol,
+                          selectTokenMarketId: "${list.marketId}",
+                          sendTokenImage : list.logo,
+                          sendTokenBalance : list.balance,
+                          sendTokenId : "${list.token_id}",
+                          sendTokenUsd : "${list.price}",
+                          sendTokenDecimals:list.decimals,
+                          explorerUrl:list.explorer_url,
+                          tokenUpDown: "${list.percentChange24H}",
+                          selectTokenUSD: "$selectTokenUSD",
+                        ),
+                      )
                   );
 
-                 Navigator.pop(context);
+                  Navigator.pop(context);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 15),
