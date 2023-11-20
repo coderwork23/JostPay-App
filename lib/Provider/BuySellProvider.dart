@@ -403,6 +403,10 @@ class BuySellProvider with ChangeNotifier{
             Helper.dialogCall.showToast(context, value['error']);
           }
 
+          /*if(value['error'] == "Supply valid a phone if you're not signing in."){
+            Helper.dialogCall.showToast(context, value['error']);
+          }*/
+
           sellValidOrder = false;
           notifyListeners();
         }
@@ -417,7 +421,7 @@ class BuySellProvider with ChangeNotifier{
 
   bool sellOderLoading = false;
   var sellResponce;
-  sellOrder(params,accountId,context,send,sendData) async {
+  sellOrder(params,accountId,context,send,sendData,name) async {
     sellOderLoading = true;
     notifyListeners();
     await ApiHandler.getInstantApi(params).then((responseData) async {
@@ -432,11 +436,11 @@ class BuySellProvider with ChangeNotifier{
 
         if(trxIndex == -1) {
           await DbSellHistory.dbSellHistory.createSellHistory(
-              SellHistoryModel.fromJson(value, accountId)
+              SellHistoryModel.fromJson(value,accountId,name)
           );
         }else{
           await DbSellHistory.dbSellHistory.updateSellHistory(
-              SellHistoryModel.fromJson(value, accountId),
+              SellHistoryModel.fromJson(value,accountId,name),
               value["invoice"],
               accountId
           );

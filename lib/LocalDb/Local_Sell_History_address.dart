@@ -31,6 +31,7 @@ class DbSellHistory{
               'amount_payable_ngn INTEGER,'
               'invoice TEXT,'
               'order_status TEXT,'
+              'tokenName TEXT,'
               'invoice_no TEXT,'
               'invoice_url TEXT,'
               'time INTEGER,'
@@ -39,6 +40,7 @@ class DbSellHistory{
               'payin_amount TEXT,'
               'payout_amount TEXT,'
               'payout_address TEXT,'
+              'payin_url TEXT,'
               'accountId TEXT'
               ')');
         },
@@ -47,7 +49,7 @@ class DbSellHistory{
 
   createSellHistory(SellHistoryModel newToken) async{
     final db= await database;
-    // print(newToken.toJson());
+    print(newToken.toJson());
     final res = await db!.insert('SellHistory', newToken.toJson());
     return res;
   }
@@ -81,6 +83,7 @@ class DbSellHistory{
       return SellHistoryModel.fromJson(
         c,
         accountId,
+        c['tokenName']
       );
     }).toList();
     sellHistoryList = list;
@@ -96,8 +99,9 @@ class DbSellHistory{
 
     if(res.isNotEmpty) {
       getTrxStatusData = SellHistoryModel.fromJson(
-        res[0],
-        accountId,
+          res[0],
+          accountId,
+          res[0]['tokenName']
       );
     }
     return getTrxStatusData;

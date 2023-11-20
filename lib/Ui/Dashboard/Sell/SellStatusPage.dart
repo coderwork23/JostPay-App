@@ -70,14 +70,21 @@ class _SellStatusPageState extends State<SellStatusPage> {
         final temp = DbNetwork.dbNetwork.networkList.where((element) {
           print(dbSymbol.trim().toLowerCase());
           return element.symbol.toLowerCase() == dbSymbol.trim().toLowerCase();
-        }).toList().first;
+        }).toList();
 
-        sendNetwork = {
-          "logo":temp.logo,
-          "name":temp.name,
-          "symbol":temp.symbol
-
-        };
+        if(temp.isNotEmpty) {
+          sendNetwork = {
+            "logo": temp[0].logo,
+            "name": temp[0].name,
+            "symbol": temp[0].symbol
+          };
+        }else{
+          sendNetwork = {
+            "logo": "",
+            "name": "",
+            "symbol": ""
+          };
+        }
       }
 
       isLoading = false;
@@ -207,7 +214,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            sendNetwork["name"],
+                            DbSellHistory.dbSellHistory.getTrxStatusData!.tokenName,
                             style: MyStyle.tx18RWhite.copyWith(
                                 fontSize: 16
                             ),

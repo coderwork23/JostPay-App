@@ -43,17 +43,19 @@ class _SellValidationPageState extends State<SellValidationPage> {
     SharedPreferences sharedPre = await SharedPreferences.getInstance();
     selectedAccountId = sharedPre.getString('accountId') ?? "";
     var data = widget.params;
+
     setState(() {
       data['action'] = "place_sell_order";
     });
 
     var sendData = widget.sendData;
     await buySellProvider.sellOrder(
-      widget.params,
-      selectedAccountId,
-      context,
-      "send",
-      sendData,
+        widget.params,
+        selectedAccountId,
+        context,
+        widget.pageName == "" ? "" : "send",
+        sendData,
+        widget.coinName
     );
   }
 
@@ -132,7 +134,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
             ),
             const SizedBox(height: 10),
 
-            buySellProvider.sellOderLoading
+           /* buySellProvider.sellOderLoading
                 ?
             const SizedBox(
                 height:52,
@@ -142,7 +144,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
                     )
                 )
             )
-                :
+                :*/
             InkWell(
               onTap: () {
                 if(acceptTerms) {

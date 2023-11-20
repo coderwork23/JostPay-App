@@ -24,7 +24,7 @@ class SellScreen extends StatefulWidget {
 
 class _SellScreenState extends State<SellScreen> {
 
-  TextEditingController priceController = TextEditingController(text: "0");
+  TextEditingController priceController = TextEditingController();
   TextEditingController bankNoController = TextEditingController();
   TextEditingController acNameController = TextEditingController();
   TextEditingController phoneNoController = TextEditingController();
@@ -66,25 +66,6 @@ class _SellScreenState extends State<SellScreen> {
     await buySellProvider.validateSellOrder(params,selectedAccountId,context,"");
 
     setState(() {
-      if(dashboardProvider.defaultCoin != "" && buySellProvider.sellRateList.isNotEmpty){
-        if (dashboardProvider.defaultCoin == "TRC20") {
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "USDTTRC20");
-          selectedCoin = buySellProvider.sellRateList[index];
-        }
-        else if (dashboardProvider.defaultCoin == "BEP20") {
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "USDTBEP20");
-          selectedCoin = buySellProvider.sellRateList[index];
-        }
-
-        else if (dashboardProvider.defaultCoin == "BNB") {
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == "BNBBEP20");
-          selectedCoin = buySellProvider.sellRateList[index];
-        }else{
-          var index = buySellProvider.sellRateList.indexWhere((element) => element['symbol'] == dashboardProvider.defaultCoin);
-          selectedCoin = buySellProvider.sellRateList[index];
-        }
-      }
-
       emailController.text = email;
     });
 
@@ -180,7 +161,7 @@ class _SellScreenState extends State<SellScreen> {
                   children: [
 
                     // coin drop down
-                /*    DropdownButtonFormField<dynamic>(
+                    DropdownButtonFormField<dynamic>(
                       // value: selectedCoin,
                       decoration: MyStyle.textInputDecoration.copyWith(
                         contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
@@ -201,22 +182,10 @@ class _SellScreenState extends State<SellScreen> {
                       style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 16
                       ),
-                      selectedItemBuilder: (BuildContext context) {
-                        return buySellProvider.sellRateList.map<Widget>((value) {
-                          return  Text(
-                            value['name'],
-                            style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 16
-                            ),
-                          );
-                        }).toList();
-                      },
-
                       items: buySellProvider.sellRateList.map((dynamic tokenData) {
                         // print("dropDown value $tokenData");
                         return DropdownMenuItem(
-                            // value: tokenData,
-
+                            value: tokenData,
                             child: Text(
                               tokenData['name'],
                               style: MyStyle.tx18RWhite.copyWith(
@@ -230,14 +199,15 @@ class _SellScreenState extends State<SellScreen> {
                           networkFees = null;
                           selectedCoin = null;
                           selectedCoin = value;
-                          // print(selectedCoin);
+                          print(selectedCoin['name']);
+                          print(value['name']);
                           priceController.clear();
                         });
 
 
                       },
                     ),
-                    const SizedBox(height: 20),*/
+                    const SizedBox(height: 20),
 
                     // Withdraw amount
                     TextFormField(
@@ -256,7 +226,7 @@ class _SellScreenState extends State<SellScreen> {
                         setState(() {});
                       },
                       decoration: MyStyle.textInputDecoration.copyWith(
-                          hintText: "Withdraw amount",
+                          hintText: "Buy amount",
                           isDense: false,
                           contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
                           suffixIcon: SizedBox(

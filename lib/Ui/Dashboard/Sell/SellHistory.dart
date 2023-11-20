@@ -101,6 +101,8 @@ class _SellHistoryState extends State<SellHistory> {
                 itemCount: DbSellHistory.dbSellHistory.sellHistoryList.length,
                 itemBuilder: (context, index) {
                   var list = DbSellHistory.dbSellHistory.sellHistoryList[index];
+                  print(list.tokenName);
+
                   dynamic sendNetwork;
                   var dbSymbol = list.payinAmount.split(" ").last;
                   if(dbSymbol.toLowerCase() == "usdtbsc"){
@@ -118,16 +120,24 @@ class _SellHistoryState extends State<SellHistory> {
                     };
                   }
                   else{
+
                     final temp = DbNetwork.dbNetwork.networkList.where((element) {
                       return element.symbol.toLowerCase() == dbSymbol.trim().toLowerCase();
-                    }).toList().first;
+                    }).toList();
 
-                    sendNetwork = {
-                      "logo":temp.logo,
-                      "name":temp.name,
-                      "symbol":temp.symbol
-
-                    };
+                    if(temp.isNotEmpty) {
+                      sendNetwork = {
+                        "logo": temp[0].logo,
+                        "name": temp[0].name,
+                        "symbol": temp[0].symbol
+                      };
+                    }else{
+                      sendNetwork = {
+                        "logo": "",
+                        "name": "",
+                        "symbol": ""
+                      };
+                    }
                   }
 
                   return InkWell(
@@ -181,7 +191,7 @@ class _SellHistoryState extends State<SellHistory> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  sendNetwork["name"],
+                                  list.tokenName,
                                   style: MyStyle.tx18RWhite.copyWith(
                                       fontSize: 16
                                   ),
