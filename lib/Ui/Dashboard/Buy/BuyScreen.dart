@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyHistory.dart';
@@ -10,7 +10,7 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'BuyValidationPage.dart';
+import 'BuyPreviewPage.dart';
 
 class BuyScreen extends StatefulWidget {
   const BuyScreen({super.key});
@@ -30,33 +30,78 @@ class _BuyScreenState extends State<BuyScreen> {
   RatesInfo? selectedCoin;
   String? selectedNetwork,networkFees,bankName;
 
-  String errorMessage = "",selectedAccountId = "";
   var usdError = "";
 
-  getSelectedAccount()async{
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await DbNetwork.dbNetwork.getNetwork();
-    setState(() {});
+  checkLogin()async{
+
+    setState(() {
+      isLoading = true;
+    });
+
+    SharedPreferences sharedPre = await SharedPreferences.getInstance();
+    var date  = sharedPre.getString("expireDate")??"";
+    const storage = FlutterSecureStorage();
+
+    if(date != "") {
+      DateTime expireDate = DateTime.parse(date);
+      if(!expireDate.isAfter(DateTime.now())){
+        await storage.deleteAll();
+        setState(() {
+          buySellProvider.accessToken = "";
+          buySellProvider.loginModel = null;
+        });
+        // ignore: use_build_context_synchronously
+        Helper.dialogCall.showToast(context, "Your Login is expire.Please login again");
+      }else {
+
+        var data = await storage.read(key: "loginValue");
+        var deCode = jsonDecode(data!);
+
+        setState(() {
+          List<RatesInfo> ratesInfoList = [];
+          deCode['rates_info'].map((e) {
+            ratesInfoList.add(
+                RatesInfo.fromJson(
+                    e,
+                    e['itemCode']
+                )
+            );
+          }).toList();
+
+          buySellProvider.loginModel = null;
+          buySellProvider.loginModel = LoginModel.fromJson(deCode, ratesInfoList);
+        });
+
+      }
+    }else{
+      setState(() {
+        buySellProvider.loginModel = null;
+      });
+    }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
 
   @override
   void initState() {
+    super.initState();
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
     buySellProvider.accessToken = "";
     buySellProvider.loginButtonText = "Get Otp";
     buySellProvider.showOtpText = false;
-    super.initState();
 
-    getSelectedAccount();
+    Future.delayed(Duration.zero,(){
+      checkLogin();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
-    // print("object ${selectedCoin!.name}");
-
+    // print("object ${ selectedCoin!.memoLabel != ""}");
     return  Scaffold(
       body: isLoading
           ?
@@ -65,7 +110,7 @@ class _BuyScreenState extends State<BuyScreen> {
       Column(
         children: [
 
-          buySellProvider.accessToken == ""
+          buySellProvider.loginModel == null
               ?
           const Expanded(child: InstantLoginScreen())
               :
@@ -149,61 +194,17 @@ class _BuyScreenState extends State<BuyScreen> {
                                 );
                               }).toList(),
                               onChanged: (RatesInfo? value) async {
-
-                                var index = DbNetwork.dbNetwork.networkList.indexWhere((element) => element.name == value!.name);
                                 setState(() {
                                   networkFees = null;
                                   selectedCoin = null;
+                                  selectedCoin = value;
+                                  print(value!.memoLabel);
+                                  print(selectedCoin!.memoLabel);
+                                  if(selectedCoin!.networkFees.isNotEmpty) {
+                                    networkFees = selectedCoin!.networkFees[0];
+                                  }
                                   priceController.clear();
                                 });
-
-                                if(index != -1){
-                                  await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, DbNetwork.dbNetwork.networkList[index].id);
-                                  setState(() {
-                                    currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-                                    selectedCoin = value;
-                                    networkFees = selectedCoin!.networkFees[0];
-                                  });
-                                }
-                                else if(value!.name == "Tether - USDT TRC20"){
-                                  await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 9);
-                                  setState(() {
-                                    currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-                                    selectedCoin = value;
-                                    networkFees = selectedCoin!.networkFees[0];
-
-                                  });
-                                }
-                                else if(value.name == "Tether BEP20"){
-                                  await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 2);
-                                  setState(() {
-                                    currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-                                    selectedCoin = value;
-                                    networkFees = selectedCoin!.networkFees[0];
-                                  });
-                                }
-                                else if(value.name == "Binance Coin BSC"){
-                                  await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 2);
-                                  setState(() {
-                                    currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-                                    selectedCoin = value;
-                                    networkFees = selectedCoin!.networkFees[0];
-                                  });
-                                }else if(value.name == "TRON - TRX"){
-                                  await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, 9);
-                                  setState(() {
-                                    currencyAcController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-                                    selectedCoin = value;
-                                    networkFees = selectedCoin!.networkFees[0];
-                                  });
-                                }
-                                else{
-                                  // print("object ${value.name}");
-                                  currencyAcController.clear();
-                                  // ignore: use_build_context_synchronously
-                                  Helper.dialogCall.showToast(context, "Selected Network is not implemented");
-                                }
-
                               },
                             ),
                             const SizedBox(height: 20),
@@ -259,7 +260,7 @@ class _BuyScreenState extends State<BuyScreen> {
 
 
                             // network fees drop down
-                            selectedCoin  == null
+                            networkFees  == null
                                 ?
                             const SizedBox():
                             DropdownButtonFormField<String>(
@@ -286,35 +287,10 @@ class _BuyScreenState extends State<BuyScreen> {
                               ),
 
                               items: selectedCoin!.networkFees.map((String category) {
-                                var symbol = "";
-                                //
-
-                                if(selectedCoin!.name.contains("-")){
-                                  symbol =  selectedCoin!.name.split("-").last.split(" ").join(" ");
-                                }else {
-                                  if (selectedCoin!.name == "Tether - USDT TRC20") {
-                                    symbol = "USDTTRC20";
-                                  } else
-                                  if (selectedCoin!.name == "Tether BEP20") {
-                                    symbol = "USDTBEP20";
-                                  } else {
-                                    symbol = DbNetwork.dbNetwork.networkList
-                                        .firstWhere((element) {
-                                      return element.name.toLowerCase() ==
-                                          (selectedCoin!.name.toLowerCase() ==
-                                              "binance coin bsc"
-                                              ? "binance smart chain"
-                                              : selectedCoin!.name
-                                              .toLowerCase());
-                                    }).symbol;
-                                  }
-                                }
                                 return DropdownMenuItem(
                                     value: category,
                                     child: Text(
-                                      // "Network Fee: $category",
-
-                                      "Network Fee: $category $symbol",
+                                      "Network Fee: $category",
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: MyStyle.tx18RWhite.copyWith(
@@ -329,7 +305,7 @@ class _BuyScreenState extends State<BuyScreen> {
                                 });
                               },
                             ),
-                            SizedBox(height: selectedCoin  == null ? 0: 20),
+                            SizedBox(height: networkFees  == null ? 0: 20),
 
 
                             // bank DropDown
@@ -384,6 +360,9 @@ class _BuyScreenState extends State<BuyScreen> {
                               style: MyStyle.tx18RWhite.copyWith(
                                   fontSize: 16
                               ),
+                              onChanged: (value) {
+                                setState(() {});
+                              },
                               decoration: MyStyle.textInputDecoration.copyWith(
                                 hintText: selectedCoin == null ? "Currency account" : "${selectedCoin!.name} account",
                                 isDense: false,
@@ -396,27 +375,31 @@ class _BuyScreenState extends State<BuyScreen> {
 
 
                             // Memo text
-                            selectedCoin == null || selectedCoin!.memoLabel != ""
-                                ?
-                            const SizedBox()
-                                :
-                            TextFormField(
-                              controller: memoController,
-                              cursorColor: MyColor.greenColor,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
-                              ),
-                              decoration: MyStyle.textInputDecoration.copyWith(
-                                hintText: "Memo",
-                                isDense: false,
-                                contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                              ),
+                            Visibility(
+                              visible: selectedCoin != null && selectedCoin!.memoLabel != "",
+                              child: TextFormField(
+                                controller: memoController,
+                                cursorColor: MyColor.greenColor,
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                                onChanged: (value) {
+                                  setState(() {});
+                                },
+                                decoration: MyStyle.textInputDecoration.copyWith(
+                                  hintText: "Memo",
+                                  isDense: false,
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+                                ),
 
+                              ),
                             ),
                             const SizedBox(height: 40),
 
                             // process button
-                            selectedCoin == null || priceController.text.isEmpty || networkFees == null
+                            selectedCoin == null
+                                || priceController.text.isEmpty
+                                || currencyAcController.text.isEmpty
                                 || bankName ==null
                                 || double.parse(priceController.text) < selectedCoin!.minBuyAmount
                                 ?
@@ -434,7 +417,9 @@ class _BuyScreenState extends State<BuyScreen> {
                                 height: 45,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 decoration:
-                                selectedCoin == null || priceController.text.isEmpty || networkFees == null
+                                selectedCoin == null
+                                    || priceController.text.isEmpty
+                                    || currencyAcController.text.isEmpty
                                     || bankName ==null
                                     || double.parse(priceController.text) < selectedCoin!.minBuyAmount
                                     ?
@@ -447,7 +432,7 @@ class _BuyScreenState extends State<BuyScreen> {
                                     style:  MyStyle.tx18BWhite.copyWith(
                                        color: selectedCoin == null
                                            || priceController.text.isEmpty
-                                           || networkFees == null
+                                           || currencyAcController.text.isEmpty
                                            || bankName ==null
                                            ||double.parse(priceController.text) < selectedCoin!.minBuyAmount
                                             ?
@@ -460,21 +445,32 @@ class _BuyScreenState extends State<BuyScreen> {
                             )
                                 :
                             InkWell(
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+
+                                var value = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => BuyValidationPage(
+                                        builder: (context) => BuyPreviewPage(
                                           amount: priceController.text.trim(),
                                           bank: bankName!,
                                           itemCode: selectedCoin!.itemCode,
                                           receivingAddress: currencyAcController.text.trim(),
                                           selectedCoin: selectedCoin,
                                           memo: memoController.text.trim(),
-                                          networkFess: networkFees!,
+                                          networkFess: networkFees == null ? "0" : networkFees!,
                                         )
                                     )
                                 );
+                                if(value!= null){
+                                  setState(() {
+                                    priceController.clear();
+                                    memoController.clear();
+                                    currencyAcController.clear();
+                                    networkFees = null;
+                                    selectedCoin = null;
+                                    bankName = null;
+                                  });
+                                }
                               },
                               child: Container(
                                 alignment: Alignment.center,

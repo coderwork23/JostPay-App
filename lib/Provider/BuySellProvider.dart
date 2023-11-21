@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
 import 'package:jost_pay_wallet/Models/BuySellHistoryModel.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyHistory.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyPaymentInstructions.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WithdrawSendPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -74,35 +75,39 @@ class BuySellProvider with ChangeNotifier{
         if (responseData.statusCode == 200 && value['error'] == null) {
 
           List<RatesInfo> ratesInfoList = [];
-
-          var list = ["PMUSD","PPUSD","WEBMONEY","PAYEER","SKYPE","XMR","USDCBEP20","XRP","USDTPOLYGON","USDCPOLYGON"];
-          // print("${}");
           value['rates_info'].keys.forEach((key){
-            if(list.indexWhere((element) => element == key) == -1){
-              // print("object key $key");
+            // print(value['rates_info'][key]);
               ratesInfoList.add(
                   RatesInfo.fromJson(value['rates_info'][key],key));
-            }
           });
 
 
           loginModel = LoginModel.fromJson(value,ratesInfoList);
-          // print(loginModel!.ratesInfo.map((e) => print(e.name)));
 
           // print("check value here");
           SharedPreferences sharedPre = await SharedPreferences.getInstance();
           sharedPre.setString("email","$email");
+          sharedPre.setString("expireDate","${DateTime.now().add(const Duration(days: 1))}");
           accessToken = value['access_token'];
 
           await getExRate({"action":"exchange_rate"},context);
 
           for(int i =0; i<loginModel!.ratesInfo.length; i++){
+            print(loginModel!.ratesInfo[i].memoLabel);
             var exListIndex = exchangeList.indexWhere((element) => element["name"] == loginModel!.ratesInfo[i].name);
             if(exListIndex != -1){
               loginModel!.ratesInfo[i].buyPrice = exchangeList[i]['buy'];
               loginModel!.ratesInfo[i].sellPrice = exchangeList[i]['sell'];
             }
           }
+
+          const storage =  FlutterSecureStorage();
+          String jsonString = jsonEncode(loginModel);
+          print("loginModel!.banks");
+          var data = jsonDecode(jsonString);
+          print(data['rates_info'].map((e)=>debugPrint(e['memo_label'])).toList());
+          await storage.write(key: "loginValue", value: jsonString);
+
 
           isLoginLoader = false;
           showOtpText = false;
@@ -224,6 +229,7 @@ class BuySellProvider with ChangeNotifier{
           receiveValue = "${double.parse(data[0]).toStringAsFixed(3)} ${data[1].trim().split("\n").first}" ;
         }
 
+
         notifyListeners();
       }else{
         isValidBuyLoading = false;
@@ -238,18 +244,21 @@ class BuySellProvider with ChangeNotifier{
     notifyListeners();
 
     await ApiHandler.getInstantApi(params).then((responseData){
-      // var value = json.decode(responseData.body);
+      var value = json.decode(responseData.body);
       if (responseData.statusCode == 200) {
-        orderLoading = false;
 
-        Helper.dialogCall.showToast(context, "Your order placed successfully.");
-
-        Navigator.pushReplacement(
+        Navigator.pop(context,"refresh");
+        Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const BuyHistory(),
+              builder: (context) => BuyPaymentInstructions(
+                buyResponse: value,
+              ),
             )
         );
+
+        // Helper.dialogCall.showToast(context, "Your order placed successfully.");
+        orderLoading = false;
 
         notifyListeners();
 
@@ -278,9 +287,10 @@ class BuySellProvider with ChangeNotifier{
 
         var items = value["transactions"];
         List client = items as List;
+        // print("client length----> ${client.length}");
 
         list = client.map<BuySellHistoryModel>((json) {
-          
+          print(json);
           return BuySellHistoryModel.fromJson(json);
         }).toList();
 
@@ -344,7 +354,6 @@ class BuySellProvider with ChangeNotifier{
     await ApiHandler.getInstantApi(params).then((responseData) async {
       try {
         var value = json.decode(responseData.body);
-        print("object---> $value");
 
         if (responseData.statusCode == 200 && value["info"] != null) {
           sellValidOrder = false;
@@ -421,7 +430,6 @@ class BuySellProvider with ChangeNotifier{
     await ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
 
-      print("value sell order $value");
       if (responseData.statusCode == 200 && value['error'] == null) {
         // print("object id ---> $accountId");
         await DbSellHistory.dbSellHistory.getSellHistory(accountId);
@@ -517,8 +525,10 @@ class BuySellProvider with ChangeNotifier{
   }
 
   bool placeNotifyOrder = false;
+  bool notifyLoading = false;
   notifyOrder(params,context,String? pageName)async{
     placeNotifyOrder = false;
+    notifyLoading = true;
     notifyListeners();
 
     await ApiHandler.getInstantApi(params).then((responseData) {
@@ -530,10 +540,12 @@ class BuySellProvider with ChangeNotifier{
           Navigator.pop(context);
         }
         placeNotifyOrder = true;
+        notifyLoading = false;
         notifyListeners();
       }
       else{
         placeNotifyOrder = false;
+        notifyLoading = false;
         notifyListeners();
         Navigator.pop(context);
         notifyListeners();

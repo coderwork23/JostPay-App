@@ -50,7 +50,7 @@ class Details {
   String apiLink;
   String adminCommentTrue;
   String newBalance;
-  String adminCommentDogemenow;
+  String payin_Address;
 
   Details({
     required this.transactionType,
@@ -76,10 +76,11 @@ class Details {
     required this.apiLink,
     required this.adminCommentTrue,
     required this.newBalance,
-    required this.adminCommentDogemenow,
+    required this.payin_Address,
   });
 
-  factory Details.fromJson(Map<String, dynamic> json) => Details(
+  factory Details.fromJson(Map<String, dynamic> json) {
+    return Details(
     transactionType: json["Transaction_Type"]??"",
     currency: json["Currency"]??"",
     amount: json["Amount"]??"",
@@ -103,8 +104,9 @@ class Details {
     apiLink: json["API_Link"]??"",
     adminCommentTrue: json["Admin_Comment_:_true"]??"",
     newBalance: json["New_Balance"]??"",
-    adminCommentDogemenow: json["Admin_Comment_:_dogemenow"]??"",
+    payin_Address: json["${json['Amount_Raw_Full'].toString().split(" ").last}_Payin_Address"]??"",
   );
+  }
 
   Map<String, dynamic> toJson() => {
     "Transaction_Type": transactionType,
@@ -130,7 +132,7 @@ class Details {
     "API_Link": apiLink,
     "Admin_Comment_:_true": adminCommentTrue,
     "New_Balance": newBalance,
-    "Admin_Comment_:_dogemenow": adminCommentDogemenow,
+    "payin_Address": payin_Address,
   };
 }
 

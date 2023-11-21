@@ -37,6 +37,8 @@ class LoginModel {
     "access_token": accessToken,
     "info": info,
     "rates_info": ratesInfo,
+    "banks": banks,
+    "sell_banks":sellBanks
   };
 
 }
@@ -89,6 +91,7 @@ class RatesInfo {
     "low_buy_price": lowBuyPrice,
     "network_fees": List<dynamic>.from(networkFees.map((x) => x)),
     "memo_label": memoLabel,
+    "itemCode":itemCode
   };
 }
 

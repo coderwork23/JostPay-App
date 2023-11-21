@@ -8,11 +8,11 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class BuyValidationPage extends StatefulWidget {
+class BuyPreviewPage extends StatefulWidget {
   final String itemCode,amount,receivingAddress,bank,memo,networkFess;
   final RatesInfo? selectedCoin;
 
-  const BuyValidationPage({
+  const BuyPreviewPage({
     super.key,
     required this.itemCode,
     required this.selectedCoin,
@@ -24,10 +24,10 @@ class BuyValidationPage extends StatefulWidget {
   });
 
   @override
-  State<BuyValidationPage> createState() => _BuyValidationPageState();
+  State<BuyPreviewPage> createState() => _BuyPreviewPageState();
 }
 
-class _BuyValidationPageState extends State<BuyValidationPage> {
+class _BuyPreviewPageState extends State<BuyPreviewPage> {
 
   late BuySellProvider buySellProvider;
   bool acceptTerms = false;
@@ -78,8 +78,7 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
       "network_fee_type":feeType,
       "auth":"p1~\$*)Ze(@",
     };
-    //
-    print(jsonEncode(params));
+    // print(jsonEncode(params));
     await buySellProvider.placeBuyOrder(params,context);
   }
 
@@ -93,46 +92,106 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
 
 
     return Scaffold(
-      bottomNavigationBar: buySellProvider.orderLoading
-          ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
-              )
-          )
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(acceptTerms) {
-            placeBuyOrder(context);
-          }else{
-            Helper.dialogCall.showToast(context, "Accept all term and condition.");
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(15,0,15,15),
-          alignment: Alignment.center,
-          height: 45,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: acceptTerms
-              ?
-          MyStyle.buttonDecoration
-              :
-          MyStyle.invalidDecoration,
-
-          child: Text(
-            "Place Order",
-            style:  MyStyle.tx18BWhite.copyWith(
-                color: acceptTerms
-                    ?
-                MyColor.mainWhiteColor
-                    :
-                MyColor.mainWhiteColor.withOpacity(0.4)
+      bottomNavigationBar: Visibility(
+        visible: !buySellProvider.isValidBuyLoading,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: () {
+                setState(() {
+                  acceptTerms = !acceptTerms;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 22,
+                      width: 22,
+                      decoration: BoxDecoration(
+                          color: acceptTerms ? MyColor.greenColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                              width: 1.5,
+                              color: acceptTerms ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
+                          )
+                      ),
+                      child: acceptTerms ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                        child:RichText(
+                          text:  TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Accept ",
+                                  style: MyStyle.tx18BWhite.copyWith(
+                                      fontSize: 16
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Terms",
+                                  style: MyStyle.tx18BWhite.copyWith(
+                                      color: MyColor.greenColor,
+                                      fontSize: 16
+                                  ),
+                                )
+                              ]
+                          ),
+                        )
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
+            const SizedBox(height: 12),
+
+            buySellProvider.orderLoading
+                ?
+            const SizedBox(
+                height:52,
+                child: Center(
+                    child: CircularProgressIndicator(
+                      color: MyColor.greenColor,
+                    )
+                )
+            )
+                :
+            InkWell(
+              onTap: () {
+                if(acceptTerms) {
+                  placeBuyOrder(context);
+                }else{
+                  Helper.dialogCall.showToast(context, "Accept all term and condition.");
+                }
+              },
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(15,0,15,15),
+                alignment: Alignment.center,
+                height: 45,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: acceptTerms
+                    ?
+                MyStyle.buttonDecoration
+                    :
+                MyStyle.invalidDecoration,
+
+                child: Text(
+                  "Place Order",
+                  style:  MyStyle.tx18BWhite.copyWith(
+                      color: acceptTerms
+                          ?
+                      MyColor.mainWhiteColor
+                          :
+                      MyColor.mainWhiteColor.withOpacity(0.4)
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
 
@@ -149,7 +208,7 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
           ),
         ),
         title: const Text(
-          "Place Order",
+          "Preview Page",
         ),
 
       ),
@@ -379,6 +438,7 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
               child: Column(
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
                         width: width*0.4,
@@ -392,7 +452,7 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
 
                       Expanded(
                         child: Text(
-                            "${widget.receivingAddress.substring(0,4)}...${widget.receivingAddress.substring(widget.receivingAddress.length-4,widget.receivingAddress.length)}",
+                            "${widget.receivingAddress}",
                           style: MyStyle.tx18RWhite.copyWith(
                               fontSize: 16
                           ),
@@ -450,39 +510,11 @@ class _BuyValidationPageState extends State<BuyValidationPage> {
             ),
             const SizedBox(height: 20),
 
-            InkWell(
-              onTap: () {
-                setState(() {
-                  acceptTerms = !acceptTerms;
-                });
-              },
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 24,
-                    width: 24,
-                    decoration: BoxDecoration(
-                        color: acceptTerms ? MyColor.greenColor : Colors.transparent,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                            width: 1.5,
-                            color: acceptTerms ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
-                        )
-                    ),
-                    child: acceptTerms ? const Center(child: Icon(Icons.check,size: 18,color: Colors.white,)) : const SizedBox(),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      "It is important that you check through our terms and conditions especially if this is your first time within the last 30 days. Check the 'Accept Terms' box below if you accept out terms and conditions.",
-                      style: MyStyle.tx18RWhite.copyWith(
-                        fontSize: 12,
-                        color: MyColor.dotBoarderColor
-                      ),
-                    ),
-                  )
-                ],
+            Text(
+              "Note: Kindly make sure all information's are correct. InstantExchangers will NOT be responsible for any loss if you input a wrong account details.",
+              style: MyStyle.tx18RWhite.copyWith(
+                  fontSize: 12,
+                  color: MyColor.dotBoarderColor,
               ),
             ),
 

@@ -1,3 +1,4 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
@@ -58,13 +59,14 @@ class _BuyHistoryState extends State<BuyHistory> {
       "action":"get_transactions",
       "email":email,
       "token":buySellProvider.loginModel!.accessToken,
-      "p":"$pageCount",
+      // "p":"$pageCount",
       "status":statusType,
       "start_date":startData,
       "end_date":endData,
       "auth":"p1~\$*)Ze(@",
     };
 
+    print(params);
     await buySellProvider.buyHistory(params);
   }
 
@@ -100,7 +102,6 @@ class _BuyHistoryState extends State<BuyHistory> {
         title: const Text(
           "Buy History",
         ),
-
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -317,22 +318,72 @@ class _BuyHistoryState extends State<BuyHistory> {
                         const SizedBox(height: 20),
 
                         // invoice and status
-                        Row(
-                          children: [
-                            Text(
-                              "Invoice no: ",
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
+                        InkWell(
+                          onTap: () {
+                            FlutterClipboard.copy(list.invoiceNo).then((value) {
+                              Helper.dialogCall.showToast(context, "Invoice No Copied");
+                            });
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                "Invoice no: ",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              list.invoiceNo,
-                              style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
+                              const SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  list.invoiceNo,
+                                  style: MyStyle.tx18RWhite.copyWith(
+                                      fontSize: 16
+                                  ),
+                                ),
                               ),
+                              const Icon(
+                                Icons.copy,
+                                size: 20,
+                                color: MyColor.whiteColor,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        Visibility(
+                          visible: list.details.payin_Address != "",
+                          child: InkWell(
+                            onTap: () {
+                              FlutterClipboard.copy(list.details.payin_Address).then((value) {
+                                Helper.dialogCall.showToast(context, "Invoice No Copied");
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Text(
+                                  "Payin Address: ",
+                                  style: MyStyle.tx18RWhite.copyWith(
+                                      fontSize: 16
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    list.details.payin_Address,
+                                    style: MyStyle.tx18RWhite.copyWith(
+                                        fontSize: 16
+                                    ),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.copy,
+                                  size: 20,
+                                  color: MyColor.whiteColor,
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                         const SizedBox(height: 8),
 

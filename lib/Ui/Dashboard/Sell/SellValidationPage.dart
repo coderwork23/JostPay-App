@@ -25,7 +25,7 @@ class SellValidationPage extends StatefulWidget {
 
 class _SellValidationPageState extends State<SellValidationPage> {
 
-  late BuySellProvider buySellProvider;
+    late BuySellProvider buySellProvider;
   bool acceptTerms = false;
 
 
