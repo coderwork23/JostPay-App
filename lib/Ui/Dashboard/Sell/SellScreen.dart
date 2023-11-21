@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
@@ -61,7 +63,7 @@ class _SellScreenState extends State<SellScreen> {
       "auth":"p1~\$*)Ze(@"
     };
 
-    // print("object ${jsonEncode(params)}");
+    print("object ${jsonEncode(params)}");
 
     await buySellProvider.validateSellOrder(params,selectedAccountId,context,"");
 
@@ -88,7 +90,7 @@ class _SellScreenState extends State<SellScreen> {
      // print("object value --> ${value}");
      if(value != null) {
        setState(() {
-         priceController.text = "0";
+         priceController.text = "";
          phoneNoController.clear();
          bankNoController.clear();
          acNameController.clear();
@@ -125,7 +127,7 @@ class _SellScreenState extends State<SellScreen> {
         title: const Padding(
           padding: EdgeInsets.only(top: 4.0),
           child: Text(
-            "Withdraw",
+            "Sell",
           ),
         ),
         actions: [
@@ -218,15 +220,19 @@ class _SellScreenState extends State<SellScreen> {
                           fontSize: 16
                       ),
                       onChanged: (value){
-                        if(double.parse(value) < selectedCoin['minSellAmount']){
-                          usdError = "Amount more then ${selectedCoin['minSellAmount']}";
-                        }else{
-                          usdError = "";
+                        if(value.isNotEmpty) {
+                          if (double.parse(value) <
+                              selectedCoin['minSellAmount']) {
+                            usdError =
+                            "Amount more then ${selectedCoin['minSellAmount']}";
+                          } else {
+                            usdError = "";
+                          }
                         }
                         setState(() {});
                       },
                       decoration: MyStyle.textInputDecoration.copyWith(
-                          hintText: "Buy amount",
+                          hintText: "Sell amount",
                           isDense: false,
                           contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
                           suffixIcon: SizedBox(

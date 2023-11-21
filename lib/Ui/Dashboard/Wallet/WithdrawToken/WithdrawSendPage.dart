@@ -724,7 +724,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
       "auth":"p1~\$*)Ze(@"
     };
 
-    await buySellProvider.notifyOrder(params, context);
+    await buySellProvider.notifyOrder(params, context,"");
 
     if(buySellProvider.placeNotifyOrder) {
 
@@ -733,7 +733,8 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
           MaterialPageRoute(
             builder: (context) =>
                 WithdrawSuccessful(
-                    invoice: widget.sellInvoice
+                  invoice: widget.sellInvoice,
+                  tokenName: sendTokenName,
                 ),
           )
       );

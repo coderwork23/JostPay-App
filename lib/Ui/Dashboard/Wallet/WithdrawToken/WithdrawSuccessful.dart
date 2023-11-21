@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellStatusPage.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
 class WithdrawSuccessful extends StatefulWidget {
-  final String invoice;
+  final String invoice,tokenName;
   const WithdrawSuccessful({
     super.key,
-    required this.invoice
+    required this.invoice,
+    required this.tokenName
   });
 
   @override
@@ -74,7 +75,11 @@ class _WithdrawSuccessfulState extends State<WithdrawSuccessful> {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const SellHistory(),
+                        builder: (context) =>
+                            SellStatusPage(
+                                invoiceNo: widget.invoice,
+                                tokenName: widget.tokenName
+                            ),
                       )
                   );
                 },

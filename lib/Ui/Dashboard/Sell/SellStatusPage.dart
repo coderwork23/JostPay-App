@@ -1,9 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:declarative_refresh_indicator/declarative_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
@@ -14,12 +12,14 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SellStatusPage extends StatefulWidget {
-  final String invoiceNo;
+  final String invoiceNo,tokenName;
   const SellStatusPage({
     super.key,
-    required this.invoiceNo
+    required this.invoiceNo,
+    required this.tokenName
   });
 
   @override
@@ -32,14 +32,10 @@ class _SellStatusPageState extends State<SellStatusPage> {
   late TokenProvider tokenProvider;
 
   var selectedAccountId = "";
-  bool isLoading = false;
+  bool isLoading = true;
 
-  dynamic sendNetwork, receiveNetwork ;
 
   getTxsStatus()async{
-    setState(() {
-      isLoading = true;
-    });
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
     await DbSellHistory.dbSellHistory.getTrxStatus(selectedAccountId,widget.invoiceNo);
@@ -47,47 +43,12 @@ class _SellStatusPageState extends State<SellStatusPage> {
     var data = {
       "search_term": "",
     };
+
     await tokenProvider.getSearchToken(data,'/getTokens');
 
     setState(() {
-
-      var dbSymbol = DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount.split(" ").last;
-      if(dbSymbol.toLowerCase() == "usdtbsc"){
-        sendNetwork = {
-          "logo":"http://139.59.88.239/api/img/token/bsc_usdt.png",
-          "name":"Tether USD",
-          "symbol":"USDT"
-        };
-      }
-      else if(dbSymbol.toLowerCase() == "usdttrc20"){
-        sendNetwork = {
-          "logo":"http://139.59.88.239/api/img/token/trx_usdt.png",
-          "name":"Tether USD",
-          "symbol":"USDT"
-        };
-      }
-      else{
-        final temp = DbNetwork.dbNetwork.networkList.where((element) {
-          print(dbSymbol.trim().toLowerCase());
-          return element.symbol.toLowerCase() == dbSymbol.trim().toLowerCase();
-        }).toList();
-
-        if(temp.isNotEmpty) {
-          sendNetwork = {
-            "logo": temp[0].logo,
-            "name": temp[0].name,
-            "symbol": temp[0].symbol
-          };
-        }else{
-          sendNetwork = {
-            "logo": "",
-            "name": "",
-            "symbol": ""
-          };
-        }
-      }
-
       isLoading = false;
+      _showRefresh = false;
     });
 
   }
@@ -98,23 +59,31 @@ class _SellStatusPageState extends State<SellStatusPage> {
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
 
     super.initState();
-    getTxsStatus();
+
+    Future.delayed(Duration.zero,(){
+      checkOrderStatus(context);
+    });
+
   }
 
-
   checkOrderStatus(context)async{
-
+    setState(() {
+      isLoading = true;
+    });
     var params = {
       "action":"check_order_status",
       "invoice":widget.invoiceNo,
       "auth":"p1~\$*)Ze(@",
     };
 
-    await buySellProvider.checkOrderStatus(params,selectedAccountId,context);
+    await buySellProvider.checkOrderStatus(
+      params,
+      selectedAccountId,
+      context,
+      widget.tokenName
+    );
+    getTxsStatus();
 
-    setState(() {
-      _showRefresh = false;
-    });
   }
 
   bool _showRefresh = false;
@@ -125,7 +94,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
     });
 
     checkOrderStatus(context);
-    getTxsStatus();
+
   }
 
 
@@ -138,6 +107,31 @@ class _SellStatusPageState extends State<SellStatusPage> {
     var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      bottomNavigationBar: Visibility(
+        visible: DbSellHistory.dbSellHistory.getTrxStatusData!.orderStatus == "Pending"
+            &&
+            DbSellHistory.dbSellHistory.getTrxStatusData!.payinUrl != "",
+        child: InkWell(
+          onTap: () {
+            launchUrl(
+              Uri.parse(DbSellHistory.dbSellHistory.getTrxStatusData!.payinUrl),
+              mode: LaunchMode.externalApplication,
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            alignment: Alignment.center,
+            height: 45,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: MyStyle.buttonDecoration,
+
+            child: const Text(
+              "Make Payment",
+              style:  MyStyle.tx18BWhite
+            ),
+          ),
+        ),
+      ),
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -184,34 +178,6 @@ class _SellStatusPageState extends State<SellStatusPage> {
                     ),
                     child: Row(
                       children: [
-                        CachedNetworkImage(
-                          height: 25,
-                          width: 25,
-                          fit: BoxFit.fill,
-                          imageUrl: sendNetwork["logo"],
-                          placeholder: (context, url) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                  color: MyColor.greenColor
-                              ),
-                            );
-                          },
-                          errorWidget: (context, url, error) {
-                            return Container(
-                              height: 25,
-                              width: 25,
-                              padding: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(14),
-                                color: MyColor.whiteColor,
-                              ),
-                              child: Image.asset(
-                                "assets/images/bitcoin.png",
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             DbSellHistory.dbSellHistory.getTrxStatusData!.tokenName,
@@ -244,6 +210,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
                       children: [
                         const SizedBox(height: 10),
 
+                        //We Pay:
                         Row(
                           children: [
 
@@ -266,9 +233,9 @@ class _SellStatusPageState extends State<SellStatusPage> {
                         ),
                         const SizedBox(height: 10),
 
+                        //Trxn Status:
                         Row(
                           children: [
-
                             Expanded(
                               child: Text(
                                 "Trxn Status: ",
@@ -348,6 +315,41 @@ class _SellStatusPageState extends State<SellStatusPage> {
 
                           ],
                         ),
+                        const SizedBox(height: 10),
+
+                        //  Invoice url
+                        Row(
+                          children: [
+
+                            Text(
+                              "Invoice url: ",
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  launchUrl(
+                                    Uri.parse(DbSellHistory.dbSellHistory.getTrxStatusData!.invoiceUrl),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                },
+                                child: Text(
+                                  DbSellHistory.dbSellHistory.getTrxStatusData!.invoiceUrl,
+                                  textAlign: TextAlign.end,
+                                  style: MyStyle.tx18RWhite.copyWith(
+                                      fontSize: 15,
+                                      color: MyColor.greenColor
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                          ],
+                        ),
                         const SizedBox(height: 5),
 
                       ],
@@ -356,139 +358,149 @@ class _SellStatusPageState extends State<SellStatusPage> {
                   const SizedBox(height: 15),
 
                   // warning message
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      "Note: Your order has been submitted. Your transaction invoice no. is"
-                          " ${DbSellHistory.dbSellHistory.getTrxStatusData!.invoice} "
-                          " To complete this transaction, please send exactly"
-                          " ${DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount} To",
-                      textAlign: TextAlign.center,
-                      style:MyStyle.tx18RWhite.copyWith(
-                          fontSize: 12,
-                          color: MyColor.dotBoarderColor
+                  Visibility(
+                    visible: DbSellHistory.dbSellHistory.getTrxStatusData!.orderStatus == "Pending",
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        "Note: Your order has been submitted. Your transaction invoice no. is"
+                            " ${DbSellHistory.dbSellHistory.getTrxStatusData!.invoice} "
+                            " To complete this transaction, please send exactly"
+                            " ${DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount} To",
+                        textAlign: TextAlign.center,
+                        style:MyStyle.tx18RWhite.copyWith(
+                            fontSize: 12,
+                            color: MyColor.dotBoarderColor
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 15),
 
-                  // qr and token name
-                  Container(
-                    width: width * 0.8,
-                    padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 22),
-                    decoration: BoxDecoration(
-                        color: MyColor.darkGrey01Color,
-                        borderRadius: BorderRadius.circular(12)
-                    ),
-                    child: Column(
-                      children: [
-
-                        Container(
-                          height: height * 0.26,
-                          width: width * 0.55,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              color: MyColor.mainWhiteColor,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: QrImageView(
-                              data: DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address,
-                              eyeStyle: const QrEyeStyle(
-                                  color: MyColor.backgroundColor,
-                                  eyeShape: QrEyeShape.square
-                              ),
-                              dataModuleStyle: const QrDataModuleStyle(
-                                  color: MyColor.backgroundColor,
-                                  dataModuleShape:  QrDataModuleShape.square
-                              ),
-                              //embeddedImage: AssetImage('assets/icons/logo.png'),
-                              version: QrVersions.auto,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-
-                        Text(
-                          DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address,
-                          textAlign: TextAlign.center,
-                          style: MyStyle.tx18RWhite.copyWith(
-                              fontSize: 16
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  // copy and shared
-                  SizedBox(
-                    width: width * 0.8,
-                    child: Row(
-                      children: [
-
-                        InkWell(
-                          onTap: () {
-                            Share.share(DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address);
-                          },
-                          child: Container(
-                            height: 55,
-                            width: 60,
-                            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 16),
+                  Visibility(
+                    visible: DbSellHistory.dbSellHistory.getTrxStatusData!.payinUrl == "",
+                      child: Column(
+                        children: [
+                          // qr and token name
+                          Container(
+                            width: width * 0.8,
+                            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 22),
                             decoration: BoxDecoration(
-                              color: MyColor.darkGrey01Color,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Image.asset(
-                              "assets/images/dashboard/share.png",
-                              fit: BoxFit.contain,
-                              color: MyColor.whiteColor,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              FlutterClipboard.copy(DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address).then((value) {
-                                Helper.dialogCall.showToast(context, "Copied");
-                              });
-                            },
-                            child: Container(
-                              height: 55,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              decoration: BoxDecoration(
                                 color: MyColor.darkGrey01Color,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child:  Row(
-                                children: [
-                                  const Icon(
-                                    Icons.copy,
-                                    color: MyColor.whiteColor,
-                                  ),
-                                  const SizedBox(width: 15),
+                                borderRadius: BorderRadius.circular(12)
+                            ),
+                            child: Column(
+                              children: [
 
-                                  Text(
-                                    "Copy address",
-                                    textAlign: TextAlign.center,
-                                    style: MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 16
+                                Container(
+                                  height: height * 0.26,
+                                  width: width * 0.55,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                      color: MyColor.mainWhiteColor,
+                                      borderRadius: BorderRadius.circular(10)
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: QrImageView(
+                                      data: DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address,
+                                      eyeStyle: const QrEyeStyle(
+                                          color: MyColor.backgroundColor,
+                                          eyeShape: QrEyeShape.square
+                                      ),
+                                      dataModuleStyle: const QrDataModuleStyle(
+                                          color: MyColor.backgroundColor,
+                                          dataModuleShape:  QrDataModuleShape.square
+                                      ),
+                                      //embeddedImage: AssetImage('assets/icons/logo.png'),
+                                      version: QrVersions.auto,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(height: 15),
+
+                                Text(
+                                  DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address,
+                                  textAlign: TextAlign.center,
+                                  style: MyStyle.tx18RWhite.copyWith(
+                                      fontSize: 16
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 15),
 
-                      ],
-                    ),
+                          // copy and shared
+                          SizedBox(
+                            width: width * 0.8,
+                            child: Row(
+                              children: [
+
+                                InkWell(
+                                  onTap: () {
+                                    Share.share(DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address);
+                                  },
+                                  child: Container(
+                                    height: 55,
+                                    width: 60,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 16),
+                                    decoration: BoxDecoration(
+                                      color: MyColor.darkGrey01Color,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Image.asset(
+                                      "assets/images/dashboard/share.png",
+                                      fit: BoxFit.contain,
+                                      color: MyColor.whiteColor,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 15),
+
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      FlutterClipboard.copy(DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address).then((value) {
+                                        Helper.dialogCall.showToast(context, "Copied");
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 55,
+                                      alignment: Alignment.center,
+                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                      decoration: BoxDecoration(
+                                        color: MyColor.darkGrey01Color,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child:  Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.copy,
+                                            color: MyColor.whiteColor,
+                                          ),
+                                          const SizedBox(width: 15),
+
+                                          Text(
+                                            "Copy address",
+                                            textAlign: TextAlign.center,
+                                            style: MyStyle.tx18RWhite.copyWith(
+                                                fontSize: 16
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                        ],
+                      )
                   ),
-                  const SizedBox(height: 15),
 
                 ],
               ),

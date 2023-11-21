@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:jost_pay_wallet/Models/AccountAddress.dart';
 import 'package:jost_pay_wallet/Models/ExTransactionModel.dart';
@@ -49,7 +50,6 @@ class DbSellHistory{
 
   createSellHistory(SellHistoryModel newToken) async{
     final db= await database;
-    print(newToken.toJson());
     final res = await db!.insert('SellHistory', newToken.toJson());
     return res;
   }
@@ -62,9 +62,25 @@ class DbSellHistory{
     return res;
   }
 
-  updateStatus(String order_status,invoice,id) async{
+  updateStatus(SellHistoryModel newToken,id) async{
     final db= await database;
-    final res = await db!.rawQuery("UPDATE SellHistory SET order_status = '$order_status' WHERE invoice = '$id' AND accountId ='$id'");
+    Map<String, dynamic> data = {
+      "invoice": newToken.invoiceNo,
+      "order_status": newToken.orderStatus,
+      "invoice_no": newToken.invoiceNo,
+      "invoice_url": newToken.invoiceUrl,
+      "payin_amount": newToken.payinAmount,
+      "payout_amount": newToken.payoutAmount,
+      "payin_address": newToken.payin_address,
+      "accountId":newToken.accountId,
+      "payout_address": newToken.payoutAddress,
+      "payin_url": newToken.payinUrl,
+      "tokenName": newToken.tokenName,
+    };
+
+    print(jsonEncode(data));
+
+    final res = await db!.update('SellHistory', data, where: "invoice = ? AND accountId = ? ",whereArgs: [newToken.invoiceNo,id]);
 
     getSellHistory(id);
     return res;

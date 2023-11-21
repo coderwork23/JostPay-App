@@ -1,21 +1,14 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
-import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/BuySellHistoryModel.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyHistory.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellStatusPage.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WithdrawSendPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../Models/SellHistoryModel.dart';
 
 class BuySellProvider with ChangeNotifier{
@@ -357,7 +350,6 @@ class BuySellProvider with ChangeNotifier{
           sellValidOrder = false;
           isValidSuccess = true;
           getSellValidation = value;
-          // print(getSellValidation);
           notifyListeners();
         }
         else {
@@ -366,7 +358,6 @@ class BuySellProvider with ChangeNotifier{
 
           if (value['rates_info'] != null) {
             value['rates_info'].keys.forEach((key) {
-              // print(value['rates_info'][key]['min_sell_amount']);
                var data = {
                   "name": value['rates_info'][key]['name'],
                   "symbol": key,
@@ -382,9 +373,7 @@ class BuySellProvider with ChangeNotifier{
                 return "${element["symbol"]}" == "$symbol";
               }).toList();
 
-              print("-----> ${myNewList[0]["minSellAmount"]} <------");
               minSellAmount = double.parse(myNewList[0]["minSellAmount"].toString());
-              print("---> ${minSellAmount}");
               notifyListeners();
 
             }
@@ -412,6 +401,9 @@ class BuySellProvider with ChangeNotifier{
         }
       }catch(e){
         sellValidOrder = false;
+        print("----> $e");
+        Helper.dialogCall.showToast(context, "Something is wrong.Please letter");
+
         notifyListeners();
       }
     });
@@ -420,9 +412,11 @@ class BuySellProvider with ChangeNotifier{
 
 
   bool sellOderLoading = false;
+  bool sellSuccess = false;
   var sellResponce;
-  sellOrder(params,accountId,context,send,sendData,name) async {
+  sellOrder(params,accountId,BuildContext context,send,Map<String,dynamic> sendData,name) async {
     sellOderLoading = true;
+    sellSuccess = false;
     notifyListeners();
     await ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
@@ -438,7 +432,8 @@ class BuySellProvider with ChangeNotifier{
           await DbSellHistory.dbSellHistory.createSellHistory(
               SellHistoryModel.fromJson(value,accountId,name)
           );
-        }else{
+        }
+        else{
           await DbSellHistory.dbSellHistory.updateSellHistory(
               SellHistoryModel.fromJson(value,accountId,name),
               value["invoice"],
@@ -446,9 +441,11 @@ class BuySellProvider with ChangeNotifier{
           );
         }
 
-        Navigator.pop(context,"refresh");
 
         if(send == "send") {
+          Navigator.pop(context,"refresh");
+
+          // ignore: use_build_context_synchronously
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -473,17 +470,10 @@ class BuySellProvider with ChangeNotifier{
                 ),
               )
           );
-        }else {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    SellStatusPage(invoiceNo: value["invoice"]),
-              )
-          );
-          Helper.dialogCall.showToast(
-              context, "Your sell order placed successfully.");
         }
+
+
+        sellSuccess = true;
         sellOderLoading = false;
 
         notifyListeners();
@@ -499,7 +489,7 @@ class BuySellProvider with ChangeNotifier{
 
 
   bool checkOrderLoading = false;
-  checkOrderStatus(params,accountId,context) async {
+  checkOrderStatus(params,accountId,context,name) async {
     checkOrderLoading = true;
     notifyListeners();
     await ApiHandler.getInstantApi(params).then((responseData) async {
@@ -509,8 +499,7 @@ class BuySellProvider with ChangeNotifier{
       if (responseData.statusCode == 200) {
         await DbSellHistory.dbSellHistory.getSellHistory(accountId);
         await DbSellHistory.dbSellHistory.updateStatus(
-            value["order_status"],
-            value["invoice"],
+            SellHistoryModel.fromJson(value, accountId, name),
             accountId
         );
 
@@ -528,7 +517,7 @@ class BuySellProvider with ChangeNotifier{
   }
 
   bool placeNotifyOrder = false;
-  notifyOrder(params,context)async{
+  notifyOrder(params,context,String? pageName)async{
     placeNotifyOrder = false;
     notifyListeners();
 
@@ -536,8 +525,10 @@ class BuySellProvider with ChangeNotifier{
       var value = json.decode(responseData.body);
 
       if (responseData.statusCode == 200 && value['info'] != null) {
-        Navigator.pop(context);
-        Navigator.pop(context);
+        if(pageName == "") {
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }
         placeNotifyOrder = true;
         notifyListeners();
       }

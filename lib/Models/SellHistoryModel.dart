@@ -34,18 +34,18 @@ class SellHistoryModel {
   factory SellHistoryModel.fromJson(Map<String, dynamic> json,acId,name) {
     // print("model id $acId");
     return SellHistoryModel(
-      amountPayableNgn: json["amount_payable_ngn"],
+      amountPayableNgn: json["amount_payable_ngn"]??0,
       invoice: json["invoice"]??"",
-      orderStatus: json["order_status"],
-      invoiceNo: json["invoice_no"],
-      invoiceUrl: json["invoice_url"],
-      time: json["time"],
-      type: json["type"],
-      payinAmount: json["payin_amount"],
-      payoutAmount: json["payout_amount"],
+      orderStatus: json["order_status"]??"",
+      invoiceNo: json["invoice_no"]??"",
+      invoiceUrl: json["invoice_url"]??"",
+      time: int.parse("${json["time"]}"),
+      type: json["type"]??"",
+      payinAmount: json["payin_amount"]??"",
+      payoutAmount: json["payout_amount"]??"",
       payin_address: json["payin_address"]??"",
       accountId: acId,
-      payoutAddress:json["payout_address"],
+      payoutAddress:json["payout_address"]??"",
       payinUrl: json["payin_url"]??"",
       tokenName: name??"",
     );
@@ -63,6 +63,7 @@ class SellHistoryModel {
     "payout_amount": payoutAmount,
     "payout_address": payoutAddress,
     "payin_address": payin_address,
+    "payin_url": payinUrl,
     "accountId": accountId,
     "tokenName": tokenName,
   };

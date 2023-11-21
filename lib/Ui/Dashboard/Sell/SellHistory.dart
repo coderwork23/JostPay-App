@@ -1,9 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
@@ -11,6 +8,7 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'SellStatusPage.dart';
 
@@ -101,56 +99,21 @@ class _SellHistoryState extends State<SellHistory> {
                 itemCount: DbSellHistory.dbSellHistory.sellHistoryList.length,
                 itemBuilder: (context, index) {
                   var list = DbSellHistory.dbSellHistory.sellHistoryList[index];
-                  print(list.tokenName);
-
-                  dynamic sendNetwork;
-                  var dbSymbol = list.payinAmount.split(" ").last;
-                  if(dbSymbol.toLowerCase() == "usdtbsc"){
-                    sendNetwork = {
-                      "logo":"http://139.59.88.239/api/img/token/bsc_usdt.png",
-                      "name":"Tether USD",
-                      "symbol":"USDT"
-                    };
-                  }
-                  else if(dbSymbol.toLowerCase() == "usdttrc20"){
-                    sendNetwork = {
-                      "logo":"http://139.59.88.239/api/img/token/trx_usdt.png",
-                      "name":"Tether USD",
-                      "symbol":"USDT"
-                    };
-                  }
-                  else{
-
-                    final temp = DbNetwork.dbNetwork.networkList.where((element) {
-                      return element.symbol.toLowerCase() == dbSymbol.trim().toLowerCase();
-                    }).toList();
-
-                    if(temp.isNotEmpty) {
-                      sendNetwork = {
-                        "logo": temp[0].logo,
-                        "name": temp[0].name,
-                        "symbol": temp[0].symbol
-                      };
-                    }else{
-                      sendNetwork = {
-                        "logo": "",
-                        "name": "",
-                        "symbol": ""
-                      };
-                    }
-                  }
-
                   return InkWell(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SellStatusPage(invoiceNo: list.invoice),
+                            builder: (context) => SellStatusPage(
+                              invoiceNo: list.invoice,
+                              tokenName: list.tokenName,
+                            ),
                           )
                       );
+                      getAllSellHistory();
                     },
                     child: Container(
-                      margin: EdgeInsets.only(bottom: 15),
+                      margin: const EdgeInsets.only(bottom: 15),
                       padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
                       decoration: BoxDecoration(
                           color: MyColor.darkGrey01Color,
@@ -161,34 +124,6 @@ class _SellHistoryState extends State<SellHistory> {
                         children: [
                           Row(
                             children: [
-                              CachedNetworkImage(
-                                height: 25,
-                                width: 25,
-                                fit: BoxFit.fill,
-                                imageUrl: sendNetwork["logo"],
-                                placeholder: (context, url) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(
-                                        color: MyColor.greenColor
-                                    ),
-                                  );
-                                },
-                                errorWidget: (context, url, error) {
-                                  return Container(
-                                    height: 25,
-                                    width: 25,
-                                    padding: const EdgeInsets.all(3),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(14),
-                                      color: MyColor.whiteColor,
-                                    ),
-                                    child: Image.asset(
-                                      "assets/images/bitcoin.png",
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   list.tokenName,
@@ -243,7 +178,7 @@ class _SellHistoryState extends State<SellHistory> {
                                 ),
                               ),
                               Text(
-                                list!.orderStatus,
+                                list.orderStatus,
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
@@ -252,6 +187,48 @@ class _SellHistoryState extends State<SellHistory> {
                             ],
                           ),
                           const SizedBox(height: 10),
+
+
+                          // PayOut url
+                          Visibility(
+                            visible: list.payinUrl != "",
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: InkWell(
+                                onTap: () {
+                                  launchUrl(
+                                    Uri.parse(DbSellHistory.dbSellHistory.getTrxStatusData!.payinUrl),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Payment Url: ",
+                                      style: MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 16
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+
+                                    Expanded(
+                                      child: Text(
+                                        list.payinUrl,
+                                        textAlign: TextAlign.end,
+                                        style: MyStyle.tx18RWhite.copyWith(
+                                            fontSize: 15,
+                                            color: MyColor.greenColor
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+
 
                           // invoice id
                           InkWell(

@@ -1,16 +1,15 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WithdrawSendPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Wallet/WithdrawToken/WithdrawSuccessful.dart';
 
 // ignore: must_be_immutable
 class SellValidationPage extends StatefulWidget {
+  // ignore: prefer_typing_uninitialized_variables
   var params,coinName,pageName,sendData;
   SellValidationPage({
     super.key,
@@ -39,7 +38,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
 
 
   var selectedAccountId = "";
-  placeSellOrder(context)async{
+  placeSellOrder()async{
     SharedPreferences sharedPre = await SharedPreferences.getInstance();
     selectedAccountId = sharedPre.getString('accountId') ?? "";
     var data = widget.params;
@@ -49,23 +48,60 @@ class _SellValidationPageState extends State<SellValidationPage> {
     });
 
     var sendData = widget.sendData;
+    // ignore: use_build_context_synchronously
     await buySellProvider.sellOrder(
         widget.params,
         selectedAccountId,
         context,
         widget.pageName == "" ? "" : "send",
-        sendData,
+        {},
         widget.coinName
     );
+
+    if(buySellProvider.sellSuccess){
+      notifyOrder();
+    }
+  }
+
+
+  notifyOrder()async{
+
+    var params = {
+      "action":"notify_payment_made",
+      "email":widget.params['email'],
+      "invoice":buySellProvider.sellResponce['invoice'],
+      "auth":"p1~\$*)Ze(@"
+    };
+
+    await buySellProvider.notifyOrder(
+        params,
+        context,
+        "sell"
+    );
+
+    if(buySellProvider.placeNotifyOrder) {
+
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context,"refresh");
+      // ignore: use_build_context_synchronously
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                WithdrawSuccessful(
+                  invoice: buySellProvider.sellResponce['invoice'],
+                  tokenName: widget.coinName,
+                ),
+          )
+      );
+
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
-
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
-
 
     return Scaffold(
       bottomNavigationBar: Padding(
@@ -134,7 +170,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
             ),
             const SizedBox(height: 10),
 
-           /* buySellProvider.sellOderLoading
+            buySellProvider.sellOderLoading
                 ?
             const SizedBox(
                 height:52,
@@ -144,11 +180,11 @@ class _SellValidationPageState extends State<SellValidationPage> {
                     )
                 )
             )
-                :*/
+                :
             InkWell(
               onTap: () {
                 if(acceptTerms) {
-                  placeSellOrder(context);
+                  placeSellOrder();
                 }else{
                   Helper.dialogCall.showToast(context, "Accept terms and condition.");
                 }
@@ -178,7 +214,6 @@ class _SellValidationPageState extends State<SellValidationPage> {
           ],
         ),
       ),
-
       appBar: AppBar(
         leading:  InkWell(
           onTap: () {
@@ -193,9 +228,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
         title: const Text(
           "Sell Order Preview",
         ),
-
       ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
