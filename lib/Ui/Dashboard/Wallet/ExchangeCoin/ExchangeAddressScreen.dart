@@ -30,19 +30,12 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
 
   var selectedAccountId = "";
 
-  getAcAddress() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,exchangeProvider.receiveCoin.networkId);
-    addressController.text = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-    setState(() {});
-  }
 
   createExchange()async {
 
     var data = {
-      "from": exchangeProvider.sendCoin.symbol.toLowerCase().trim(),
-      "to": exchangeProvider.receiveCoin.symbol.toLowerCase().trim(),
+      "from": exchangeProvider.sendCoin.ticker.toLowerCase().trim(),
+      "to": exchangeProvider.receiveCoin.ticker.toLowerCase().trim(),
       "amount": widget.sendAmount.trim(),
       "address": addressController.text.trim()
     };
@@ -93,7 +86,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
 
   addressVerification(context) async {
     var params = {
-      "currency":exchangeProvider.receiveCoin.symbol.toLowerCase().trim(),
+      "currency":exchangeProvider.receiveCoin.ticker.toLowerCase().trim(),
       "address":addressController.text.trim()
     };
     await exchangeProvider.addressVerification("/v2/validate/address",params,context);
@@ -106,10 +99,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
     exchangeProvider.isAddressVerify = false;
     exchangeProvider.createExSuccess = false;
     exchangeProvider.statusLoading = false;
-    DbAccountAddress.dbAccountAddress.selectAccountPublicAddress = "";
-    DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress = "";
     super.initState();
-    getAcAddress();
   }
 
 
@@ -202,7 +192,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
           ),
         ),
         title: Text(
-          "Enter ${exchangeProvider.receiveCoin.symbol} address",
+          "Enter ${exchangeProvider.receiveCoin.ticker} address",
         ),
 
       ),
@@ -242,7 +232,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
                         },
                         decoration: InputDecoration(
                             filled: true,
-                            hintText: "Add ${exchangeProvider.receiveCoin.symbol} Address",
+                            hintText: "Add ${exchangeProvider.receiveCoin.ticker} Address",
                             fillColor: MyColor.blackColor,
                             border: InputBorder.none,
                             hintStyle:MyStyle.tx22RWhite.copyWith(

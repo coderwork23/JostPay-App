@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
+import 'package:jost_pay_wallet/Models/ExchangeTokenModel.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
@@ -14,7 +16,7 @@ import 'ExchangeAddressScreen.dart';
 import 'ExchangeHistory.dart';
 
 class ExchangeScreen extends StatefulWidget {
-  final AccountTokenList? tokenList;
+  final ExchangeTokenModel? tokenList;
   const ExchangeScreen({
     super.key,
      this.tokenList
@@ -36,19 +38,20 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
   getExToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    // ignore: use_build_context_synchronously
     await exchangeProvider.getTokenList("/v1/currencies",context);
 
     if(widget.tokenList != null){
       setState(() {
-        exchangeProvider.changeSendToken(widget.tokenList!, context, selectedAccountId,"oldValue");
+        exchangeProvider.changeSendToken(widget.tokenList!, context,"oldValue");
       });
     }
   }
 
   // get receive token animate amount
   estimateExchangeAmount(context)async{
-    String sendSymbol = exchangeProvider.sendCoin.symbol.toLowerCase();
-    String receiveSymbol = exchangeProvider.receiveCoin.symbol.toLowerCase();
+    String sendSymbol = exchangeProvider.sendCoin.ticker.toLowerCase();
+    String receiveSymbol = exchangeProvider.receiveCoin.ticker.toLowerCase();
     var data = {
       "api_key":Utils.apiKey
     };
@@ -60,8 +63,8 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
     var tempSend = exchangeProvider.sendCoin;
     var tempReceive = exchangeProvider.receiveCoin;
 
-    exchangeProvider.changeReceiveToken(tempSend, context, selectedAccountId);
-    exchangeProvider.changeSendToken(tempReceive, context, selectedAccountId,"");
+    exchangeProvider.changeReceiveToken(tempSend, context,);
+    exchangeProvider.changeSendToken(tempReceive, context,"");
 
     estimateExchangeAmount(context);
   }
@@ -178,7 +181,6 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
 
             // send coin details
             Container(
-              height: 80,
               width: width,
               decoration: BoxDecoration(
                 color:MyColor.blackColor,
@@ -195,7 +197,8 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
                           child: Text(
-                            "You send ${exchangeProvider.sendCoin.name.split(" ").first} ${exchangeProvider.sendCoin.type}",
+
+                            "You send ${exchangeProvider.sendCoin.name.split(" ").first} (${exchangeProvider.sendCoin.ticker})",
                             style:MyStyle.tx18RWhite.copyWith(
                                 fontSize: 12,
                                 color: MyColor.grey01Color
@@ -275,55 +278,20 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                         padding: const EdgeInsets.only(right: 5.0),
                         child: Row(
                           children: [
-                            exchangeProvider.sendCoin.symbol == "usdtbsc" || exchangeProvider.sendCoin.symbol == "usdttrc20"
-                                ?
-                            Image.asset(
-                              exchangeProvider.sendCoin.symbol == "usdtbsc"
-                                  ?
-                              "assets/images/bsc_usdt.png"
-                                  :
-                              exchangeProvider.sendCoin.symbol == "usdttrc20"
-                                  ?
-                              "assets/images/trx_usdt.png"
-                                  :
-                              "assets/images/bitcoin.png",
+                            SizedBox(
                               height: 25,
                               width: 25,
-                            )
-                                :
-                            CachedNetworkImage(
-                              height: 25,
-                              width: 25,
-                              fit: BoxFit.fill,
-                              imageUrl: exchangeProvider.sendCoin.logo,
-                              placeholder: (context, url) {
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                      color: MyColor.greenColor
-                                  ),
-                                );
-                              },
-                              errorWidget: (context, url, error) {
-                                return Container(
-                                  height: 25,
-                                  width: 25,
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    color: MyColor.whiteColor,
-                                  ),
-                                  child: Image.asset(
-                                    "assets/images/bitcoin.png",
-                                  ),
-                                );
-                              },
+                              child: SvgPicture.network(
+                                exchangeProvider.sendCoin.image,
+                                fit: BoxFit.fill,
+                              ),
                             ),
                             const SizedBox(width: 12),
-                            Expanded(
+                            Flexible(
                               child: Text(
-                                exchangeProvider.sendCoin.name,
+                                "${exchangeProvider.sendCoin.name.split(" ").first} (${exchangeProvider.sendCoin.ticker})",
                                 style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
+                                  fontSize: 14
                                 ),
                               ),
                             ),
@@ -375,12 +343,10 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
 
               ],
             ),
-
             const SizedBox(height: 20),
 
             // get coin details
             Container(
-              height: 80,
               width: width,
               decoration: BoxDecoration(
                   color:MyColor.blackColor,
@@ -397,7 +363,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
                           child: Text(
-                            "You get ${exchangeProvider.receiveCoin.name.split(" ").first} ${exchangeProvider.receiveCoin.type}",
+                            "You get ${exchangeProvider.receiveCoin.name.split(" ").first} (${exchangeProvider.receiveCoin.ticker})",
                             style:MyStyle.tx18RWhite.copyWith(
                                 fontSize: 12,
                                 color: MyColor.grey01Color
@@ -456,55 +422,20 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                         padding: const EdgeInsets.only(right: 5.0),
                         child: Row(
                           children: [
-                            exchangeProvider.receiveCoin.symbol == "usdtbsc" || exchangeProvider.receiveCoin.symbol == "usdttrc20"
-                                ?
-                            Image.asset(
-                              exchangeProvider.receiveCoin.symbol == "usdtbsc"
-                                  ?
-                              "assets/images/bsc_usdt.png"
-                                  :
-                              exchangeProvider.receiveCoin.symbol == "usdttrc20"
-                                  ?
-                              "assets/images/trx_usdt.png"
-                                  :
-                              "assets/images/bitcoin.png",
+                            SizedBox(
                               height: 25,
                               width: 25,
-                            )
-                                :
-                            CachedNetworkImage(
-                              height: 25,
-                              width: 25,
-                              fit: BoxFit.fill,
-                              imageUrl: exchangeProvider.receiveCoin.logo,
-                              placeholder: (context, url) {
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                      color: MyColor.greenColor
-                                  ),
-                              );
-                              },
-                              errorWidget: (context, url, error) {
-                                return Container(
-                                    height: 25,
-                                    width: 25,
-                                    padding: const EdgeInsets.all(3),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(14),
-                                      color: MyColor.whiteColor,
-                                    ),
-                                    child: Image.asset(
-                                      "assets/images/bitcoin.png",
-                                    ),
-                                  );
-                              },
+                              child: SvgPicture.network(
+                                exchangeProvider.receiveCoin.image,
+                                fit: BoxFit.fill,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                exchangeProvider.receiveCoin.name,
+                                "${exchangeProvider.receiveCoin.name.split(" ").first} (${exchangeProvider.receiveCoin.ticker})",
                                 style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 16
+                                    fontSize: 14
                                 ),
                               ),
                             ),

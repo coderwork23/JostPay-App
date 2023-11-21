@@ -5,6 +5,7 @@ import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/ExTransactionModel.dart';
+import 'package:jost_pay_wallet/Models/ExchangeTokenModel.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,68 +13,60 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ExchangeProvider with ChangeNotifier{
   
 
-  // List<ExchangeTokenModel> exTokenList = [];
-  List<AccountTokenList> exTokenList = [];
+  List<ExchangeTokenModel> exTokenList = [];
+  List<ExchangeTokenModel> searchExToList = [];
+  List<ExchangeTokenModel> tempExTokenList = [];
+  // List<AccountTokenList> exTokenList = [];
 
-  late AccountTokenList sendCoin;
-  late AccountTokenList receiveCoin;
+  late ExchangeTokenModel sendCoin;
+  late ExchangeTokenModel receiveCoin;
 
   bool isLoading = true;
 
   getTokenList(String url,context)async{
     isLoading = true;
-    exTokenList.clear();
+
     notifyListeners();
 
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
 
-    sendCoin = AccountTokenList.fromJson(
-        await DBTokenProvider.dbTokenProvider.getTokenById(selectedAccountId,"1"),
-        selectedAccountId
-    );
-
-    receiveCoin = AccountTokenList.fromJson(
-        await DBTokenProvider.dbTokenProvider.getTokenById(selectedAccountId,"1027"),
-        selectedAccountId
-    );
     isLoading = false;
-
-    await getExchangeMinMax(
-        "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
-        {"api_key":Utils.apiKey},
-        context
-    );
     notifyListeners();
 
-    // await ApiHandler.getExchange(url).then((responseData) async {
-    //   var value = json.decode(responseData.body);
-    //   // print("Get Exchange Token ----> $value");
-    //
-    //   if(responseData.statusCode == 200) {
-    //
-    //     List<ExchangeTokenModel> list = [];
-    //     (value as List).map((token) {
-    //       list.add(ExchangeTokenModel.fromJson(token));
-    //     }).toList();
-    //
-    //     exTokenList = list;
-    //     sendCoin = exTokenList[0];
-    //     receiveCoin = exTokenList[1];
-    //
-    //     await getExchangeMinMax(
-    //       "v1/exchange-range/${sendCoin.ticker}_${receiveCoin.ticker}",
-    //       {"api_key":Utils.apiKey}
-    //     );
-    //     isLoading = false;
-    //     notifyListeners();
-    //
-    //   }else{
-    //     isLoading = false;
-    //     notifyListeners();
-    //   }
-    // });
+    await ApiHandler.getExchange(url).then((responseData) async {
+      var value = json.decode(responseData.body);
+      // print("Get Exchange Token ----> $value");
+
+      if(responseData.statusCode == 200) {
+        exTokenList.clear();
+        searchExToList.clear();
+        tempExTokenList.clear();
+
+        List<ExchangeTokenModel> list = [];
+        (value as List).map((token) {
+          list.add(ExchangeTokenModel.fromJson(token));
+        }).toList();
+
+        exTokenList = list;
+        searchExToList.addAll(exTokenList);
+        tempExTokenList.addAll(exTokenList);
+        sendCoin = exTokenList[0];
+        receiveCoin = exTokenList[1];
+        notifyListeners();
+
+        await getExchangeMinMax(
+            "v1/exchange-range/fixed-rate/${sendCoin.ticker.toLowerCase()}_${receiveCoin.ticker.toLowerCase()}",
+            {"api_key":Utils.apiKey},
+            context
+        );
+
+        isLoading = false;
+        notifyListeners();
+
+      }else{
+        isLoading = false;
+        notifyListeners();
+      }
+    });
 
   }
 
@@ -129,25 +122,19 @@ class ExchangeProvider with ChangeNotifier{
     });
   }
 
-  changeSendToken(AccountTokenList newToken, context, id,valueType) async {
-    if (receiveCoin.id != newToken.id) {
+  changeSendToken(ExchangeTokenModel newToken, context,valueType) async {
+    if (receiveCoin.ticker != newToken.ticker) {
       // Create a copy of newToken
-      AccountTokenList copiedToken = AccountTokenList.fromJson(newToken.toJson(),id);
+      ExchangeTokenModel copiedToken = ExchangeTokenModel.fromJson(newToken.toJson());
       sendCoin = copiedToken;
 
-      if (newToken.type == "TRC20") {
-        sendCoin.symbol = "usdttrc20";
-      } else if (newToken.type == "BEP20") {
-        sendCoin.symbol = "usdtbsc";
-      }
       if(valueType == "") {
-
         Navigator.pop(context);
       }
 
 
       await getMinMax(
-          "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
+          "v1/exchange-range/fixed-rate/${sendCoin.ticker.toLowerCase()}_${receiveCoin.ticker.toLowerCase()}",
           {"api_key":Utils.apiKey},
           context
       );
@@ -158,28 +145,18 @@ class ExchangeProvider with ChangeNotifier{
     }
   }
 
-  changeReceiveToken(AccountTokenList newToken,context,id) async {
-
-
-    if(sendCoin.id != newToken.id ) {
-      AccountTokenList copiedToken = AccountTokenList.fromJson(newToken.toJson(),id);
-      receiveCoin = copiedToken;
-
-      if (newToken.type == "TRC20") {
-        receiveCoin.symbol = "usdttrc20";
-      } else if (newToken.type == "BEP20") {
-        receiveCoin.symbol = "usdtbsc";
-      }
+  changeReceiveToken(ExchangeTokenModel newToken,context) async {
+    if(sendCoin.ticker != newToken.ticker ) {
+      ExchangeTokenModel copiedToken = ExchangeTokenModel.fromJson(newToken.toJson());
+      sendCoin = copiedToken;
 
       Navigator.pop(context);
 
       await getMinMax(
-          "v1/exchange-range/fixed-rate/${sendCoin.symbol.toLowerCase()}_${receiveCoin.symbol.toLowerCase()}",
+          "v1/exchange-range/fixed-rate/${sendCoin.ticker.toLowerCase()}_${receiveCoin.ticker.toLowerCase()}",
           {"api_key":Utils.apiKey},
           context
       );
-
-
       notifyListeners();
 
     }else{

@@ -7,6 +7,7 @@ import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
+import 'package:jost_pay_wallet/Models/ExchangeTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
@@ -470,16 +471,17 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     InkWell(
                       onTap: () {
 
-                        var data = DBTokenProvider.dbTokenProvider.tokenList.indexWhere((element) {
-                          return "${element.marketId}" == tokenMarketId;
-                        });
-
+                        ExchangeTokenModel model = ExchangeTokenModel(
+                            ticker: tokenSymbol,
+                            name: tokenName,
+                            image: tokenImage
+                        );
 
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => ExchangeScreen(
-                                tokenList: DBTokenProvider.dbTokenProvider.tokenList[data],
+                                tokenList: model,
                               ),
                             )
                         );

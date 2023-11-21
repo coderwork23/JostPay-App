@@ -1,12 +1,27 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
-import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class Debouncer {
+  final int milliseconds;
+  late VoidCallback action;
+  Timer? timer;
+
+  Debouncer({required this.milliseconds});
+
+  run(VoidCallback action) {
+    if (null != timer) {
+      timer!.cancel();
+    }
+    timer = Timer(Duration(milliseconds: milliseconds), action);
+  }
+}
+
 
 class ExChangeTokenList extends StatefulWidget {
   final String pageType;
@@ -21,6 +36,8 @@ class ExChangeTokenList extends StatefulWidget {
 
 class _ExChangeTokenListState extends State<ExChangeTokenList> {
 
+  TextEditingController searchController = TextEditingController();
+  final _debouncer = Debouncer(milliseconds: 500);
 
   late ExchangeProvider exchangeProvider;
   var selectedAccountId ="";
@@ -40,10 +57,6 @@ class _ExChangeTokenListState extends State<ExChangeTokenList> {
 
   @override
   Widget build(BuildContext context) {
-
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
-
     exchangeProvider = Provider.of<ExchangeProvider>(context,listen: true);
 
     return Scaffold(
@@ -63,86 +76,122 @@ class _ExChangeTokenListState extends State<ExChangeTokenList> {
           "Select ${widget.pageType} token",
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
-        itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          var list = DBTokenProvider.dbTokenProvider.tokenList[index];
-          return InkWell(
-            onTap: () async {
-              if(widget.pageType == "send"){
-                exchangeProvider.changeSendToken(list,context,selectedAccountId,"");
-              }else{
-                exchangeProvider.changeReceiveToken(list,context,selectedAccountId);
-              }
+      body: Column(
+        children: [
+          const SizedBox(height: 10),
 
-            },
-            child : Padding(
-              padding: const EdgeInsets.only(bottom: 15),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child:
-                    CachedNetworkImage(
-                      height: 35,
-                      width: 35,
-                      fit: BoxFit.fill,
-                      imageUrl: list.logo,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(color: MyColor.greenColor),
-                      ),
-                      errorWidget: (context, url, error) =>
-                          Container(
-                            height: 35,
-                            width: 35,
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              color: MyColor.whiteColor,
-                            ),
-                            child: Image.asset(
-                              "assets/images/bitcoin.png",
+          //search filed
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: TextFormField(
+              controller: searchController,
+              cursorColor: MyColor.greenColor,
+              style: MyStyle.tx18RWhite,
+              onChanged: (value) {
+                _debouncer.run(() async {
+                  if(value.isNotEmpty){
+                    setState(() {
+                      exchangeProvider.searchExToList = exchangeProvider.exTokenList.where((element) {
+                        return element.name.toLowerCase().contains(value.toLowerCase());
+                      }).toList();
+                    });
+                  }else{
+                    setState(() {
+                      exchangeProvider.searchExToList.addAll(exchangeProvider.tempExTokenList);
+                    });
+                  }
+                });
+              },
+              decoration: InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: MyColor.backgroundColor,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 15),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: const BorderSide(
+                      color: MyColor.boarderColor,
+                    )
+                ),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: const BorderSide(
+                      color: MyColor.boarderColor,
+                    )
+                ),
+                hintText: "Search",
+                hintStyle:MyStyle.tx22RWhite.copyWith(
+                    fontSize: 14,
+                    color: MyColor.grey01Color
+                ),
+
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+              itemCount: exchangeProvider.searchExToList.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                var list = exchangeProvider.searchExToList[index];
+                return InkWell(
+                  onTap: () async {
+                    if(widget.pageType == "send"){
+                      exchangeProvider.changeSendToken(list,context,"");
+                    }else{
+                      exchangeProvider.changeReceiveToken(list,context);
+                    }
+                  },
+                  child : Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child:
+                          SizedBox(
+                            height: 25,
+                            width: 25,
+                            child: SvgPicture.network(
+                              list.image,
+                              fit: BoxFit.fill,
                             ),
                           ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          list.name,
-                          style: MyStyle.tx18RWhite,
                         ),
-                        Visibility(
-                          visible: list.type.isNotEmpty,
-                          child: Text(
-                            "type: ${list.type}",
-                            style:MyStyle.tx18RWhite.copyWith(
-                                fontSize: 13,
-                                color: MyColor.grey01Color
-                            ),
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                list.name,
+                                style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 14
+                                ),
+                              ),
+                              Text(
+                                "Symbol: ${list.ticker}",
+                                style:MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 12,
+                                    color: MyColor.grey01Color
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
+                );
 
-                  Text(
-                    list.symbol,
-                    style: MyStyle.tx18RWhite,
-                  ),
-                ],
-              ),
+              },
             ),
-          );
-
-        },
+          ),
+        ],
       ),
     );
   }
