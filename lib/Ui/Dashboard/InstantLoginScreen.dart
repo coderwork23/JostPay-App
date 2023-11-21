@@ -5,6 +5,7 @@ import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 class InstantLoginScreen extends StatefulWidget {
@@ -81,11 +82,11 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
                   child: Image.asset(
                     "assets/images/dashboard/instantExchangers.png",
                     width: width * 0.4,
-                    height: 40,
+                    height: 60,
                     fit: BoxFit.contain,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
 
                 // title for purchase
                 Text(
@@ -96,7 +97,7 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
                       fontSize: 15
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
 
                 // SignIn text
                 Text(
@@ -230,21 +231,37 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
                 const SizedBox(height: 25),
 
                 //Forget Your Password?
-                Text(
-                  "Forget Your Password?",
-                  textAlign: TextAlign.center,
-                  style: MyStyle.tx18RWhite.copyWith(
-                      fontSize: 16
+                InkWell(
+                  onTap: () {
+                    launchUrl(
+                      Uri.parse("https://instantexchangers.net/recover/personal"),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                  child: Text(
+                    "Forget Your Password?",
+                    textAlign: TextAlign.center,
+                    style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
 
                 //Register!
-                Text(
-                  "Register!",
-                  textAlign: TextAlign.center,
-                  style: MyStyle.tx18RWhite.copyWith(
-                      fontSize: 16
+                InkWell(
+                  onTap: () {
+                    launchUrl(
+                      Uri.parse("https://instantexchangers.net/register"),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                  child : Text(
+                    "Register!",
+                    textAlign: TextAlign.center,
+                    style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
                   ),
                 ),
 

@@ -19,7 +19,6 @@ import 'Provider/Token_Provider.dart';
 import 'Provider/Transection_Provider.dart';
 
 bool _initialUriIsHandled = false;
-GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -112,7 +111,6 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => ExchangeProvider()),
       ],
       child: MaterialApp(
-        key: navigatorKey,
         debugShowCheckedModeBanner: false,
         title: 'JostPayWallet',
         theme: ThemeData(
