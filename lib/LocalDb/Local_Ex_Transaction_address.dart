@@ -65,8 +65,9 @@ class DbExTransaction{
   getExTransaction(String accountId) async {
 
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM ExTransaction Where accountId = '$accountId'");
+    final res = await db!.rawQuery("SELECT * FROM ExTransaction");
 
+    print(res);
     List<ExTransactionModel> list = res.map((c) {
       return ExTransactionModel.fromJson(
         c,

@@ -61,7 +61,6 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
 
   getTrxStatus()async{
     await exchangeProvider.transactionStatus(
-        // "/v1/transactions/${exchangeProvider.trxId}",
         "/v1/transactions/${exchangeProvider.trxId}/${Utils.apiKey}",
         selectedAccountId
     );

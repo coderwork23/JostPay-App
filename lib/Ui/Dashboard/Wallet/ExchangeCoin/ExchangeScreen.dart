@@ -59,12 +59,20 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
   }
 
   // swap UpDown methods
-  swapUpDown(){
+  swapUpDown(context) async {
     var tempSend = exchangeProvider.sendCoin;
     var tempReceive = exchangeProvider.receiveCoin;
 
-    exchangeProvider.changeReceiveToken(tempSend, context,);
-    exchangeProvider.changeSendToken(tempReceive, context,"");
+    setState(() {
+      exchangeProvider.sendCoin = tempReceive;
+      exchangeProvider.receiveCoin = tempSend;
+    });
+
+
+    await exchangeProvider.getMinMax(
+    "v1/exchange-range/fixed-rate/${exchangeProvider.sendCoin.ticker.toLowerCase()}_"
+        "${exchangeProvider.receiveCoin.ticker.toLowerCase()}",
+    {"api_key":Utils.apiKey}, context);
 
     estimateExchangeAmount(context);
   }
@@ -326,7 +334,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
                 const Spacer(),
                 InkWell(
                   onTap: () {
-                    swapUpDown();
+                    swapUpDown(context);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),

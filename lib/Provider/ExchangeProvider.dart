@@ -253,10 +253,12 @@ class ExchangeProvider with ChangeNotifier{
         var trxIndex = DbExTransaction.dbExTransaction.exTransactionList.indexWhere((element) => "${element.id}" == "${value['id']}");
 
         if(trxIndex == -1) {
+          print("object 1");
           await DbExTransaction.dbExTransaction.createExTransaction(
               ExTransactionModel.fromJson(value, accountId)
           );
         }else{
+          print("object 2");
           await DbExTransaction.dbExTransaction.updateExTransaction(
               ExTransactionModel.fromJson(value, accountId),
               value["id"],
