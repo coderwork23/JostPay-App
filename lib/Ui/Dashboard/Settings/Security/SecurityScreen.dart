@@ -95,7 +95,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
       "new_password":pinNotSave ? setPassCodeController.text : newPassword,
     };
 
-    print(json.encode(data));
+    // print(json.encode(data));
     await accountProvider.forgotPassword(data, "/changePassword");
 
     if(accountProvider.isPassword){
