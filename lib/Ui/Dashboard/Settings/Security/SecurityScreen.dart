@@ -74,8 +74,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
     var deviceId = sharedPreferences.getString('deviceId');
     var oldPassword = "",  newPassword = "";
 
-
-
     if(passwordChange){
       oldPassword = passwordType ? savePasscode : savePassword;
     }else {
@@ -95,7 +93,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
       "new_password":pinNotSave ? setPassCodeController.text : newPassword,
     };
 
-    // print(json.encode(data));
+    print(json.encode(data));
     await accountProvider.forgotPassword(data, "/changePassword");
 
     if(accountProvider.isPassword){
@@ -300,7 +298,8 @@ class _SecurityScreenState extends State<SecurityScreen> {
                           children: [
                             // new passcode
                             TextFormField(
-                              obscureText: hideSetCode,
+                                obscureText: hideSetCode,
+                                readOnly: accountProvider.passwordLoading,
                                 controller: setPassCodeController,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
@@ -383,6 +382,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
                             //Confirm new passcode
                             TextFormField(
+                                readOnly: accountProvider.passwordLoading,
                                 obscureText: hideSetReCode,
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
@@ -481,6 +481,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                           Visibility(
                             visible: savePasscode.isNotEmpty ,
                             child: TextFormField(
+                                readOnly: accountProvider.passwordLoading,
                                 obscureText: hideOldCode,
                                 validator: (value) {
                                   if(value!.isEmpty){
@@ -562,6 +563,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
                           // new passcode
                           TextFormField(
+                              readOnly: accountProvider.passwordLoading,
                               controller: newPassCodeController,
                               obscureText: hideNewCode,
                               inputFormatters:[
@@ -640,6 +642,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
                           //Confirm new passcode
                           TextFormField(
+                              readOnly: accountProvider.passwordLoading,
                               onChanged: (value) {
                                 if(value.isEmpty){
                                   reNewCodeError = "please enter you passcode";
@@ -729,6 +732,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                           Visibility(
                             visible: savePassword.isNotEmpty,
                             child: TextFormField(
+                                readOnly: accountProvider.passwordLoading,
                                 keyboardType:TextInputType.text,
                                 obscureText: hideOldPass,
                                 onChanged: (value) {
@@ -794,6 +798,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
                           // new passcode
                           TextFormField(
+                            readOnly: accountProvider.passwordLoading,
                             controller: newPassController,
                               obscureText: hideNewPass,
                               keyboardType: TextInputType.text,
@@ -856,6 +861,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
                           //Confirm new passcode
                           TextFormField(
+                            readOnly: accountProvider.passwordLoading,
                               keyboardType: TextInputType.text,
                               obscureText: hideReNewPass,
                               onChanged: (value) {

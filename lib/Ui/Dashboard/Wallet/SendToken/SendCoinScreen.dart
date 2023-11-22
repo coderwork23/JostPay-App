@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
@@ -5,12 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
-import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/CoinDetailScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/CoinSendProcessingPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
@@ -36,7 +34,8 @@ class SendCoinScreen extends StatefulWidget {
       sendTokenId = "",
       explorerUrl = "",
       sendTokenUsd = "",
-      accAddress = "";
+      accAddress = "",
+      sendTokenType = "";
   int sendTokenDecimals;
 
 
@@ -53,6 +52,7 @@ class SendCoinScreen extends StatefulWidget {
     required this.selectTokenUSD,
     required this.sendTokenId,
     required this.explorerUrl,
+    required this.sendTokenType,
     required this.sendTokenUsd,
     required this.sendTokenDecimals,
     required this.accAddress,
@@ -83,6 +83,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       sendTokenName = "",
       sendTokenSymbol = "",
       selectTokenMarketId = "",
+      sendTokenType = "",
       sendTokenImage = "",
       tokenUpDown = "",
       selectTokenUSD = "",
@@ -120,6 +121,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       tokenUpDown  = widget.tokenUpDown;
       sendTokenBalance  = widget.sendTokenBalance;
       sendTokenId  = widget.sendTokenId;
+      sendTokenType  = widget.sendTokenType;
       sendTokenUsd  = widget.sendTokenUsd;
       explorerUrl  = widget.explorerUrl;
       selectTokenUSD  = widget.selectTokenUSD;
@@ -133,7 +135,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
       selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
     });
-
 
 
 
@@ -195,7 +196,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       "decimals":sendTokenDecimals
     };
 
-    // print(json.encode(data));
+    print(json.encode(data));
 
     await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);
 
@@ -723,14 +724,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       http.Client(),
     );
 
-    // print(rpcUrl);
-
     setState((){
       isLoading = true;
     });
-
-
-    //print(EtherAmount.inWei(BigInt.from(1)));
 
     var estimateGas = await _web3client!.estimateGas(
         sender:EthereumAddress.fromHex(fromAddressController.text),
@@ -739,20 +735,14 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     );
     var getGasPrice = await _web3client!.getGasPrice();
 
-    //print("estimateGas === > ${"${estimateGas}"}");
-    //print("getGasPrice === > ${"${getGasPrice.getInWei}"}");
 
     var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}")) / BigInt.from(10).pow(18);
-    //print(value);
 
     double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value * 2);
 
-    //print(tokenBalance);
-
-
     if(tokenBalance > 0){
       setState((){
-        sendTokenQuantity = TextEditingController(text: "$tokenBalance");
+        sendTokenQuantity = TextEditingController(text: tokenBalance.toStringAsFixed(5));
         isLoading = false;
       });
     }else{
@@ -811,7 +801,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     transectionProvider = Provider.of<TransectionProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
-    // print(networkList[0].isEVM);
+    // print(networkList[0].toJson());
     return Scaffold(
 
       bottomNavigationBar:isLoading == true
@@ -947,6 +937,10 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
           ),
         ),
         title: Text(
+          widget.sendTokenType != ""
+              ?
+          "Sent ${widget.sendTokenSymbol}(${widget.sendTokenType})"
+          :
           "Sent ${widget.sendTokenSymbol}",
         ),
       ),
@@ -1064,7 +1058,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                 contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
                 suffixIcon: InkWell(
                   onTap: () {
-                    if(networkList[0].isEVM == 1){
+                    if(networkList[0].isEVM == 1 && sendTokenAddress == ""){
 
                       if(toController.text != "") {
                         setState((){
@@ -1116,17 +1110,20 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                   ),
                 )
               ),
-
-
             ),
             const SizedBox(height: 8),
 
 
             //Available Balance
             Text(
+
                 sendTokenBalance == "0"
                     ?
               "Available: 0.0 $sendTokenSymbol"
+                    :
+                widget.sendTokenType != ""
+                    ?
+                "Available: ${ApiHandler.calculateLength3("${double.parse(sendTokenBalance) }")} $sendTokenSymbol (${widget.sendTokenType})"
                     :
               "Available: ${ApiHandler.calculateLength3("${double.parse(sendTokenBalance) }")} $sendTokenSymbol",
               style:MyStyle.tx18RWhite.copyWith(

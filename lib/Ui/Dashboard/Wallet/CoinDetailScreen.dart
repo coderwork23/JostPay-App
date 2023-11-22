@@ -318,6 +318,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                           MaterialPageRoute(
                             builder: (context) => SendCoinScreen(
                               accAddress: widget.accAddress,
+                              sendTokenType: widget.tokenType,
                               sendTokenAddress: widget.tokenAddress,
                               sendTokenNetworkId: widget.tokenNetworkId,
                               sendTokenName: widget.tokenName,

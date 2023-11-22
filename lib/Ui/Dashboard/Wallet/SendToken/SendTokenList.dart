@@ -143,6 +143,7 @@ class _SendTokenListState extends State<SendTokenList> {
                     MaterialPageRoute(
                       builder: (context) => SendCoinScreen(
                         accAddress :list.accAddress,
+                        sendTokenType :list.type,
                         sendTokenAddress: list.address,
                         sendTokenNetworkId: "${list.networkId}",
                         sendTokenName: list.name,

@@ -228,7 +228,7 @@ class _BuyScreenState extends State<BuyScreen> {
                                 setState(() {});
                               },
                               decoration: MyStyle.textInputDecoration.copyWith(
-                                  hintText: "Withdraw amount",
+                                  hintText: "Buy amount",
                                   isDense: false,
                                   contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
                                   suffixIcon: SizedBox(

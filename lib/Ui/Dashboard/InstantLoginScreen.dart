@@ -86,7 +86,7 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
                     fit: BoxFit.contain,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 35),
 
                 // title for purchase
                 Text(
@@ -97,7 +97,7 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
                       fontSize: 15
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 45),
 
                 // SignIn text
                 Text(
@@ -201,7 +201,6 @@ class _InstantLoginScreenState extends State<InstantLoginScreen> {
                 ),
 
                 // login button
-
                 buySellProvider.getOtpBool || buySellProvider.isLoginLoader
                     ?
                 Helper.dialogCall.showLoader()
