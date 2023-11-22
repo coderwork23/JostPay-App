@@ -5,7 +5,8 @@ import 'package:jost_pay_wallet/Values/MyStyle.dart';
 
 class CoinSendProcessingPage extends StatefulWidget {
   String selectedAccountAddress,tokenId,tokenNetworkId,tokenAddress,tokenName,token_transection_Id,
-      tokenSymbol,tokenBalance,tokenImage,tokenType,tokenMarketId,tokenDecimal,explorerUrl;
+      tokenSymbol,tokenBalance,tokenImage,tokenType,tokenMarketId,
+      tokenDecimal,explorerUrl,accAddress;
   double tokenUsdPrice,tokenUpDown,tokenFullPrice;
 
   CoinSendProcessingPage({
@@ -26,6 +27,7 @@ class CoinSendProcessingPage extends StatefulWidget {
     required this.tokenFullPrice,
     required this.tokenMarketId,
     required this.explorerUrl,
+    required this.accAddress,
   });
 
   @override
@@ -94,6 +96,7 @@ class _CoinSendProcessingPageState extends State<CoinSendProcessingPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => CoinDetailScreen(
+                    accAddress: widget.accAddress,
                     selectedAccountAddress: widget.selectedAccountAddress,
                     tokenDecimal: widget.tokenDecimal,
                     tokenId: widget.tokenId,

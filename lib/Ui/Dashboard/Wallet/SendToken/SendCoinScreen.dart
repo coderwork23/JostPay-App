@@ -35,7 +35,8 @@ class SendCoinScreen extends StatefulWidget {
       sendTokenBalance = "",
       sendTokenId = "",
       explorerUrl = "",
-      sendTokenUsd = "";
+      sendTokenUsd = "",
+      accAddress = "";
   int sendTokenDecimals;
 
 
@@ -54,6 +55,7 @@ class SendCoinScreen extends StatefulWidget {
     required this.explorerUrl,
     required this.sendTokenUsd,
     required this.sendTokenDecimals,
+    required this.accAddress,
   });
 
   @override
@@ -780,6 +782,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         return Container(
             padding: const EdgeInsets.fromLTRB(20,22,20,10),
             child: CoinSendProcessingPage(
+              accAddress: widget.accAddress,
               selectedAccountAddress: selectedAccountAddress,
               tokenDecimal: "$sendTokenDecimals",
               tokenId: sendTokenId,

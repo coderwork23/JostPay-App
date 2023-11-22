@@ -27,7 +27,7 @@ import 'SendToken/SendCoinScreen.dart';
 // ignore: must_be_immutable
 class CoinDetailScreen extends StatefulWidget {
 
-  String selectedAccountAddress,tokenId,tokenNetworkId,tokenAddress,tokenName,token_transection_Id,
+  String selectedAccountAddress,tokenId,tokenNetworkId,tokenAddress,accAddress,tokenName,token_transection_Id,
       tokenSymbol,tokenBalance,tokenImage,tokenType,tokenMarketId,tokenDecimal,explorerUrl;
   double tokenUsdPrice,tokenUpDown,tokenFullPrice;
 
@@ -49,6 +49,7 @@ class CoinDetailScreen extends StatefulWidget {
     required this.tokenFullPrice,
     required this.tokenMarketId,
     required this.explorerUrl,
+    required this.accAddress,
   });
 
   @override
@@ -316,6 +317,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => SendCoinScreen(
+                              accAddress: widget.accAddress,
                               sendTokenAddress: widget.tokenAddress,
                               sendTokenNetworkId: widget.tokenNetworkId,
                               sendTokenName: widget.tokenName,
@@ -432,6 +434,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                 tokenUpDown:widget.tokenUpDown.toString() ,
                                 explorerUrl: widget.explorerUrl,
                                 selectTokenUSD: widget.tokenUsdPrice.toString(),
+                                accAddress: widget.accAddress,
                               ),
                             )
                         );

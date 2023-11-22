@@ -147,6 +147,7 @@ class _WithDrawTokenListState extends State<WithDrawTokenList> {
                       MaterialPageRoute(
                         builder: (context) => WalletWithdrawDetails(
                           sendTokenAddress: list.address,
+                          accAddress: list.accAddress,
                           sendTokenNetworkId: "${list.networkId}",
                           sendTokenName: list.name,
                           sendTokenSymbol: list.symbol,

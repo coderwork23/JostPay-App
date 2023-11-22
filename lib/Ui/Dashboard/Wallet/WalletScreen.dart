@@ -308,7 +308,7 @@ class _WalletScreenState extends State<WalletScreen> {
         "network_id": "${DBTokenProvider.dbTokenProvider.tokenList[i].networkId}",
         "tokenAddress": DBTokenProvider.dbTokenProvider.tokenList[i].address,
         "address": DBTokenProvider.dbTokenProvider.tokenList[i].accAddress,
-        "trxPrivateKey": "$trxPrivateKey",
+        "trxPrivateKey": trxPrivateKey,
         "isCustomeRPC":false,
         "network_url":networkList.isEmpty ? "" : networkList.first.url,
       };
@@ -680,6 +680,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                builder: (context) => CoinDetailScreen(
                                    selectedAccountAddress: selectedAccountAddress,
                                    tokenDecimal: "${list.decimals}",
+                                   accAddress: list.accAddress,
                                    tokenId: "${list.token_id}",
                                    tokenNetworkId: "${list.networkId}",
                                    tokenAddress: list.address,

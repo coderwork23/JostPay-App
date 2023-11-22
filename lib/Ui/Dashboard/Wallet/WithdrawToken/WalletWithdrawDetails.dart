@@ -1,9 +1,9 @@
-import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
@@ -13,6 +13,7 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web3dart/web3dart.dart';
 
 
 // ignore: must_be_immutable
@@ -28,6 +29,7 @@ class WalletWithdrawDetails extends StatefulWidget {
       sendTokenBalance = "",
       sendTokenId = "",
       explorerUrl = "",
+      accAddress = "",
       sendTokenUsd = "";
   int sendTokenDecimals;
 
@@ -45,6 +47,7 @@ class WalletWithdrawDetails extends StatefulWidget {
     required this.sendTokenId,
     required this.explorerUrl,
     required this.sendTokenUsd,
+    required this.accAddress,
     required this.sendTokenDecimals,
   });
 
@@ -55,7 +58,7 @@ class WalletWithdrawDetails extends StatefulWidget {
 class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
 
 
-  TextEditingController priceController = TextEditingController(text: "0");
+  TextEditingController priceController = TextEditingController();
   TextEditingController bankNoController = TextEditingController();
   TextEditingController acNameController = TextEditingController();
   TextEditingController phoneNoController = TextEditingController();
@@ -164,9 +167,13 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
 
   }
 
-  storeData(){
+  storeData() async {
+    await DbNetwork.dbNetwork.getNetwork();
     setState(() {
       isLoading = true;
+
+
+
       sendTokenName = widget.sendTokenName;
       sendTokenAddress = widget.sendTokenAddress;
       sendTokenNetworkId = widget.sendTokenNetworkId;
@@ -181,6 +188,9 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       selectTokenUSD  = widget.selectTokenUSD;
       sendTokenDecimals  = widget.sendTokenDecimals;
 
+      networkList = DbNetwork.dbNetwork.networkList.where((element) {
+        return "${element.id}" == sendTokenNetworkId;
+      }).toList();
       isLoading = false;
     });
 
@@ -222,6 +232,68 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
 
 
   }
+
+
+  Web3Client? _web3client;
+  List<NetworkList> networkList = [];
+  bool web3Loading = false;
+  getWeb3NetWorkFees()async{
+
+
+
+    setState((){
+      web3Loading = true;
+    });
+
+    _web3client = Web3Client(
+      networkList[0].url,
+      http.Client(),
+    );
+
+
+    var estimateGas = await _web3client!.estimateGas(
+        sender:EthereumAddress.fromHex(widget.accAddress),
+        to: EthereumAddress.fromHex(widget.accAddress),
+        value: EtherAmount.inWei(BigInt.from(double.parse(sendTokenBalance)))
+    );
+    var getGasPrice = await _web3client!.getGasPrice();
+
+    //print("estimateGas === > ${"${estimateGas}"}");
+    //print("getGasPrice === > ${"${getGasPrice.getInWei}"}");
+
+    var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}")) / BigInt.from(10).pow(18);
+    //print(value);
+
+    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value * 2);
+
+    //print(tokenBalance);
+
+
+    if(tokenBalance > 0){
+      setState((){
+        priceController = TextEditingController(text: "$tokenBalance");
+        web3Loading = false;
+      });
+
+      usdAmount = double.parse(sendTokenBalance) * double.parse(sendTokenUsd);
+
+      if(usdAmount < buySellProvider.minSellAmount){
+        usdError = "Amount more then ${buySellProvider.minSellAmount}";
+      }else{
+        // print("object");
+        usdError = "";
+      }
+    }else{
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
+    }
+
+    setState((){
+      web3Loading = false;
+    });
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -397,17 +469,43 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                                 children: [
                                   InkWell(
                                     onTap: () {
-                                      setState(() {
-                                        priceController.text = double.parse(sendTokenBalance).toStringAsFixed(5);
-                                        usdAmount = double.parse(sendTokenBalance) * double.parse(sendTokenUsd);
+                                      if(networkList[0].isEVM == 1){
+                                        getWeb3NetWorkFees();
+                                      }
+                                      else {
 
-                                        if(usdAmount < buySellProvider.minSellAmount){
-                                          usdError = "Amount more then ${buySellProvider.minSellAmount}";
+                                        // print(sendTokenAddress);
+                                        if(sendTokenAddress == "") {
+                                          double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
+
+                                          //print(tokenBalance.toStringAsFixed(3));
+                                          setState(() {
+                                            priceController = TextEditingController(
+                                                text: tokenBalance.toStringAsFixed(6)
+                                            );
+                                          });
                                         }else{
                                           // print("object");
-                                          usdError = "";
+                                          setState(() {
+                                            priceController.text = sendTokenBalance;
+                                          });
                                         }
-                                      });
+
+                                        setState(() {
+                                          // priceController.text = double.parse(sendTokenBalance).toStringAsFixed(5);
+                                          usdAmount = double.parse(sendTokenBalance) * double.parse(sendTokenUsd);
+
+                                          if(usdAmount < buySellProvider.minSellAmount){
+                                            usdError = "Amount more then ${buySellProvider.minSellAmount}";
+                                          }else{
+                                            // print("object");
+                                            usdError = "";
+                                          }
+                                        });
+                                      }
+                                      /*setState(() {
+
+                                      });*/
                                     },
                                     child: Text(
                                       "Max",
@@ -614,13 +712,13 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                         :
                      priceController.text.isEmpty
                         || sellBank == null || emailError.isNotEmpty
-                        // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                        || usdAmount < buySellProvider.minSellAmount
                         || phoneNoController.text.isEmpty
                         || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                         ?
                     InkWell(
                       onTap: () {
-                        if(buySellProvider.minSellAmount < double.parse(priceController.text)){
+                        if(usdAmount < buySellProvider.minSellAmount){
                           Helper.dialogCall.showToast(context, "Insufficient balance");
                         }else{
                           Helper.dialogCall.showToast(context, "Please provider all details");
@@ -634,7 +732,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                         decoration:
                          priceController.text.isEmpty || sellBank == null
                             ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
-                            // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                            || usdAmount < buySellProvider.minSellAmount
                             || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                             ?
                         MyStyle.invalidDecoration
@@ -642,11 +740,11 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                         MyStyle.buttonDecoration,
 
                         child: Text(
-                            "Continue",
+                            "Proceed",
                             style:  MyStyle.tx18BWhite.copyWith(
                                 color:   priceController.text.isEmpty || sellBank == null
                                     || phoneNoController.text.isEmpty
-                                    // || double.parse(selectedCoin['amount']) < double.parse(priceController.text)
+                                    || usdAmount < buySellProvider.minSellAmount
                                     || acNameController.text.isEmpty || bankNoController.text.isEmpty
                                     || emailController.text.isEmpty
                                     ?
