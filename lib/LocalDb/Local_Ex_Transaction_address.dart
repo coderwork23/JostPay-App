@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:jost_pay_wallet/Models/AccountAddress.dart';
 import 'package:jost_pay_wallet/Models/ExTransactionModel.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -38,7 +37,6 @@ class DbExTransaction{
               'expectedSendAmount REAL,'
               'expectedReceiveAmount REAL,'
               'createdAt TEXT,'
-              'accountId TEXT,'
               'isPartner TEXT'
               ')');
         },
@@ -53,25 +51,24 @@ class DbExTransaction{
     return res;
   }
 
-  updateExTransaction(ExTransactionModel newToken,tokenId,id) async{
+  updateExTransaction(ExTransactionModel newToken,tokenId,) async{
     final db= await database;
 
-    final res = await db!.update('ExTransaction', newToken.toJson(), where: "id = ? AND accountId = ? ",whereArgs: [tokenId,id]);
-    getExTransaction(id);
+    final res = await db!.update('ExTransaction', newToken.toJson(), where: "id = ?",whereArgs: [tokenId]);
+    getExTransaction();
     return res;
   }
 
   List<ExTransactionModel> exTransactionList = [];
-  getExTransaction(String accountId) async {
+  getExTransaction() async {
 
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM ExTransaction");
 
-    print(res);
+    //print(res);
     List<ExTransactionModel> list = res.map((c) {
       return ExTransactionModel.fromJson(
         c,
-        accountId,
       );
     }).toList();
     exTransactionList = list;
@@ -80,15 +77,14 @@ class DbExTransaction{
 
 
   ExTransactionModel? getTrxStatusData;
-  getTrxStatus(String accountId,String id) async {
+  getTrxStatus(String id) async {
 
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM ExTransaction Where accountId = '$accountId' AND id = '$id'");
+    final res = await db!.rawQuery("SELECT * FROM ExTransaction Where id = '$id'");
 
     if(res.isNotEmpty) {
       getTrxStatusData = ExTransactionModel.fromJson(
         res[0],
-        accountId,
       );
     }
     return getTrxStatusData;

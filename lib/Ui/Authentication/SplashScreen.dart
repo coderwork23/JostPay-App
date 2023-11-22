@@ -127,8 +127,8 @@ class _SplashScreenState extends State<SplashScreen> {
     isLogin = sharedPreferences.getString('isLogin')??"false";
     if(sharedPreferences.getString('isLogin') != null){
       var passwordType = sharedPreferences.getBool('passwordType')?? false;
-      print("object passwordType ---> $passwordType");
-      print("object passwordType ---> ${sharedPreferences.getBool('passwordType')}");
+      //print("object passwordType ---> $passwordType");
+      //print("object passwordType ---> ${sharedPreferences.getBool('passwordType')}");
       if(isLogin == "true"){
         // ignore: use_build_context_synchronously
 

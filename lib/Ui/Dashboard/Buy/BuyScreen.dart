@@ -49,6 +49,8 @@ class _BuyScreenState extends State<BuyScreen> {
         setState(() {
           buySellProvider.accessToken = "";
           buySellProvider.loginModel = null;
+          sharedPre.remove("expireDate");
+          sharedPre.remove("email");
         });
         // ignore: use_build_context_synchronously
         Helper.dialogCall.showToast(context, "Your Login is expire.Please login again");
@@ -198,8 +200,8 @@ class _BuyScreenState extends State<BuyScreen> {
                                   networkFees = null;
                                   selectedCoin = null;
                                   selectedCoin = value;
-                                  print(value!.memoLabel);
-                                  print(selectedCoin!.memoLabel);
+                                  // print(value!.memoLabel);
+                                  // print(selectedCoin!.memoLabel);
                                   if(selectedCoin!.networkFees.isNotEmpty) {
                                     networkFees = selectedCoin!.networkFees[0];
                                   }

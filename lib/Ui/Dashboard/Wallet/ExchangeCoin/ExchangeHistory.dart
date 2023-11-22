@@ -20,7 +20,6 @@ class ExchangeHistory extends StatefulWidget {
 class _ExchangeHistoryState extends State<ExchangeHistory> {
 
   late ExchangeProvider exchangeProvider;
-  var selectedAccountId ="";
   bool isLoading = true;
 
   getExTransactionList() async {
@@ -28,9 +27,7 @@ class _ExchangeHistoryState extends State<ExchangeHistory> {
       isLoading = true;
     });
 
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await DbExTransaction.dbExTransaction.getExTransaction(selectedAccountId);
+    await DbExTransaction.dbExTransaction.getExTransaction();
 
     setState(() {
       isLoading = false;

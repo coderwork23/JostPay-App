@@ -93,7 +93,7 @@ class BuySellProvider with ChangeNotifier{
           await getExRate({"action":"exchange_rate"},context);
 
           for(int i =0; i<loginModel!.ratesInfo.length; i++){
-            print(loginModel!.ratesInfo[i].memoLabel);
+            // print(loginModel!.ratesInfo[i].memoLabel);
             var exListIndex = exchangeList.indexWhere((element) => element["name"] == loginModel!.ratesInfo[i].name);
             if(exListIndex != -1){
               loginModel!.ratesInfo[i].buyPrice = exchangeList[i]['buy'];
@@ -103,9 +103,9 @@ class BuySellProvider with ChangeNotifier{
 
           const storage =  FlutterSecureStorage();
           String jsonString = jsonEncode(loginModel);
-          print("loginModel!.banks");
+          // print("loginModel!.banks");
           var data = jsonDecode(jsonString);
-          print(data['rates_info'].map((e)=>debugPrint(e['memo_label'])).toList());
+          // print(data['rates_info'].map((e)=>debugPrint(e['memo_label'])).toList());
           await storage.write(key: "loginValue", value: jsonString);
 
 
@@ -290,7 +290,7 @@ class BuySellProvider with ChangeNotifier{
         // print("client length----> ${client.length}");
 
         list = client.map<BuySellHistoryModel>((json) {
-          print(json);
+          // print(json);
           return BuySellHistoryModel.fromJson(json);
         }).toList();
 
@@ -410,7 +410,7 @@ class BuySellProvider with ChangeNotifier{
         }
       }catch(e){
         sellValidOrder = false;
-        print("----> $e");
+        // print("----> $e");
         Helper.dialogCall.showToast(context, "Something is wrong.Please letter");
 
         notifyListeners();
@@ -503,7 +503,7 @@ class BuySellProvider with ChangeNotifier{
     await ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
 
-      print("checkOrderStatus $value");
+      // print("checkOrderStatus $value");
       if (responseData.statusCode == 200) {
         await DbSellHistory.dbSellHistory.getSellHistory(accountId);
         await DbSellHistory.dbSellHistory.updateStatus(

@@ -2,13 +2,10 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
-import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/ExTransactionModel.dart';
 import 'package:jost_pay_wallet/Models/ExchangeTokenModel.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ExchangeProvider with ChangeNotifier{
   
@@ -172,13 +169,13 @@ class ExchangeProvider with ChangeNotifier{
     estimateLoading = true;
     notifyListeners();
 
-    print("object--->  $url");
-    print("object--->  $params");
+    // print("object--->  $url");
+    // print("object--->  $params");
 
     await ApiHandler.getExchangeParams(url, params).then((responseData){
       var value = json.decode(responseData.body);
 
-      print("estimate object --->  $value");
+      // print("estimate object --->  $value");
 
       if(responseData.statusCode == 200) {
 
@@ -248,21 +245,20 @@ class ExchangeProvider with ChangeNotifier{
 
       if(responseData.statusCode == 200) {
 
-        await DbExTransaction.dbExTransaction.getExTransaction(accountId);
+        await DbExTransaction.dbExTransaction.getExTransaction();
 
         var trxIndex = DbExTransaction.dbExTransaction.exTransactionList.indexWhere((element) => "${element.id}" == "${value['id']}");
 
         if(trxIndex == -1) {
-          print("object 1");
+          // print("object 1");
           await DbExTransaction.dbExTransaction.createExTransaction(
-              ExTransactionModel.fromJson(value, accountId)
+              ExTransactionModel.fromJson(value)
           );
         }else{
-          print("object 2");
+          // print("object 2");
           await DbExTransaction.dbExTransaction.updateExTransaction(
-              ExTransactionModel.fromJson(value, accountId),
+              ExTransactionModel.fromJson(value),
               value["id"],
-              accountId
           );
         }
 

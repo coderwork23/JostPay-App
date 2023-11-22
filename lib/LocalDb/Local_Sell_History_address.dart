@@ -78,7 +78,7 @@ class DbSellHistory{
       "tokenName": newToken.tokenName,
     };
 
-    print(jsonEncode(data));
+    //print(jsonEncode(data));
 
     final res = await db!.update('SellHistory', data, where: "invoice = ? AND accountId = ? ",whereArgs: [newToken.invoiceNo,id]);
 

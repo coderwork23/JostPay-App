@@ -63,7 +63,7 @@ class _SellScreenState extends State<SellScreen> {
       "auth":"p1~\$*)Ze(@"
     };
 
-    print("object ${jsonEncode(params)}");
+    //print("object ${jsonEncode(params)}");
 
     await buySellProvider.validateSellOrder(params,selectedAccountId,context,"");
 
@@ -201,8 +201,8 @@ class _SellScreenState extends State<SellScreen> {
                           networkFees = null;
                           selectedCoin = null;
                           selectedCoin = value;
-                          print(selectedCoin['name']);
-                          print(value['name']);
+                          //print(selectedCoin['name']);
+                          //print(value['name']);
                           priceController.clear();
                         });
 

@@ -97,82 +97,53 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
     exchangeProvider = Provider.of<ExchangeProvider>(context,listen: true);
 
     return Scaffold(
-      bottomNavigationBar: exchangeProvider.isLoading || exchangeProvider.exRateLoading || exchangeProvider.estimateLoading
-          ?
-      Visibility(
-        visible: exchangeProvider.exMinMaxLoading,
-        child: SizedBox(
-          height: 55,
-          child: Helper.dialogCall.showLoader(),
-        ),
-      )
-            :
-      InkWell(
-        onTap: () async {
-          if(showSendError || exchangeProvider.getCoinController.text.isEmpty || sendCoinController.text.isEmpty){
-            Helper.dialogCall.showToast(context, "Please provide all details");
-          }else {
-            await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ExchangeAddressScreen(
-                        sendAmount: sendCoinController.text.trim(),
-                      ),
-                )
-            );
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          exchangeProvider.isLoading || exchangeProvider.exRateLoading || exchangeProvider.estimateLoading
+              ?
+          Visibility(
+            visible: exchangeProvider.exMinMaxLoading,
+            child: SizedBox(
+              height: 55,
+              child: Helper.dialogCall.showLoader(),
+            ),
+          )
+              :
+          InkWell(
+            onTap: () async {
+              if(showSendError || exchangeProvider.getCoinController.text.isEmpty || sendCoinController.text.isEmpty){
+                Helper.dialogCall.showToast(context, "Please provide all details");
+              }else {
+                await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ExchangeAddressScreen(
+                            sendAmount: sendCoinController.text.trim(),
+                          ),
+                    )
+                );
 
-            setState(() {
-              sendCoinController.clear();
-              exchangeProvider.getCoinController.clear();
-            });
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: showSendError || exchangeProvider.getCoinController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
-          child:  Text(
-            "Continue",
-            style: MyStyle.tx18BWhite.copyWith(
-                color: showSendError || exchangeProvider.getCoinController.text.isEmpty ? MyColor.dotBoarderColor : MyColor.mainWhiteColor,
+                setState(() {
+                  sendCoinController.clear();
+                  exchangeProvider.getCoinController.clear();
+                });
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: showSendError || exchangeProvider.getCoinController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
+              child:  Text(
+                "Continue",
+                style: MyStyle.tx18BWhite.copyWith(
+                  color: showSendError || exchangeProvider.getCoinController.text.isEmpty ? MyColor.dotBoarderColor : MyColor.mainWhiteColor,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-
-      appBar: AppBar(
-        centerTitle: true,
-        leading:  InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.arrow_back_ios_new,
-            color: MyColor.mainWhiteColor,
-            size: 20,
-          ),
-        ),
-        title: const Text(
-          "Exchange",
-        ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ExchangeHistory(),
-                  )
-                );
-              },
-              icon: const Icon(
-                Icons.history,
-                color: MyColor.mainWhiteColor,
-              )
-          )
         ],
       ),
 
@@ -180,283 +151,324 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
           ?
       Helper.dialogCall.showLoader()
           :
-      SingleChildScrollView(
-        padding: const EdgeInsets.all(15),
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            // send coin details
-            Container(
-              width: width,
-              decoration: BoxDecoration(
-                color:MyColor.blackColor,
-                borderRadius: BorderRadius.circular(12)
-              ),
-              child: Row(
+              Row(
                 children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: MyColor.mainWhiteColor,
+                      size: 20,
+                    ),
+                  ),
 
-                  // text filed and title
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
-                          child: Text(
-
-                            "You send ${exchangeProvider.sendCoin.name.split(" ").first} (${exchangeProvider.sendCoin.ticker})",
-                            style:MyStyle.tx18RWhite.copyWith(
-                                fontSize: 12,
-                                color: MyColor.grey01Color
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            if(double.parse(value.isEmpty ? "0" : value) < exchangeProvider.minAmount){
-                              setState(() {
-                                showSendError = true;
-                                sendError = "Amount must be more then ${exchangeProvider.minAmount}";
-                              });
-                            }else if(exchangeProvider.maxAmount!=-1 && double.parse(value) > exchangeProvider.maxAmount){
-                              setState(() {
-                                showSendError = true;
-                                sendError = "Amount must be less then ${exchangeProvider.maxAmount}";
-                              });
-                            }else{
-                              setState(() {
-                                showSendError = false;
-                                sendError = "";
-                              });
-                              estimateExchangeAmount(context);
-
-                            }
-                          },
-                          controller: sendCoinController,
-                          cursorColor: MyColor.greenColor,
-                          style: MyStyle.tx18RWhite,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
-                            ],
-                          decoration: InputDecoration(
-                              hintText: "0.0",
-                              border: InputBorder.none,
-                              hintStyle:MyStyle.tx22RWhite.copyWith(
-                                  fontSize: 18,
-                                  color: MyColor.whiteColor.withOpacity(0.7)
-                              ),
-                              errorStyle: const TextStyle(fontSize: 0,height: 0),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
-                          )
+                  const SizedBox(width: 15),
+                  const Expanded(
+                    child: Text(
+                      "Exchange",
+                      style: MyStyle.tx18BWhite,
+                    ),
+                  ),
+                  IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ExchangeHistory(),
+                              )
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.history,
+                          color: MyColor.mainWhiteColor,
                         )
-                      ],
-                    ),
-                  ),
-
-
-                  const SizedBox(width: 8),
-                  const VerticalDivider(
-                    thickness: 1.5,
-                    color: MyColor.backgroundColor,
-                  ),
-                  const SizedBox(width: 8),
-
-                  // coin images and name
-                  SizedBox(
-                    width: width * 0.3,
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ExChangeTokenList(
-                              pageType: "send"
-                            ),
-                          )
-                        );
-                        setState(() {
-                          sendCoinController.clear();
-                          exchangeProvider.getCoinController.clear();
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 5.0),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              height: 25,
-                              width: 25,
-                              child: SvgPicture.network(
-                                exchangeProvider.sendCoin.image,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Flexible(
-                              child: Text(
-                                "${exchangeProvider.sendCoin.name.split(" ").first} (${exchangeProvider.sendCoin.ticker})",
-                                style: MyStyle.tx18RWhite.copyWith(
-                                  fontSize: 14
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
+                    )
                 ],
               ),
-            ),
-            Visibility(
-              visible: showSendError,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  sendError,
-                  style: MyStyle.tx18BWhite.copyWith(
-                      color: MyColor.redColor,
-                      fontSize: 12
-                  ),
-                ),
-              ),
-            ),
+              const SizedBox(height: 20),
 
-            const SizedBox(height: 15),
-
-            // middle send coin value and price
-            Row(
-              children: [
-
-                const Spacer(),
-                InkWell(
-                  onTap: () {
-                    swapUpDown(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
-                    color:MyColor.blackColor,
-                    child: Image.asset(
-                      "assets/images/dashboard/up_down_arrow.png",
-                      height: 20,
-                      width: 20,
-                      color: MyColor.mainWhiteColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // get coin details
-            Container(
-              width: width,
-              decoration: BoxDecoration(
+              Container(
+                width: width,
+                decoration: BoxDecoration(
                   color:MyColor.blackColor,
                   borderRadius: BorderRadius.circular(12)
-              ),
-              child: Row(
-                children: [
+                ),
+                child: Row(
+                  children: [
 
-                  // text filed and title
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
-                          child: Text(
-                            "You get ${exchangeProvider.receiveCoin.name.split(" ").first} (${exchangeProvider.receiveCoin.ticker})",
-                            style:MyStyle.tx18RWhite.copyWith(
-                                fontSize: 12,
-                                color: MyColor.grey01Color
+                    // text filed and title
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
+                            child: Text(
+
+                              "You send ${exchangeProvider.sendCoin.name.split(" ").first} (${exchangeProvider.sendCoin.ticker})",
+                              style:MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 12,
+                                  color: MyColor.grey01Color
+                              ),
                             ),
                           ),
-                        ),
-                        TextFormField(
+                          TextFormField(
                             keyboardType: TextInputType.number,
-                            controller: exchangeProvider.getCoinController,
-                            readOnly: true,
+                            onChanged: (value) {
+                              if(double.parse(value.isEmpty ? "0" : value) < exchangeProvider.minAmount){
+                                setState(() {
+                                  showSendError = true;
+                                  sendError = "Amount must be more then ${exchangeProvider.minAmount}";
+                                });
+                              }else if(exchangeProvider.maxAmount!=-1 && double.parse(value) > exchangeProvider.maxAmount){
+                                setState(() {
+                                  showSendError = true;
+                                  sendError = "Amount must be less then ${exchangeProvider.maxAmount}";
+                                });
+                              }else{
+                                setState(() {
+                                  showSendError = false;
+                                  sendError = "";
+                                });
+                                estimateExchangeAmount(context);
+
+                              }
+                            },
+                            controller: sendCoinController,
                             cursorColor: MyColor.greenColor,
                             style: MyStyle.tx18RWhite,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
-                            ],
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
+                              ],
                             decoration: InputDecoration(
-                              hintText: "0.0",
-                              border: InputBorder.none,
-                              hintStyle:MyStyle.tx22RWhite.copyWith(
-                                  fontSize: 18,
-                                  color: MyColor.whiteColor.withOpacity(0.7)
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
-                            )
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  const VerticalDivider(
-                    thickness: 1.5,
-                    color: MyColor.backgroundColor,
-                  ),
-                  const SizedBox(width: 8),
-
-                  // coin images and name
-                  SizedBox(
-                    width: width * 0.3,
-                    child: InkWell(
-                      onTap: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ExChangeTokenList(
-                                pageType: "receive"
-                            ),
-                          )
-                        );
-                        setState(() {
-                          sendCoinController.clear();
-                          exchangeProvider.getCoinController.clear();
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 5.0),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              height: 25,
-                              width: 25,
-                              child: SvgPicture.network(
-                                exchangeProvider.receiveCoin.image,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                "${exchangeProvider.receiveCoin.name.split(" ").first} (${exchangeProvider.receiveCoin.ticker})",
-                                style: MyStyle.tx18RWhite.copyWith(
-                                    fontSize: 14
+                                hintText: "0.0",
+                                border: InputBorder.none,
+                                hintStyle:MyStyle.tx22RWhite.copyWith(
+                                    fontSize: 18,
+                                    color: MyColor.whiteColor.withOpacity(0.7)
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
+                                errorStyle: const TextStyle(fontSize: 0,height: 0),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                            )
+                          )
+                        ],
                       ),
                     ),
-                  )
+
+
+                    const SizedBox(width: 8),
+                    const SizedBox(height: 60,
+                      child: VerticalDivider(
+                        thickness: 1.5,
+                        color: MyColor.backgroundColor,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // coin images and name
+                    SizedBox(
+                      width: width * 0.3,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ExChangeTokenList(
+                                pageType: "send"
+                              ),
+                            )
+                          );
+                          setState(() {
+                            sendCoinController.clear();
+                            exchangeProvider.getCoinController.clear();
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 5.0),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                height: 25,
+                                width: 25,
+                                child: SvgPicture.network(
+                                  exchangeProvider.sendCoin.image,
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Flexible(
+                                child: Text(
+                                  "${exchangeProvider.sendCoin.name.split(" ").first} (${exchangeProvider.sendCoin.ticker})",
+                                  style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 14
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Visibility(
+                visible: showSendError,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    sendError,
+                    style: MyStyle.tx18BWhite.copyWith(
+                        color: MyColor.redColor,
+                        fontSize: 12
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              // middle send coin value and price
+              Row(
+                children: [
+
+                  const Spacer(),
+                  InkWell(
+                    onTap: () {
+                      swapUpDown(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
+                      color:MyColor.blackColor,
+                      child: Image.asset(
+                        "assets/images/dashboard/up_down_arrow.png",
+                        height: 20,
+                        width: 20,
+                        color: MyColor.mainWhiteColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+
                 ],
               ),
-            ),
+              const SizedBox(height: 20),
 
-          ],
+              // get coin details
+              Container(
+                width: width,
+                decoration: BoxDecoration(
+                    color:MyColor.blackColor,
+                    borderRadius: BorderRadius.circular(12)
+                ),
+                child: Row(
+                  children: [
+
+                    // text filed and title
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
+                            child: Text(
+                              "You get ${exchangeProvider.receiveCoin.name.split(" ").first} (${exchangeProvider.receiveCoin.ticker})",
+                              style:MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 12,
+                                  color: MyColor.grey01Color
+                              ),
+                            ),
+                          ),
+                          TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: exchangeProvider.getCoinController,
+                              readOnly: true,
+                              cursorColor: MyColor.greenColor,
+                              style: MyStyle.tx18RWhite,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
+                              ],
+                              decoration: InputDecoration(
+                                hintText: "0.0",
+                                border: InputBorder.none,
+                                hintStyle:MyStyle.tx22RWhite.copyWith(
+                                    fontSize: 18,
+                                    color: MyColor.whiteColor.withOpacity(0.7)
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                              )
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    const SizedBox(height: 60,
+                      child: VerticalDivider(
+                        thickness: 1.5,
+                        color: MyColor.backgroundColor,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // coin images and name
+                    SizedBox(
+                      width: width * 0.3,
+                      child: InkWell(
+                        onTap: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ExChangeTokenList(
+                                  pageType: "receive"
+                              ),
+                            )
+                          );
+                          setState(() {
+                            sendCoinController.clear();
+                            exchangeProvider.getCoinController.clear();
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 5.0),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                height: 25,
+                                width: 25,
+                                child: SvgPicture.network(
+                                  exchangeProvider.receiveCoin.image,
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  "${exchangeProvider.receiveCoin.name.split(" ").first} (${exchangeProvider.receiveCoin.ticker})",
+                                  style: MyStyle.tx18RWhite.copyWith(
+                                      fontSize: 14
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
 

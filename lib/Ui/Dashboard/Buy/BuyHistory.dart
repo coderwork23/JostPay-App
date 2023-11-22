@@ -66,7 +66,7 @@ class _BuyHistoryState extends State<BuyHistory> {
       "auth":"p1~\$*)Ze(@",
     };
 
-    print(params);
+    //print(params);
     await buySellProvider.buyHistory(params);
   }
 

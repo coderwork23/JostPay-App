@@ -2,10 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:declarative_refresh_indicator/declarative_refresh_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/Models/ExchangeTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
@@ -40,7 +42,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
   var selectedAccountId = "";
   bool isLoading = false;
 
-  dynamic sendNetwork, receiveNetwork ;
+  ExchangeTokenModel? sendNetwork, receiveNetwork ;
 
   getTxsStatus()async{
     setState(() {
@@ -48,7 +50,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
     });
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
-    await DbExTransaction.dbExTransaction.getTrxStatus(selectedAccountId,widget.statusId);
+    await DbExTransaction.dbExTransaction.getTrxStatus(widget.statusId);
 
     var data = {
       "search_term": "",
@@ -58,61 +60,15 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
     setState(() {
 
       // set send token
-      if(DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency == "usdtbsc"){
-        sendNetwork = {
-          "logo":"http://139.59.88.239/api/img/token/bsc_usdt.png",
-          "name":"Tether USD",
-          "symbol":"USDT"
-        };
-      }
-      else if(DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency == "usdttrc20"){
-        sendNetwork = {
-          "logo":"http://139.59.88.239/api/img/token/trx_usdt.png",
-          "name":"Tether USD",
-          "symbol":"USDT"
-        };
-      }
-      else{
-        final temp = DbNetwork.dbNetwork.networkList.where((element) {
-          return element.symbol.toLowerCase() == DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency;
-        }).toList().first;
+      sendNetwork = exchangeProvider.tempExTokenList.where((element) {
+        print(element.ticker);
+        print(DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency);
+        return element.ticker == DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency;
+      }).toList().first;
 
-        sendNetwork = {
-          "logo":temp.logo,
-          "name":temp.name,
-          "symbol":temp.symbol
-
-        };
-      }
-
-
-      // set receive token
-      if(DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency == "usdtbsc"){
-        receiveNetwork = {
-          "logo":"http://139.59.88.239/api/img/token/bsc_usdt.png",
-          "name":"Tether USD",
-          "symbol":"USDT"
-        };
-      }
-      else if(DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency == "usdttrc20"){
-        receiveNetwork = {
-          "logo":"http://139.59.88.239/api/img/token/trx_usdt.png",
-          "name":"Tether USD",
-          "symbol":"USDT"
-        };
-      }
-      else{
-        final temp = DbNetwork.dbNetwork.networkList.where((element) {
-          return element.symbol.toLowerCase() == DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency;
-        }).toList().first;
-
-        receiveNetwork = {
-          "logo":temp.logo,
-          "name":temp.name,
-          "symbol":temp.symbol
-        };
-      }
-
+      receiveNetwork = exchangeProvider.tempExTokenList.where((element) {
+        return element.ticker == DbExTransaction.dbExTransaction.getTrxStatusData!.toCurrency;
+      }).toList().first;
 
      isLoading = false;
 
@@ -214,45 +170,28 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                         // from coin details
                         Row(
                           children: [
-                            CachedNetworkImage(
+                            SizedBox(
                               height: 25,
                               width: 25,
-                              fit: BoxFit.fill,
-                              imageUrl: sendNetwork["logo"],
-                              placeholder: (context, url) {
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                      color: MyColor.greenColor
-                                  ),
-                                );
-                              },
-                              errorWidget: (context, url, error) {
-                                return Container(
-                                  height: 25,
-                                  width: 25,
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    color: MyColor.whiteColor,
-                                  ),
-                                  child: Image.asset(
-                                    "assets/images/bitcoin.png",
-                                  ),
-                                );
-                              },
+                              child: SvgPicture.network(
+                                sendNetwork!.image,
+                                fit: BoxFit.fill,
+                              ),
                             ),
                             const SizedBox(width: 12),
+
                             Expanded(
                               child: Text(
-                                  sendNetwork["name"],
+                                  sendNetwork!.name,
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
                               ),
                             ),
+
                             Text(
                               "~${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData!.expectedSendAmount}")} "
-                                  "${sendNetwork['symbol']}",
+                                  "${sendNetwork!.ticker}",
                               style: MyStyle.tx18RWhite.copyWith(
                                   fontSize: 16
                               ),
@@ -281,37 +220,19 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                         // to coin details
                         Row(
                           children: [
-                            CachedNetworkImage(
+                            SizedBox(
                               height: 25,
                               width: 25,
-                              fit: BoxFit.fill,
-                              imageUrl: receiveNetwork["logo"],
-                              placeholder: (context, url) {
-                                return const Center(
-                                  child: CircularProgressIndicator(
-                                      color: MyColor.greenColor
-                                  ),
-                                );
-                              },
-                              errorWidget: (context, url, error) {
-                                return Container(
-                                  height: 25,
-                                  width: 25,
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    color: MyColor.whiteColor,
-                                  ),
-                                  child: Image.asset(
-                                    "assets/images/bitcoin.png",
-                                  ),
-                                );
-                              },
+                              child: SvgPicture.network(
+                                receiveNetwork!.image,
+                                fit: BoxFit.fill,
+                              ),
                             ),
                             const SizedBox(width: 12),
+
                             Expanded(
                               child: Text(
-                                receiveNetwork["name"],
+                                receiveNetwork!.name,
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
@@ -319,7 +240,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                             ),
                             Text(
                               "~${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData!.expectedReceiveAmount}")} "
-                                  "${receiveNetwork['symbol']}",
+                                  "${receiveNetwork!.ticker}",
                               style: MyStyle.tx18RWhite.copyWith(
                                   fontSize: 16
                               ),
@@ -439,7 +360,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                     child: Text(
                       "Note: Please send "
                           "${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData?.expectedSendAmount}")} "
-                          "(${sendNetwork['symbol']}) with in valid time period.If you send after that result is permanent loss of your token.",
+                          "(${sendNetwork!.ticker}) with in valid time period.If you send after that result is permanent loss of your token.",
                       textAlign: TextAlign.center,
                       style:MyStyle.tx18RWhite.copyWith(
                           fontSize: 12,
