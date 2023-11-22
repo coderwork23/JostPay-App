@@ -11,6 +11,7 @@ import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/CoinDetailScreen.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/CoinSendProcessingPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -682,29 +683,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         sendTokenQuantity.clear();
 
         Navigator.pop(context);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CoinDetailScreen(
-                selectedAccountAddress: selectedAccountAddress,
-                tokenDecimal: "$sendTokenDecimals",
-                tokenId: sendTokenId,
-                tokenNetworkId: sendTokenNetworkId,
-                tokenAddress: sendTokenAddress,
-                tokenName: sendTokenName,
-                tokenSymbol: sendTokenSymbol,
-                tokenBalance: sendTokenBalance,
-                tokenMarketId: selectTokenMarketId,
-                tokenType: tokenType,
-                tokenImage: sendTokenImage,
-                tokenUsdPrice: double.parse(selectTokenUSD),
-                tokenFullPrice: double.parse(sendTokenUsd),
-                tokenUpDown: double.parse(tokenUpDown),
-                token_transection_Id: sendTokenId,
-                explorerUrl: explorerUrl,
-              ),
-            )
-        );
+        showSendProcessingPage(context);
 
       });
     }
@@ -785,6 +764,43 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
   }
 
+
+  showSendProcessingPage(BuildContext context){
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: MyColor.backgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
+      ),
+      context: context,
+      builder: (context) {
+        return Container(
+            padding: const EdgeInsets.fromLTRB(20,22,20,10),
+            child: CoinSendProcessingPage(
+              selectedAccountAddress: selectedAccountAddress,
+              tokenDecimal: "$sendTokenDecimals",
+              tokenId: sendTokenId,
+              tokenNetworkId: sendTokenNetworkId,
+              tokenAddress: sendTokenAddress,
+              tokenName: sendTokenName,
+              tokenSymbol: sendTokenSymbol,
+              tokenBalance: sendTokenBalance,
+              tokenMarketId: selectTokenMarketId,
+              tokenType: tokenType,
+              tokenImage: sendTokenImage,
+              tokenUsdPrice: double.parse(selectTokenUSD),
+              tokenFullPrice: double.parse(sendTokenUsd),
+              tokenUpDown: double.parse(tokenUpDown),
+              token_transection_Id: sendTokenId,
+              explorerUrl: explorerUrl,
+            )
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

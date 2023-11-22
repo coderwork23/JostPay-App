@@ -107,7 +107,11 @@ class _SellStatusPageState extends State<SellStatusPage> {
     var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      bottomNavigationBar: Visibility(
+      bottomNavigationBar: isLoading || DbSellHistory.dbSellHistory.getTrxStatusData == null
+          ?
+      const SizedBox()
+          :
+      Visibility(
         visible: DbSellHistory.dbSellHistory.getTrxStatusData!.orderStatus == "Pending"
             &&
             DbSellHistory.dbSellHistory.getTrxStatusData!.payinUrl != "",

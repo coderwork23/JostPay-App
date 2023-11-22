@@ -137,6 +137,8 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
         "selectTokenUSD":selectTokenUSD,
       };
 
+      print(jsonEncode(sendData));
+
 
       var value =  await Navigator.push(
           context,

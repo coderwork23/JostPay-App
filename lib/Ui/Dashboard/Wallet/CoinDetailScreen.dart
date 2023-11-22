@@ -582,14 +582,16 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
                       var transectionDetails = transectionProvider.transectionList[index];
 
-                      DateTime time =
-                      DateTime.fromMillisecondsSinceEpoch(
-                          int.parse(transectionDetails.timeStamp) * 1000);
+                      // print(transectionDetails.timeStamp);
+                      String formattedDate = "",formattedTime = "";
+                      if(transectionDetails.timeStamp != "undefined") {
+                        DateTime time =
+                        DateTime.fromMillisecondsSinceEpoch(
+                            int.parse(transectionDetails.timeStamp) * 1000);
 
-                      String formattedDate = DateFormat('MMM dd, yyyy').format(time);
-                      String formattedTime = DateFormat('hh:mm aa').format(time);
-
-
+                        formattedDate = DateFormat('MMM dd, yyyy').format(time);
+                        formattedTime = DateFormat('hh:mm aa').format(time);
+                      }
                       return InkWell(
                         onTap: () {
                           launchUrl(
@@ -674,7 +676,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                                   ),
                                                 ),
                                                 TextSpan(
-                                                  text: formattedDate,
+                                                  text: transectionDetails.timeStamp == "undefined" ? "-":formattedDate,
                                                   style:MyStyle.tx18RWhite.copyWith(
                                                       fontSize: 14,
                                                       color: MyColor.grey01Color
@@ -694,7 +696,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                                   ),
                                                 ),
                                                 TextSpan(
-                                                  text: formattedTime,
+                                                  text: transectionDetails.timeStamp == "undefined" ? "-":formattedTime,
                                                   style:MyStyle.tx18RWhite.copyWith(
                                                       fontSize: 14,
                                                       color: MyColor.grey01Color

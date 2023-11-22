@@ -16,7 +16,7 @@ class SellValidationPage extends StatefulWidget {
     required this.params,
     required this.coinName,
     required this.pageName,
-    required this.sendData,
+    this.sendData,
   });
 
   @override
@@ -49,17 +49,20 @@ class _SellValidationPageState extends State<SellValidationPage> {
 
     var sendData = widget.sendData;
     // ignore: use_build_context_synchronously
+    // print("object ${widget.sendData}");
     await buySellProvider.sellOrder(
         widget.params,
         selectedAccountId,
         context,
         widget.pageName == "" ? "" : "send",
-        {},
+        widget.sendData == null ? {} : sendData,
         widget.coinName
     );
 
     if(buySellProvider.sellSuccess){
-      notifyOrder();
+      if(widget.sendData == null) {
+        notifyOrder();
+      }
     }
   }
 

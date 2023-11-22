@@ -82,7 +82,7 @@ class _SellScreenState extends State<SellScreen> {
               params: params,
               coinName: selectedCoin['name'],
               pageName: "",
-              sendData: {},
+              sendData: null,
             ),
           )
       );
