@@ -87,6 +87,8 @@ class _SecurityScreenState extends State<SecurityScreen> {
       newPassword = passwordType ? newPassCodeController.text : newPassController.text;
     }
 
+    // print("newPassword-----> $newPassword");
+    // print("oldPassword-----> $oldPassword");
     var data = {
       "device_id":deviceId,
       "old_password":oldPassword,
