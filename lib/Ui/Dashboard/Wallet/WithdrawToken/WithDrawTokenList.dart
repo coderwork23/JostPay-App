@@ -148,6 +148,7 @@ class _WithDrawTokenListState extends State<WithDrawTokenList> {
                         builder: (context) => WalletWithdrawDetails(
                           sendTokenAddress: list.address,
                           accAddress: list.accAddress,
+                          sendTonkenType: list.type,
                           sendTokenNetworkId: "${list.networkId}",
                           sendTokenName: list.name,
                           sendTokenSymbol: list.symbol,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellStatusPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -48,8 +49,8 @@ class _SellValidationPageState extends State<SellValidationPage> {
     });
 
     var sendData = widget.sendData;
+
     // ignore: use_build_context_synchronously
-    // print("object ${widget.sendData}");
     await buySellProvider.sellOrder(
         widget.params,
         selectedAccountId,
@@ -59,11 +60,13 @@ class _SellValidationPageState extends State<SellValidationPage> {
         widget.coinName
     );
 
-    if(buySellProvider.sellSuccess){
+    /*if(buySellProvider.sellSuccess){
       if(widget.sendData == null) {
         notifyOrder();
       }
-    }
+      // ignore: use_build_context_synchronously
+
+    }*/
   }
 
 
@@ -111,6 +114,8 @@ class _SellValidationPageState extends State<SellValidationPage> {
         padding: const EdgeInsets.fromLTRB(15,0,15,15),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             InkWell(
               onTap: () {

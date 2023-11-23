@@ -436,6 +436,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                 explorerUrl: widget.explorerUrl,
                                 selectTokenUSD: widget.tokenUsdPrice.toString(),
                                 accAddress: widget.accAddress,
+                                sendTonkenType:widget.tokenType,
                               ),
                             )
                         );

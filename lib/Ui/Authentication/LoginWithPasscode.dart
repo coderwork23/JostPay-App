@@ -1,12 +1,13 @@
 import 'dart:io';
+import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
+import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:local_auth_ios/types/auth_messages_ios.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
@@ -17,7 +18,6 @@ import 'package:custom_pin_screen/custom_pin_screen.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:pin_code_fields/pin_code_fields.dart' as pin;
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginWithPassCode extends StatefulWidget {
@@ -35,6 +35,8 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
 
   late AccountProvider accountProvider;
   late TokenProvider tokenProvider;
+  late DashboardProvider dashProvider;
+
 
 
 
@@ -215,13 +217,23 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
 
     }
 
-    // ignore: use_build_context_synchronously
-    Navigator.pushReplacement(
+    if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){
+      Navigator.pop(context);
+      // print("object gooing in if");
+    }
+    else {
+      // print("object gooing in else");
+      dashProvider.changeBottomIndex(0);
+      // ignore: use_build_context_synchronously
+      await Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
             builder: (context) => const DashboardScreen()
-        )
-    );
+        ),
+            (route) => true,
+      );
+
+    }
 
     setState((){
       isLoading = false;
@@ -376,6 +388,8 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
   void initState() {
     accountProvider = Provider.of<AccountProvider>(context, listen: false);
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
+    dashProvider = Provider.of<DashboardProvider>(context,listen: false);
+
 
     super.initState();
 
@@ -389,6 +403,7 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
 
     accountProvider = Provider.of<AccountProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
+    dashProvider = Provider.of<DashboardProvider>(context,listen: true);
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;

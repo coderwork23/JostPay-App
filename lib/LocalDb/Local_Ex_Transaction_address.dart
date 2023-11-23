@@ -37,6 +37,8 @@ class DbExTransaction{
               'expectedSendAmount REAL,'
               'expectedReceiveAmount REAL,'
               'createdAt TEXT,'
+              'payinExtraIdName TEXT,'
+              'payinExtraId TEXT,'
               'isPartner TEXT'
               ')');
         },

@@ -22,6 +22,7 @@ class WalletWithdrawDetails extends StatefulWidget {
       sendTokenNetworkId = "",
       sendTokenName = "",
       sendTokenSymbol = "",
+      sendTonkenType = "",
       selectTokenMarketId = "",
       tokenUpDown = "",
       sendTokenImage = "",
@@ -48,6 +49,7 @@ class WalletWithdrawDetails extends StatefulWidget {
     required this.explorerUrl,
     required this.sendTokenUsd,
     required this.accAddress,
+    required this.sendTonkenType,
     required this.sendTokenDecimals,
   });
 
@@ -78,10 +80,10 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
     var email = sharedPre.getString("email")??"";
     setState(() {
       if(widget.sendTokenSymbol != "" && buySellProvider.sellRateList.isNotEmpty){
-        if (widget.sendTokenSymbol == "TRC20") {
+        if (widget.sendTonkenType == "TRC20") {
           sendTokenSymbol = "USDTTRC20";
         }
-        else if (widget.sendTokenSymbol == "BEP20") {
+        else if (widget.sendTonkenType == "BEP20") {
           sendTokenSymbol = "USDTBEP20";
         }
         else if (widget.sendTokenSymbol == "BNB") {

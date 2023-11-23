@@ -40,14 +40,12 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
   late TokenProvider tokenProvider;
 
   var selectedAccountId = "";
-  bool isLoading = false;
+  bool isLoading = true;
 
   ExchangeTokenModel? sendNetwork, receiveNetwork ;
 
   getTxsStatus()async{
-    setState(() {
-      isLoading = true;
-    });
+
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     selectedAccountId = sharedPreferences.getString('accountId') ?? "";
     await DbExTransaction.dbExTransaction.getTrxStatus(widget.statusId);
@@ -61,8 +59,6 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
 
       // set send token
       sendNetwork = exchangeProvider.tempExTokenList.where((element) {
-        print(element.ticker);
-        print(DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency);
         return element.ticker == DbExTransaction.dbExTransaction.getTrxStatusData!.fromCurrency;
       }).toList().first;
 
@@ -71,7 +67,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
       }).toList().first;
 
      isLoading = false;
-
+      _showRefresh = false;
     });
 
   }
@@ -87,15 +83,16 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
 
 
   getTrxStatusApi()async{
+    setState(() {
+      isLoading = true;
+    });
 
     await exchangeProvider.transactionStatus(
         "/v1/transactions/${DbExTransaction.dbExTransaction.getTrxStatusData!.id}/${Utils.apiKey}",
         selectedAccountId
     );
 
-    setState(() {
-      _showRefresh = false;
-    });
+    getTxsStatus();
   }
 
   bool _showRefresh = false;
@@ -105,7 +102,6 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
       _showRefresh = true;
     });
 
-    getTrxStatusApi();
     getTxsStatus();
   }
 
@@ -324,6 +320,47 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                           ),
                         ),
                         const SizedBox(height: 10),
+
+                        // Tag id
+                        Visibility(
+                          visible: DbExTransaction.dbExTransaction.getTrxStatusData!.payinExtraId != "" && DbExTransaction.dbExTransaction.getTrxStatusData!.payinExtraIdName != "",
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: InkWell(
+                              onTap: () {
+                                FlutterClipboard.copy(DbExTransaction.dbExTransaction.getTrxStatusData!.payinExtraId).then((value) {
+                                  Helper.dialogCall.showToast(context, "${DbExTransaction.dbExTransaction.getTrxStatusData!.payinExtraIdName} Copied");
+                                });
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "${DbExTransaction.dbExTransaction.getTrxStatusData!.payinExtraIdName}: ",
+                                      style: MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 16
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    DbExTransaction.dbExTransaction.getTrxStatusData!.payinExtraId,
+                                    style: MyStyle.tx18RWhite.copyWith(
+                                        fontSize: 16
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  const Icon(
+                                    Icons.copy,
+                                    size: 20,
+                                    color: MyColor.whiteColor,
+                                  ),
+
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
 
 
                         //  validity time

@@ -126,7 +126,7 @@ class AccountProvider with ChangeNotifier{
       await ApiHandler.post(data,url).then((responseData){
 
         var value = json.decode(responseData.body);
-        // print(value);
+        // print("login response ---> $value");
 
         if(responseData.statusCode == 200 && value["status"] == true)
         {
@@ -152,8 +152,7 @@ class AccountProvider with ChangeNotifier{
 
   bool isdeleted = true;
   var deleteData;
-  deleteAccount(data,url) async
-  {
+  deleteAccount(data,url) async {
     isLoading = true;
     notifyListeners();
 

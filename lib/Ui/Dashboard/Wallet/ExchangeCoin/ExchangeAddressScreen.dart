@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
@@ -7,7 +9,6 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'ExchangeTransactionStatus.dart';
 
@@ -39,6 +40,8 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
       "amount": widget.sendAmount.trim(),
       "address": addressController.text.trim()
     };
+
+    // print(json.encode(data));
 
     await exchangeProvider.createExchange(
         "/v1/transactions/fixed-rate/${Utils.apiKey}",

@@ -9,13 +9,17 @@ import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Walletv2_provider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Provider/InternetProvider.dart';
+import 'package:jost_pay_wallet/Ui/Authentication/LoginScreen.dart';
+import 'package:jost_pay_wallet/Ui/Authentication/LoginWithPasscode.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyScreen.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/BuySellPage.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Settings/SettingScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Settings/WalletConnect/walletv2_models/ethereum/wc_ethereum_sign_message.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Settings/WalletConnect/widgets/eip155_data_1.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Support/SupportScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WalletScreen.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Withdraw/WithdrawDetails.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -52,8 +56,8 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
   List body = [
     const WalletScreen(),
-    const BuyScreen(),
-    const SellScreen(),
+    const BuySellPage(),
+    const WithdrawDetails(),
     const SupportScreen(),
     const SettingScreen()
   ];
@@ -127,16 +131,55 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
-      // print("object ---> resumed state");
-      if (Utils.wcUrlVal.isNotEmpty) {
-        getAccount();
-        if (Utils.wcUrlVal
-            .split('?')
-            .last
-            .substring(0, 9) != "requestId") {
-          signClient!.pair(Utils.wcUrlVal);
+      Utils.pageType = "NewPage";
+
+      getAccount();
+
+      if(Utils.wcUrlVal == "" && Utils.pageType == "NewPage" && Utils.pageType1 != "walletConnect") {
+        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        var passwordType = sharedPreferences.getBool('passwordType')?? false;
+
+        if(passwordType){
+          // ignore: use_build_context_synchronously
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const LoginWithPassCode()
+              ),
+                (route) => false,
+          );
+        }else {
+          // ignore: use_build_context_synchronously
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const LoginScreen()
+            ),
+                (route) => false,
+          );
+        }
+
+      }else{
+        if(Platform.isAndroid){
+          if (Utils.wcUrlVal != "") {
+            if (Utils.wcUrlVal.split('?').last.substring(0, 9) != "requestId") {
+              signClient!.pair(Utils.wcUrlVal);
+            }
+            Utils.wcUrlVal = "";
+          }
+        }
+        else{
+          if(Utils.wcUrlVal != ""){
+
+
+            var decodedUriIos = Uri.decodeFull(Utils.wcUrlVal.split("uri=").last);
+
+            if(decodedUriIos.split('?').last.substring(0, 9) != "requestId"){
+              signClient!.pair(decodedUriIos.toString());
+            }
+          }
           Utils.wcUrlVal = "";
         }
       }
@@ -795,7 +838,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                       color: dashProvider.currentIndex == 1 ? MyColor.greenColor : MyColor.textGreyColor,
                     ),
                     Text(
-                      "Buy",
+                      "Buy/Sell",
                       style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 13,
                         color: dashProvider.currentIndex == 1 ? MyColor.greenColor : MyColor.textGreyColor,
@@ -822,7 +865,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                           color: dashProvider.currentIndex == 2 ? MyColor.greenColor : MyColor.textGreyColor,
                     ),
                     Text(
-                      "Sell",
+                      "Withdraw",
                       style: MyStyle.tx18RWhite.copyWith(
                           fontSize: 13,
                           color: dashProvider.currentIndex == 2 ? MyColor.greenColor : MyColor.textGreyColor,

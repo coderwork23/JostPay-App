@@ -34,7 +34,9 @@ class _WalletConnectScreenState extends State<WalletConnectScreen> with WidgetsB
   void initState() {
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
     super.initState();
-    
+    Utils.pageType1 = "walletConnect";
+
+
     _initializing = true;
     WidgetsBinding.instance.addObserver(this);
     selectedAccount();
@@ -66,6 +68,9 @@ class _WalletConnectScreenState extends State<WalletConnectScreen> with WidgetsB
 
   @override
   void dispose() {
+    setState(() {
+      Utils.pageType1 = "";
+    });
     super.dispose();
   }
 

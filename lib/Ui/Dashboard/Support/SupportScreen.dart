@@ -27,7 +27,7 @@ class _SupportScreenState extends State<SupportScreen> {
           children: [
             InAppWebView(
               initialUrlRequest:URLRequest(
-                  url: Uri.parse("https://tawk.to/chat/653b61bcf2439e1631e8f3f8/1hdnvbihh")
+                  url: Uri.parse("https://tawk.to/chat/56f3c326d19f288b7cc160b5/1h503baso")
               ),
               initialOptions: InAppWebViewGroupOptions(
                 crossPlatform: InAppWebViewOptions(

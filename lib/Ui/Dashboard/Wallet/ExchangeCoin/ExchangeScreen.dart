@@ -69,12 +69,15 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
     });
 
 
-    await exchangeProvider.getMinMax(
-    "v1/exchange-range/fixed-rate/${exchangeProvider.sendCoin.ticker.toLowerCase()}_"
-        "${exchangeProvider.receiveCoin.ticker.toLowerCase()}",
-    {"api_key":Utils.apiKey}, context);
+    if(sendCoinController.text.isNotEmpty) {
+      await exchangeProvider.getMinMax(
+          "v1/exchange-range/fixed-rate/${exchangeProvider.sendCoin.ticker
+              .toLowerCase()}_"
+              "${exchangeProvider.receiveCoin.ticker.toLowerCase()}",
+          {"api_key": Utils.apiKey}, context);
 
-    estimateExchangeAmount(context);
+      estimateExchangeAmount(context);
+    }
   }
 
   @override
@@ -155,6 +158,7 @@ class _ExchangeScreenState extends State<ExchangeScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
 

@@ -940,7 +940,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             if(newPassCodeKey.currentState!.validate()){
                               changePasswordApi(true,context);
                             }else{
-                              Helper.dialogCall.showToast(context, "Please filed all details first");
+                              Helper.dialogCall.showToast(context, "Minimum 6 digit code");
                             }
                           }else{
                             if(passwordType){
@@ -948,11 +948,11 @@ class _SecurityScreenState extends State<SecurityScreen> {
                                 if (oldCodeError.isNotEmpty && newCodeError.isNotEmpty && reNewCodeError.isNotEmpty) {
                                   changePasswordApi(true,context);
                                 } else {
-                                  Helper.dialogCall.showToast(context, "Please filed all details first");
+                                  Helper.dialogCall.showToast(context, "Minimum 6 digit code");
                                 }
                               }
                               else{
-                              Helper.dialogCall.showToast(context, "Please filed all details first");
+                              Helper.dialogCall.showToast(context, "Minimum 6 digit code");
                             }
                             }else{
                               if(passwordFormKey.currentState!.validate()){

@@ -43,8 +43,15 @@ class _ExChangeTokenListState extends State<ExChangeTokenList> {
   var selectedAccountId ="";
 
   getAcID() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    if(exchangeProvider.tempExTokenList.isNotEmpty){
+      setState(() {
+        exchangeProvider.searchExToList.clear();
+        exchangeProvider.searchExToList.addAll(
+            exchangeProvider.tempExTokenList
+        );
+      });
+    }
+
   }
 
 

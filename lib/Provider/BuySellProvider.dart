@@ -7,6 +7,7 @@ import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
 import 'package:jost_pay_wallet/Models/BuySellHistoryModel.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyPaymentInstructions.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellStatusPage.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WithdrawSendPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,8 +73,9 @@ class BuySellProvider with ChangeNotifier{
 
         var value = json.decode(responseData.body);
 
+        // print("Login value ${value}");
         if (responseData.statusCode == 200 && value['error'] == null) {
-
+          loginModel = null;
           List<RatesInfo> ratesInfoList = [];
           value['rates_info'].keys.forEach((key){
             // print(value['rates_info'][key]);
@@ -354,6 +356,7 @@ class BuySellProvider with ChangeNotifier{
     await ApiHandler.getInstantApi(params).then((responseData) async {
       try {
         var value = json.decode(responseData.body);
+        //print("validateSellOrder----> $value");
 
         if (responseData.statusCode == 200 && value["info"] != null) {
           sellValidOrder = false;
@@ -401,16 +404,16 @@ class BuySellProvider with ChangeNotifier{
             Helper.dialogCall.showToast(context, value['error']);
           }
 
-          /*if(value['error'] == "Supply valid a phone if you're not signing in."){
-            Helper.dialogCall.showToast(context, value['error']);
-          }*/
+          if(value['error'] == "Supply the amount"){
+            Helper.dialogCall.showToast(context, "Insufficient balance");
+          }
 
           sellValidOrder = false;
           notifyListeners();
         }
       }catch(e){
         sellValidOrder = false;
-        // print("----> $e");
+        //print("----> $e");
         Helper.dialogCall.showToast(context, "Something is wrong.Please letter");
 
         notifyListeners();
@@ -423,27 +426,27 @@ class BuySellProvider with ChangeNotifier{
   bool sellOderLoading = false;
   bool sellSuccess = false;
   var sellResponce;
-  sellOrder(params,accountId,BuildContext context,send,Map<String,dynamic> sendData,name) async {
+  sellOrder(params,accountId,BuildContext context,send,Map<String,dynamic> sendData,coinName) async {
     sellOderLoading = true;
     sellSuccess = false;
     notifyListeners();
     await ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
 
+      //print("object id ---> $value");
       if (responseData.statusCode == 200 && value['error'] == null) {
-        // print("object id ---> $accountId");
         await DbSellHistory.dbSellHistory.getSellHistory(accountId);
         sellResponce = value;
         var trxIndex = DbSellHistory.dbSellHistory.sellHistoryList.indexWhere((element) => element.invoice == "${value['invoice']}");
 
         if(trxIndex == -1) {
           await DbSellHistory.dbSellHistory.createSellHistory(
-              SellHistoryModel.fromJson(value,accountId,name)
+              SellHistoryModel.fromJson(value,accountId,coinName)
           );
         }
         else{
           await DbSellHistory.dbSellHistory.updateSellHistory(
-              SellHistoryModel.fromJson(value,accountId,name),
+              SellHistoryModel.fromJson(value,accountId,coinName),
               value["invoice"],
               accountId
           );
@@ -451,6 +454,7 @@ class BuySellProvider with ChangeNotifier{
 
 
         if(send == "send") {
+          // ignore: use_build_context_synchronously
           Navigator.pop(context,"refresh");
 
           // ignore: use_build_context_synchronously
@@ -458,23 +462,37 @@ class BuySellProvider with ChangeNotifier{
               context,
               MaterialPageRoute(
                 builder: (context) => WithdrawSendPage(
-                  selectTokenUSD:sendData['selectTokenUSD'],
+                  selectTokenUSD:"${sendData['selectTokenUSD']}",
                   explorerUrl:sendData['explorerUrl'],
-                  tokenUpDown:sendData['tokenUpDown'],
-                  sendTokenId:sendData['sendTokenId'],
-                  selectTokenMarketId:sendData['selectTokenMarketId'],
+                  tokenUpDown:"${sendData['tokenUpDown']}",
+                  sendTokenId:"${sendData['sendTokenId']}",
+                  selectTokenMarketId:"${sendData['selectTokenMarketId']}",
                   sendTokenAddress:sendData['sendTokenAddress'],
                   sendTokenBalance:sendData['sendTokenBalance'],
                   sendTokenDecimals:int.parse("${sendData['sendTokenDecimals']}"),
                   sendTokenImage:sendData['sendTokenImage'],
                   sendTokenName:sendData['sendTokenName'],
-                  sendTokenNetworkId:sendData['sendTokenNetworkId'],
+                  sendTokenNetworkId:"${sendData['sendTokenNetworkId']}",
                   sendTokenSymbol:sendData['sendTokenSymbol'],
-                  sendTokenUsd:sendData['sendTokenUsd'],
+                  sendTokenUsd:"${sendData['sendTokenUsd']}",
                   sellInvoice: value["invoice"],
                   sellResponce:sellResponce,
                   params: params,
 
+                ),
+              )
+          );
+        }else{
+          // ignore: use_build_context_synchronously
+          Navigator.pop(context,"refresh");
+
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SellStatusPage(
+                  invoiceNo: sellResponce['invoice'],
+                  tokenName: coinName,
                 ),
               )
           );

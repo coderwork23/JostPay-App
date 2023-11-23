@@ -149,6 +149,40 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
       sendTokenQuantity.text = widget.sellResponce['payin_amount'].toString().split(" ").first;
     });
 
+    if(isTxfees == 0){
+
+      if(sendTokenId == ""
+          || sendTokenQuantity.text.isEmpty
+          || double.parse(sendTokenQuantity.text) == 0.0
+          || toController.text.isEmpty
+          || double.parse(sendTokenQuantity.text) == 0
+          || double.parse(sendTokenQuantity.text) < 0.00
+          || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
+      ){
+
+      }else{
+        FocusScope.of(context).unfocus();
+        confirmBottomSheet(context);
+      }
+
+    }else{
+      if(sendTokenId == ""
+          || sendTokenQuantity.text.isEmpty
+          || double.parse(sendTokenQuantity.text) == 0.0
+          || double.parse(sendTokenQuantity.text) == 0
+          || double.parse(sendTokenQuantity.text) < 0.00
+          || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
+          || toController.text.isEmpty
+      ){
+
+        // print("object");
+      }else{
+        FocusScope.of(context).unfocus();
+        getNetworkFees();
+      }
+
+    }
+
   }
 
   late TransectionProvider transectionProvider;
@@ -250,6 +284,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
   confirmBottomSheet(BuildContext context) {
 
     showModalBottomSheet(
+        isDismissible: true,
         isScrollControlled:true,
         backgroundColor: MyColor.backgroundColor,
         context: context,
@@ -811,127 +846,6 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
     // print(networkList[0].isEVM);
     return Scaffold(
-
-      bottomNavigationBar:isLoading == true
-          ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
-              )
-          )
-      )
-          :
-      isTxfees == 0
-          ?
-      InkWell(
-        onTap: () {
-          if(sendTokenId == ""
-              || sendTokenQuantity.text.isEmpty
-              || double.parse(sendTokenQuantity.text) == 0.0
-              || toController.text.isEmpty
-              || double.parse(sendTokenQuantity.text) == 0
-              || double.parse(sendTokenQuantity.text) < 0.00
-              || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-          ){
-
-          }else{
-            FocusScope.of(context).unfocus();
-            confirmBottomSheet(context);
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: MyStyle.buttonDecoration.copyWith(
-              color: sendTokenId == ""
-                  || sendTokenQuantity.text.isEmpty
-                  || double.parse(sendTokenQuantity.text) == 0.0
-                  || toController.text.isEmpty
-                  || double.parse(sendTokenQuantity.text) == 0
-                  || double.parse(sendTokenQuantity.text) < 0.00
-                  || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                  ?
-              MyColor.boarderColor
-                  :
-              MyColor.greenColor
-          ),
-          child:  Text(
-            "Next",
-            style: MyStyle.tx18BWhite.copyWith(
-                color: sendTokenId == ""
-                    || sendTokenQuantity.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0.0
-                    || toController.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0
-                    || double.parse(sendTokenQuantity.text) < 0.00
-                    || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                    ?
-                MyColor.mainWhiteColor.withOpacity(0.4)
-                    :
-                MyColor.mainWhiteColor
-            ),
-          ),
-        ),
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(sendTokenId == ""
-              || sendTokenQuantity.text.isEmpty
-              || double.parse(sendTokenQuantity.text) == 0.0
-              || double.parse(sendTokenQuantity.text) == 0
-              || double.parse(sendTokenQuantity.text) < 0.00
-              || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-              || toController.text.isEmpty
-          ){
-
-            // print("object");
-          }else{
-            FocusScope.of(context).unfocus();
-            getNetworkFees();
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: MyStyle.buttonDecoration.copyWith(
-              color: sendTokenId == ""
-                  || sendTokenQuantity.text.isEmpty
-                  || double.parse(sendTokenQuantity.text) == 0.0
-                  || toController.text.isEmpty
-                  || double.parse(sendTokenQuantity.text) == 0
-                  || double.parse(sendTokenQuantity.text) < 0.00
-                  || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                  ?
-              MyColor.boarderColor
-                  :
-              MyColor.greenColor
-          ),
-          child:  Text(
-            "Next",
-            style: MyStyle.tx18BWhite.copyWith(
-                color: sendTokenId == ""
-                    || sendTokenQuantity.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0.0
-                    || toController.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0
-                    || double.parse(sendTokenQuantity.text) < 0.00
-                    || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                    ?
-                MyColor.mainWhiteColor.withOpacity(0.4)
-                    :
-                MyColor.mainWhiteColor
-            ),
-          ),
-        ),
-      ),
-
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -949,7 +863,18 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
         ),
       ),
 
-      body: SingleChildScrollView(
+      body: isLoading == true
+          ?
+      const SizedBox(
+          height:52,
+          child: Center(
+              child: CircularProgressIndicator(
+                color: MyColor.greenColor,
+              )
+          )
+      )
+          :
+      SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -971,6 +896,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
 
             TextFormField(
+              readOnly: true,
               controller: toController,
               cursorColor: MyColor.greenColor,
               style: MyStyle.tx18RWhite,
@@ -1047,6 +973,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
             // Amount
             TextFormField(
+              readOnly: true,
               keyboardType: TextInputType.number,
               controller: sendTokenQuantity,
               inputFormatters: <TextInputFormatter>[

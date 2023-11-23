@@ -11,6 +11,8 @@ class ExTransactionModel {
   double expectedReceiveAmount;
   DateTime createdAt;
   String isPartner;
+  String payinExtraId;
+  String payinExtraIdName;
 
   ExTransactionModel({
     required this.status,
@@ -25,6 +27,8 @@ class ExTransactionModel {
     required this.expectedReceiveAmount,
     required this.createdAt,
     required this.isPartner,
+    required this.payinExtraId,
+    required this.payinExtraIdName,
   });
 
   factory ExTransactionModel.fromJson(Map<String, dynamic> json,) => ExTransactionModel(
@@ -40,6 +44,8 @@ class ExTransactionModel {
     expectedReceiveAmount: json["expectedReceiveAmount"]?.toDouble(),
     createdAt: DateTime.parse(json["createdAt"]),
     isPartner: json["isPartner"].toString(),
+    payinExtraId: json["payinExtraId"]??"",
+    payinExtraIdName: json["payinExtraIdName"]??"",
   );
 
   Map<String, dynamic> toJson() => {
@@ -55,5 +61,7 @@ class ExTransactionModel {
     "expectedReceiveAmount": expectedReceiveAmount,
     "createdAt": createdAt.toIso8601String(),
     "isPartner": isPartner.toString(),
+    "payinExtraIdName": payinExtraIdName,
+    "payinExtraId": payinExtraId,
   };
 }
