@@ -356,7 +356,7 @@ class BuySellProvider with ChangeNotifier{
     await ApiHandler.getInstantApi(params).then((responseData) async {
       try {
         var value = json.decode(responseData.body);
-        //print("validateSellOrder----> $value");
+        // print("validateSellOrder----> $value");
 
         if (responseData.statusCode == 200 && value["info"] != null) {
           sellValidOrder = false;
@@ -404,16 +404,12 @@ class BuySellProvider with ChangeNotifier{
             Helper.dialogCall.showToast(context, value['error']);
           }
 
-          if(value['error'] == "Supply the amount"){
-            Helper.dialogCall.showToast(context, "Insufficient balance");
-          }
-
           sellValidOrder = false;
           notifyListeners();
         }
       }catch(e){
         sellValidOrder = false;
-        //print("----> $e");
+        // print("----> $e");
         Helper.dialogCall.showToast(context, "Something is wrong.Please letter");
 
         notifyListeners();

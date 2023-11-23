@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
@@ -42,7 +44,9 @@ class _SellScreenState extends State<SellScreen> {
     SharedPreferences sharedPre = await SharedPreferences.getInstance();
     selectedAccountId = sharedPre.getString('accountId') ?? "";
     var email = sharedPre.getString("email")??"";
-
+    setState(() {
+      emailController.text = email;
+    });
     await DbNetwork.dbNetwork.getNetwork();
 
     var params = {
@@ -59,7 +63,7 @@ class _SellScreenState extends State<SellScreen> {
       "auth":"p1~\$*)Ze(@"
     };
 
-    //print("object ${jsonEncode(params)}");
+    // print("object ${jsonEncode(params)}");
 
     await buySellProvider.validateSellOrder(params,selectedAccountId,context,"");
 
@@ -103,6 +107,8 @@ class _SellScreenState extends State<SellScreen> {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
     dashboardProvider = Provider.of<DashboardProvider>(context,listen: false);
     buySellProvider.accessToken = "";
+    buySellProvider.sellBankList = [];
+    buySellProvider.sellRateList = [];
     super.initState();
     Future.delayed(Duration.zero,(){
       sellValidateOrder(context);
