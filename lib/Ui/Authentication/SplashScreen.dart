@@ -38,6 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if(Platform.isAndroid){
       final  deviceInfo = await deviceInfoPlugin.androidInfo;
       deviceId = deviceInfo.id;
+      // print("deviceId $deviceId");
     }else{
 
      final deviceInfo = await deviceInfoPlugin.iosInfo;

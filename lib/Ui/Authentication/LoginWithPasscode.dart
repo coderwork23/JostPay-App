@@ -160,14 +160,19 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
   }
 
   autologin() async {
-    Helper.dialogCall.showAlertDialog(context);
-    setState((){
-      isLoading = true;
-    });
+
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     deviceId = sharedPreferences.getString('deviceId')!;
     String? password = sharedPreferences.getString('passcode');
+    setState(() {
+      passwordController.text = password!;
+    });
+
+    Helper.dialogCall.showAlertDialog(context);
+    setState((){
+      isLoading = true;
+    });
 
     // print(password);
     var data = {

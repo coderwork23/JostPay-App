@@ -90,7 +90,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
     });
 
     await exchangeProvider.transactionStatus(
-        "/v1/transactions/${DbExTransaction.dbExTransaction.getTrxStatusData!.id}/${Utils.apiKey}",
+        "/v1/transactions/${widget.statusId}/${Utils.apiKey}",
         selectedAccountId
     );
 

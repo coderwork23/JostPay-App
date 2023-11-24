@@ -267,9 +267,9 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       "network_id": sendTokenNetworkId,
       "privateKey": selectedAccountPrivateAddress,
       "from": selectedAccountAddress,
-      "to": selectedAccountAddress,
+      "to": sendTokenNetworkId == "9" ? "TF2JHvbiHbLyUyP3GyfnEzvRCD3P66u6VZ" : selectedAccountAddress,
       "token_id": sendTokenId,
-      "value": type == "max" ? sendTokenBalance : priceController.text,
+      "value": type == "max" ? (double.parse(sendTokenBalance) * 0.98) : priceController.text,
       "gasPrice": "",
       "gas":"",
       "nonce": 0,
@@ -279,7 +279,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       "decimals":sendTokenDecimals
     };
 
-    // print(json.encode(data));
+    print(json.encode(data));
 
     // ignore: use_build_context_synchronously
     await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);
