@@ -65,6 +65,9 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
           sendTokenSymbol = "BNBBEP20";
         }
       }
+
+      emailController.text = email;
+
     });
 
     await DbNetwork.dbNetwork.getNetwork();
@@ -73,8 +76,8 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
     var params = {
       "action":"validate_sell_order",
       "email":emailController.text.isEmpty ? "a@gmail.com" : emailController.text.trim(),
-      // "token":"",
-      "token":buySellProvider.loginModel== null ? "" : buySellProvider.loginModel!.accessToken,
+      "token":"",
+      // "token":buySellProvider.loginModel== null ? "" : buySellProvider.loginModel!.accessToken,
       "item_code":sendTokenSymbol,
       "amount":usdAmount.toString(),
       "bank":sellBank ?? "",
@@ -93,10 +96,6 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
         sendTokenSymbol
     );
 
-
-    setState(() {
-      emailController.text = email;
-    });
 
     // print(buySellProvider.getSellValidation);
 
@@ -181,7 +180,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
     dashboardProvider = Provider.of<DashboardProvider>(context,listen: false);
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
     buySellProvider.accessToken = "";
-
+    buySellProvider.sellValidOrder = false;
 
 
     Future.delayed(const Duration(milliseconds: 500),(){
@@ -227,7 +226,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
 
     if(tokenBalance > 0){
       setState((){
-        priceController = TextEditingController(text: "$tokenBalance");
+        priceController = TextEditingController(text: ApiHandler.calculateLength3("$tokenBalance"));
         web3Loading = false;
       });
 
@@ -471,7 +470,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                           if(value.isNotEmpty) {
                             usdAmount = double.parse(value) * double.parse(sendTokenUsd);
                             if (usdAmount < buySellProvider.minSellAmount) {
-                              usdError = "Amount more then ${buySellProvider.minSellAmount}";
+                              usdError = "Min. ${buySellProvider.minSellAmount}";
                             } else {
                               usdError = "";
                             }
@@ -509,7 +508,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                                             usdAmount = double.parse(sendTokenBalance) * double.parse(sendTokenUsd);
 
                                             if(usdAmount < buySellProvider.minSellAmount){
-                                              usdError = "Amount more then ${buySellProvider.minSellAmount}";
+                                              usdError = "Min. ${buySellProvider.minSellAmount}";
                                             }else{
                                               usdError = "";
                                             }
@@ -723,11 +722,12 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                           || sellBank == null || emailError.isNotEmpty
                           || usdAmount < buySellProvider.minSellAmount
                           || phoneNoController.text.isEmpty
+                          || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)
                           || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                           ?
                       InkWell(
                         onTap: () {
-                          if(usdAmount < buySellProvider.minSellAmount){
+                          if(usdAmount < buySellProvider.minSellAmount || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)){
                             Helper.dialogCall.showToast(context, "Insufficient balance");
                           }else{
                             Helper.dialogCall.showToast(context, "Please provider all details");
@@ -742,7 +742,8 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                            priceController.text.isEmpty || sellBank == null
                               ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
                               || usdAmount < buySellProvider.minSellAmount
-                              || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
+                               || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)
+                               || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                               ?
                           MyStyle.invalidDecoration
                               :
@@ -754,6 +755,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                                   color:   priceController.text.isEmpty || sellBank == null
                                       || phoneNoController.text.isEmpty
                                       || usdAmount < buySellProvider.minSellAmount
+                                      || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)
                                       || acNameController.text.isEmpty || bankNoController.text.isEmpty
                                       || emailController.text.isEmpty
                                       ?

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/DashboardScreen.dart';
@@ -175,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
       "password":"$password",
     };
 
-    //print(json.encode(data));
+    print(json.encode(data));
     await accountProvider.loginAccount(data,'/deviceLogin');
     if(accountProvider.isSuccess == true){
 
@@ -216,6 +215,10 @@ class _LoginScreenState extends State<LoginScreen> {
       await tokenProvider.getAccountToken(data, '/getAccountTokens', DBAccountProvider.dbAccountProvider.newAccountList[i].id,);
 
     }
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString("loginTime", "${DateTime.now().add(const Duration(minutes: 1))}");
+
 
 
     if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){

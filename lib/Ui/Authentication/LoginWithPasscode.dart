@@ -217,6 +217,9 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
 
     }
 
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString("loginTime", "${DateTime.now().add(const Duration(minutes: 1))}");
+
     if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){
       Navigator.pop(context);
       // print("object gooing in if");
@@ -411,12 +414,14 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+        child: SizedBox(
+          height: height,
+          width: width,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
             children: [
               const SizedBox(height: 15),
@@ -437,14 +442,11 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
                     color: MyColor.grey01Color
                 ),
               ),
-              SizedBox(height: height*0.09),
 
 
-              const SizedBox(height: 22),
 
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
-                height: 40,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: pin.PinCodeTextField(
@@ -489,38 +491,45 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
                 ),
               ),
 
-              const Spacer(),
 
-              CustomKeyBoard(
-                maxLength: 6,
-                pinTheme: PinTheme(
-                    keysColor: MyColor.mainWhiteColor
+              SizedBox(
+                height: height * 0.4,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CustomKeyBoard(
+                      maxLength: 6,
+                      pinTheme: PinTheme(
+                          keysColor: MyColor.mainWhiteColor
+                      ),
+                      onChanged: (p0) {
+                        setState(() {
+                          passwordController.text = p0;
+                        });
+                      },
+                      onCompleted: (p0) {
+                        loginAccount();
+                      },
+                      specialKey: Visibility(
+                        visible: fingerOn,
+                        child: Image.asset(
+                          "assets/images/fingerprint.png",
+                          height: 45,
+                          width: 60,
+                          fit: BoxFit.contain,
+                          color: MyColor.whiteColor,
+                        ),
+                      ),
+                      specialKeyOnTap: () {
+                        if(fingerOn) {
+                          _authenticate();
+                        }
+                      },
+                    ),
+                  ],
                 ),
-                onChanged: (p0) {
-                  setState(() {
-                    passwordController.text = p0;
-                  });
-                },
-                onCompleted: (p0) {
-                  loginAccount();
-                },
-                specialKey: Visibility(
-                  visible: fingerOn,
-                  child: Image.asset(
-                    "assets/images/fingerprint.png",
-                    height: 45,
-                    width: 60,
-                    fit: BoxFit.contain,
-                    color: MyColor.whiteColor,
-                  ),
-                ),
-                specialKeyOnTap: () {
-                  if(fingerOn) {
-                    _authenticate();
-                  }
-                },
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               InkWell(
                 onTap: (){
@@ -531,8 +540,8 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
                     style: MyStyle.tx18RWhite
                 ),
               ),
+              const SizedBox(height: 15),
 
-              const SizedBox(height: 50)
             ],
           ),
         ),

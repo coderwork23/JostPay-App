@@ -54,6 +54,7 @@ class DbExTransaction{
   }
 
   updateExTransaction(ExTransactionModel newToken,tokenId,) async{
+    // print("ExTransactionModel ${newToken.toJson()}");
     final db= await database;
 
     final res = await db!.update('ExTransaction', newToken.toJson(), where: "id = ?",whereArgs: [tokenId]);
@@ -65,7 +66,7 @@ class DbExTransaction{
   getExTransaction() async {
 
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM ExTransaction");
+    final res = await db!.rawQuery("SELECT * FROM ExTransaction ORDER BY createdAt DESC");
 
     //print(res);
     List<ExTransactionModel> list = res.map((c) {

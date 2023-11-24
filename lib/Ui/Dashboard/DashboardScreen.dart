@@ -105,7 +105,10 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   late InternetProvider _internetProvider;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  checkForWc2Url(){
+  late SharedPreferences sharedPreferences;
+  checkForWc2Url() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
     Future.delayed(const Duration(milliseconds: 1100), () {
       getAccount();
       _initialize();
@@ -122,65 +125,84 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     selectedAccountId =  sharedPreferences.getString('accountId')??"";
     await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,"2");
     await DbNetwork.dbNetwork.getNetwork();
-    await DbNetwork.dbNetwork.getNetwork();
 
-    setState((){
-      selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
-      selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
-    });
+    if(mounted) {
+      setState(() {
+        selectedAccountAddress =
+            DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+        selectedAccountPrivateAddress =
+            DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
+      });
+    }
   }
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+
     if (state == AppLifecycleState.resumed) {
-      Utils.pageType = "NewPage";
+      var date = sharedPreferences.getString("loginTime") ?? "";
+      DateTime expireDate = DateTime.parse(date);
 
-      getAccount();
+      if(date != "") {
+        if (!expireDate.isAfter(DateTime.now())) {
+          Utils.pageType = "NewPage";
 
-      if(Utils.wcUrlVal == "" && Utils.pageType == "NewPage" && Utils.pageType1 != "walletConnect") {
-        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-        var passwordType = sharedPreferences.getBool('passwordType')?? false;
+          getAccount();
 
-        if(passwordType){
-          // ignore: use_build_context_synchronously
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const LoginWithPassCode()
-              ),
-                (route) => false,
-          );
-        }else {
-          // ignore: use_build_context_synchronously
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const LoginScreen()
-            ),
-                (route) => false,
-          );
-        }
+          if (Utils.wcUrlVal == "" && Utils.pageType == "NewPage" &&
+              Utils.pageType1 != "walletConnect") {
+            SharedPreferences sharedPreferences = await SharedPreferences
+                .getInstance();
+            var passwordType = sharedPreferences.getBool('passwordType') ??
+                false;
 
-      }else{
-        if(Platform.isAndroid){
-          if (Utils.wcUrlVal != "") {
-            if (Utils.wcUrlVal.split('?').last.substring(0, 9) != "requestId") {
-              signClient!.pair(Utils.wcUrlVal);
+            if (passwordType) {
+              // ignore: use_build_context_synchronously
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const LoginWithPassCode()
+                ),
+                    (route) => false,
+              );
+            } else {
+              // ignore: use_build_context_synchronously
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const LoginScreen()
+                ),
+                    (route) => false,
+              );
             }
-            Utils.wcUrlVal = "";
-          }
-        }
-        else{
-          if(Utils.wcUrlVal != ""){
+          } else {
+            if (Platform.isAndroid) {
+              if (Utils.wcUrlVal != "") {
+                if (Utils.wcUrlVal
+                    .split('?')
+                    .last
+                    .substring(0, 9) != "requestId") {
+                  signClient!.pair(Utils.wcUrlVal);
+                }
+                Utils.wcUrlVal = "";
+              }
+            }
+            else {
+              if (Utils.wcUrlVal != "") {
+                var decodedUriIos = Uri.decodeFull(Utils.wcUrlVal
+                    .split("uri=")
+                    .last);
 
-
-            var decodedUriIos = Uri.decodeFull(Utils.wcUrlVal.split("uri=").last);
-
-            if(decodedUriIos.split('?').last.substring(0, 9) != "requestId"){
-              signClient!.pair(decodedUriIos.toString());
+                if (decodedUriIos
+                    .split('?')
+                    .last
+                    .substring(0, 9) != "requestId") {
+                  signClient!.pair(decodedUriIos.toString());
+                }
+              }
+              Utils.wcUrlVal = "";
             }
           }
-          Utils.wcUrlVal = "";
         }
       }
     }

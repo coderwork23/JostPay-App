@@ -78,7 +78,9 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
     tokenProvider = Provider.of<TokenProvider>(context, listen: false);
 
     super.initState();
-    getTxsStatus();
+    Future.delayed(Duration.zero,(){
+      getTrxStatusApi();
+    });
   }
 
 
@@ -102,7 +104,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
       _showRefresh = true;
     });
 
-    getTxsStatus();
+    getTrxStatusApi();
   }
 
   @override
@@ -131,7 +133,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
         ),
       ),
 
-      body: isLoading
+      body: isLoading && !_showRefresh
           ?
       Helper.dialogCall.showLoader()
           :
@@ -362,6 +364,32 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                           ),
                         ),
 
+                        //  validity time
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                            Expanded(
+                              child: Text(
+                                "Coin Address: ",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                DbExTransaction.dbExTransaction.getTrxStatusData!.payoutAddress,
+                                textAlign: TextAlign.end  ,
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ),
+
+                          ],
+                        ),
+                        const SizedBox(height: 10),
 
                         //  validity time
                         Row(
@@ -391,139 +419,146 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                   ),
                   const SizedBox(height: 15),
 
-                  // warning message
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      "Note: Please send "
-                          "${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData?.expectedSendAmount}")} "
-                          "(${sendNetwork!.ticker}) with in valid time period.If you send after that result is permanent loss of your token.",
-                      textAlign: TextAlign.center,
-                      style:MyStyle.tx18RWhite.copyWith(
-                          fontSize: 12,
-                          color: MyColor.dotBoarderColor
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  // qr and token name
-                  Container(
-                    width: width * 0.8,
-                    padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 22),
-                    decoration: BoxDecoration(
-                        color: MyColor.darkGrey01Color,
-                        borderRadius: BorderRadius.circular(12)
-                    ),
+                  Visibility(
+                    visible: DbExTransaction.dbExTransaction.getTrxStatusData!.status == "waiting",
                     child: Column(
                       children: [
-
-                        Container(
-                          height: height * 0.26,
-                          width: width * 0.55,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              color: MyColor.mainWhiteColor,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: QrImageView(
-                              data: DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress,
-                              eyeStyle: const QrEyeStyle(
-                                  color: MyColor.backgroundColor,
-                                  eyeShape: QrEyeShape.square
-                              ),
-                              dataModuleStyle: const QrDataModuleStyle(
-                                  color: MyColor.backgroundColor,
-                                  dataModuleShape:  QrDataModuleShape.square
-                              ),
-                              //embeddedImage: AssetImage('assets/icons/logo.png'),
-                              version: QrVersions.auto,
+                        // warning message
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            "Note: Please send "
+                                "${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData?.expectedSendAmount}")} "
+                                "(${sendNetwork!.ticker}) with in valid time period.If you send after that result is permanent loss of your token.",
+                            textAlign: TextAlign.center,
+                            style:MyStyle.tx18RWhite.copyWith(
+                                fontSize: 12,
+                                color: MyColor.dotBoarderColor
                             ),
                           ),
                         ),
                         const SizedBox(height: 15),
 
-                        Text(
-                          DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress,
-                          textAlign: TextAlign.center,
-                          style: MyStyle.tx18RWhite.copyWith(
-                              fontSize: 16
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  // copy and shared
-                  SizedBox(
-                    width: width * 0.8,
-                    child: Row(
-                      children: [
-
-                        InkWell(
-                          onTap: () {
-                            Share.share(DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress);
-                          },
-                          child: Container(
-                            height: 55,
-                            width: 60,
-                            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 16),
-                            decoration: BoxDecoration(
+                        // qr and token name
+                        Container(
+                          width: width * 0.8,
+                          padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 22),
+                          decoration: BoxDecoration(
                               color: MyColor.darkGrey01Color,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Image.asset(
-                              "assets/images/dashboard/share.png",
-                              fit: BoxFit.contain,
-                              color: MyColor.whiteColor,
-                            ),
+                              borderRadius: BorderRadius.circular(12)
+                          ),
+                          child: Column(
+                            children: [
+
+                              Container(
+                                height: height * 0.26,
+                                width: width * 0.55,
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                    color: MyColor.mainWhiteColor,
+                                    borderRadius: BorderRadius.circular(10)
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: QrImageView(
+                                    data: DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress,
+                                    eyeStyle: const QrEyeStyle(
+                                        color: MyColor.backgroundColor,
+                                        eyeShape: QrEyeShape.square
+                                    ),
+                                    dataModuleStyle: const QrDataModuleStyle(
+                                        color: MyColor.backgroundColor,
+                                        dataModuleShape:  QrDataModuleShape.square
+                                    ),
+                                    //embeddedImage: AssetImage('assets/icons/logo.png'),
+                                    version: QrVersions.auto,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+
+                              Text(
+                                DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress,
+                                textAlign: TextAlign.center,
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 15),
+                        const SizedBox(height: 15),
 
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              FlutterClipboard.copy(DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress).then((value) {
-                                Helper.dialogCall.showToast(context, "Copied");
-                              });
-                            },
-                            child: Container(
-                              height: 55,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              decoration: BoxDecoration(
-                                color: MyColor.darkGrey01Color,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child:  Row(
-                                children: [
-                                  const Icon(
-                                    Icons.copy,
+                        // copy and shared
+                        SizedBox(
+                          width: width * 0.8,
+                          child: Row(
+                            children: [
+
+                              InkWell(
+                                onTap: () {
+                                  Share.share(DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress);
+                                },
+                                child: Container(
+                                  height: 55,
+                                  width: 60,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: MyColor.darkGrey01Color,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Image.asset(
+                                    "assets/images/dashboard/share.png",
+                                    fit: BoxFit.contain,
                                     color: MyColor.whiteColor,
                                   ),
-                                  const SizedBox(width: 15),
+                                ),
+                              ),
+                              const SizedBox(width: 15),
 
-                                  Text(
-                                    "Copy address",
-                                    textAlign: TextAlign.center,
-                                    style: MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 16
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    FlutterClipboard.copy(DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress).then((value) {
+                                      Helper.dialogCall.showToast(context, "Copied");
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 55,
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    decoration: BoxDecoration(
+                                      color: MyColor.darkGrey01Color,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child:  Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.copy,
+                                          color: MyColor.whiteColor,
+                                        ),
+                                        const SizedBox(width: 15),
+
+                                        Text(
+                                          "Copy address",
+                                          textAlign: TextAlign.center,
+                                          style: MyStyle.tx18RWhite.copyWith(
+                                              fontSize: 16
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+
+                            ],
                           ),
                         ),
-
+                        const SizedBox(height: 15),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 15),
+                  )
 
                 ],
               ),

@@ -145,7 +145,7 @@ class ExchangeProvider with ChangeNotifier{
   changeReceiveToken(ExchangeTokenModel newToken,context) async {
     if(sendCoin.ticker != newToken.ticker ) {
       ExchangeTokenModel copiedToken = ExchangeTokenModel.fromJson(newToken.toJson());
-      sendCoin = copiedToken;
+      receiveCoin = copiedToken;
 
       Navigator.pop(context);
 

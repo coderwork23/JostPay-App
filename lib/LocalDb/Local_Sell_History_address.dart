@@ -91,7 +91,7 @@ class DbSellHistory{
 
     // print("accountId ------> $accountId");
     final db = await database;
-    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId'");
+    final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId' ORDER BY time DESC");
 
     // print("object--- $res");
     List<SellHistoryModel> list = res.map((c) {
