@@ -279,7 +279,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       "decimals":sendTokenDecimals
     };
 
-    print(json.encode(data));
+    // print(json.encode(data));
 
     // ignore: use_build_context_synchronously
     await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);

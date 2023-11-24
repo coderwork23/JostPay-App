@@ -235,7 +235,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
       "decimals":selectedCoin!.decimals
     };
 
-    print(json.encode(data));
+    // print(json.encode(data));
 
     // ignore: use_build_context_synchronously
     await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);

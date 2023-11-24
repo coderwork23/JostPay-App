@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
       "password":"$password",
     };
 
-    print(json.encode(data));
+    // print(json.encode(data));
     await accountProvider.loginAccount(data,'/deviceLogin');
     if(accountProvider.isSuccess == true){
 
