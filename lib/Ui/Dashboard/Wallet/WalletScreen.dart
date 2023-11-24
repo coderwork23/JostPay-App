@@ -277,14 +277,13 @@ class _WalletScreenState extends State<WalletScreen> {
         // print(json.encode(response));
         if(mounted) {
           if (response["status"] == true) {
-            if ("${response["data"]["balance"]}" != "0") {
               if (response["data"]["balance"] != "null") {
                 await DBTokenProvider.dbTokenProvider.updateTokenBalance(
                   '${response["data"]["balance"]}',
                   '${response["data"]["id"]}',
                 );
               }
-            }
+
           }
 
           // print("Socket ac id $selectedAccountId");

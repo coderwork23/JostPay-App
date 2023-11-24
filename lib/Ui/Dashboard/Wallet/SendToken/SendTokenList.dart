@@ -138,7 +138,8 @@ class _SendTokenListState extends State<SendTokenList> {
                   setState(() {
                     selectTokenUSD = double.parse(list.balance) * list.price;
                   });
-                 await Navigator.push(
+                  Navigator.pop(context);
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => SendCoinScreen(
@@ -157,11 +158,11 @@ class _SendTokenListState extends State<SendTokenList> {
                         explorerUrl:list.explorer_url,
                         tokenUpDown: "${list.percentChange24H}",
                         selectTokenUSD: "$selectTokenUSD",
+                        pageName: "sendList",
                       ),
                     )
                   );
 
-                 Navigator.pop(context);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 15),

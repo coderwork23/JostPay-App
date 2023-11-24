@@ -3,12 +3,14 @@ import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
+import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellHistory.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellValidationPage.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
@@ -40,12 +42,17 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
   TextEditingController phoneNoController = TextEditingController();
   TextEditingController emailController = TextEditingController();
 
-  String? selectedBank,selectedAccountId = "",networkFees,sellBank;
+  String? selectedBank,selectedAccountId = "",
+      networkFees,sellBank,
+      selectedAccountAddress = "",
+      selectedAccountPrivateAddress = "";
   bool isLoading = true;
   var usdError = "",emailError = "";
 
   late BuySellProvider buySellProvider;
   late DashboardProvider dashboardProvider;
+  late TransectionProvider transectionProvider;
+
   AccountTokenList? selectedCoin;
 
   sellValidateOrder(context)async{
@@ -179,6 +186,8 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
     super.initState();
     dashboardProvider = Provider.of<DashboardProvider>(context,listen: false);
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
+    transectionProvider = Provider.of<TransectionProvider>(context, listen: false);
+
     buySellProvider.accessToken = "";
     buySellProvider.sellValidOrder = false;
 
@@ -190,63 +199,108 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
 
   }
 
-
-  Web3Client? _web3client;
   List<NetworkList> networkList = [];
-  bool web3Loading = false;
-  getWeb3NetWorkFees()async{
 
-    setState((){
-      web3Loading = true;
+  String sendGasPrice = "";
+  String sendGas = "";
+  String? sendNonce = "";
+  String sendTransactionFee = "0";
+  bool feesLoading = false;
+
+  getNetworkFees(String type) async {
+    setState(() {
+      feesLoading = true;
+    });
+    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId, selectedCoin!.networkId);
+
+    setState(() {
+      selectedAccountAddress = DbAccountAddress.dbAccountAddress.selectAccountPublicAddress;
+      selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
     });
 
-    _web3client = Web3Client(
-      networkList[0].url,
-      http.Client(),
-    );
+    var data = {
 
+      "network_id": selectedCoin!.networkId,
+      "privateKey": selectedAccountPrivateAddress,
+      "from": selectedAccountAddress,
+      "to": selectedAccountAddress,
+      "token_id": selectedCoin!.token_id,
+      "value": type == "max" ? sendTokenBalance : priceController.text,
+      "gasPrice": "",
+      "gas":"",
+      "nonce": 0,
+      "isCustomeRPC": false,
+      "network_url":networkList.first.url,
+      "tokenAddress":selectedCoin!.address,
+      "decimals":selectedCoin!.decimals
+    };
 
-    var estimateGas = await _web3client!.estimateGas(
-        // sender:EthereumAddress.fromHex(widget.accAddress),
-        // to: EthereumAddress.fromHex(widget.accAddress),
-        value: EtherAmount.inWei(BigInt.from(double.parse(sendTokenBalance)))
-    );
-    var getGasPrice = await _web3client!.getGasPrice();
+    print(json.encode(data));
 
-    //print("estimateGas === > ${"${estimateGas}"}");
-    //print("getGasPrice === > ${"${getGasPrice.getInWei}"}");
+    // ignore: use_build_context_synchronously
+    await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);
 
-    var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}")) / BigInt.from(10).pow(18);
-    //print(value);
+    if( transectionProvider.isSuccess == true){
 
-    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value * 2);
+      var body = transectionProvider.networkData;
 
-    //print(tokenBalance);
+      setState(() {
+        isLoading = false;
 
+        sendGasPrice = "${body['gasPrice']}";
+        sendGas = "${body['gas']}";
+        sendNonce = "${body['nonce']}";
+        sendTransactionFee = "${body['transactionFee']}";
 
-    if(tokenBalance > 0){
-      setState((){
-        priceController = TextEditingController(text: ApiHandler.calculateLength3("$tokenBalance"));
-        web3Loading = false;
+        if(type == "max") {
+          if (selectedCoin!.address != "") {
+            priceController.text = ApiHandler.calculateLength3(
+                "${double.parse(sendTokenBalance)}");
+            // totalUsd = tokenUsd + double.parse(sendTransactionFee) * tokenPrice;
+            usdAmount =
+                double.parse(priceController.text) * double.parse(sendTokenUsd);
+          } else {
+            priceController.text = ApiHandler.calculateLength3(
+                "${double.parse(sendTokenBalance) -
+                    double.parse(sendTransactionFee)}");
+            // totalUsd = tokenUsd + networkUsd;
+            usdAmount =
+                double.parse(priceController.text) * double.parse(sendTokenUsd);
+          }
+
+          if (usdAmount < buySellProvider.minSellAmount) {
+            usdError = "Min. ${buySellProvider.minSellAmount}";
+          } else {
+            usdError = "";
+          }
+        }
+
+        List<AccountTokenList> tokenBalance = DBTokenProvider.dbTokenProvider.tokenList.where((element) {
+          return element.networkId == selectedCoin!.networkId && element.type == "";
+        }).toList();
+
+        if(double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)){
+          Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
+        }
+
+        setState(() {});
+
+        if(type == ""){
+          sellValidateOrder(context);
+        }
+
       });
 
-      usdAmount = double.parse(sendTokenBalance) * double.parse(sendTokenUsd);
-
-      if(usdAmount < buySellProvider.minSellAmount){
-        usdError = "Amount more then ${buySellProvider.minSellAmount}";
-      }else{
-        // print("object");
-        usdError = "";
-      }
-    }else{
       // ignore: use_build_context_synchronously
-      Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
     }
+    else{
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Insufficient Balance");
 
-    setState((){
-      web3Loading = false;
+    }
+    setState(() {
+      feesLoading = false;
     });
-
   }
 
 
@@ -254,6 +308,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
   Widget build(BuildContext context) {
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
     dashboardProvider = Provider.of<DashboardProvider>(context,listen: true);
+    transectionProvider = Provider.of<TransectionProvider>(context, listen: true);
 
     return Scaffold(
 
@@ -487,33 +542,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                                   children: [
                                     InkWell(
                                       onTap: () {
-                                        if(networkList[0].isEVM == 1 && selectedCoin!.address == ""){
-                                          getWeb3NetWorkFees();
-                                        }
-                                        else {
-                                          if(selectedCoin!.address == "") {
-                                            double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
-                                            setState(() {
-                                              priceController = TextEditingController(
-                                                  text: tokenBalance.toStringAsFixed(6)
-                                              );
-                                            });
-                                          }else{
-                                            setState(() {
-                                              priceController.text = sendTokenBalance;
-                                            });
-                                          }
-
-                                          setState(() {
-                                            usdAmount = double.parse(sendTokenBalance) * double.parse(sendTokenUsd);
-
-                                            if(usdAmount < buySellProvider.minSellAmount){
-                                              usdError = "Min. ${buySellProvider.minSellAmount}";
-                                            }else{
-                                              usdError = "";
-                                            }
-                                          });
-                                        }
+                                        getNetworkFees("max");
                                       },
                                       child: Text(
                                         "Max",
@@ -557,7 +586,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Text(
-                          "Amount in USD ~ ${usdAmount.toStringAsFixed(3)}",
+                          "Amount in USD ~ ${usdAmount.toStringAsFixed(2)}",
                           style: MyStyle.tx18BWhite.copyWith(
                               fontSize: 13,
                               color: MyColor.grey01Color
@@ -714,20 +743,20 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
 
                       // Proceed button
 
-                      buySellProvider.sellValidOrder
+                      buySellProvider.sellValidOrder || feesLoading
                           ?
                       Helper.dialogCall.showLoader()
                           :
-                       priceController.text.isEmpty
+                      priceController.text.isEmpty
                           || sellBank == null || emailError.isNotEmpty
                           || usdAmount < buySellProvider.minSellAmount
                           || phoneNoController.text.isEmpty
-                          || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)
+                          || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
                           || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                           ?
                       InkWell(
                         onTap: () {
-                          if(usdAmount < buySellProvider.minSellAmount || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)){
+                          if(usdAmount < buySellProvider.minSellAmount || double.parse(sendTokenBalance) <=  double.parse(priceController.text)){
                             Helper.dialogCall.showToast(context, "Insufficient balance");
                           }else{
                             Helper.dialogCall.showToast(context, "Please provider all details");
@@ -739,11 +768,11 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                           height: 45,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration:
-                           priceController.text.isEmpty || sellBank == null
+                          priceController.text.isEmpty || sellBank == null
                               ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
                               || usdAmount < buySellProvider.minSellAmount
-                               || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)
-                               || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
+                              || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
+                              || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                               ?
                           MyStyle.invalidDecoration
                               :
@@ -755,7 +784,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                                   color:   priceController.text.isEmpty || sellBank == null
                                       || phoneNoController.text.isEmpty
                                       || usdAmount < buySellProvider.minSellAmount
-                                      || double.parse(selectedCoin!.balance) <=  double.parse(priceController.text)
+                                      || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
                                       || acNameController.text.isEmpty || bankNoController.text.isEmpty
                                       || emailController.text.isEmpty
                                       ?
@@ -769,7 +798,9 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                           :
                       InkWell(
                         onTap: () {
-                          sellValidateOrder(context);
+                          getNetworkFees("");
+
+                          // sellValidateOrder(context);
                         },
                         child: Container(
                           alignment: Alignment.center,

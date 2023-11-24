@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Transection_Provider.dart';
@@ -35,6 +37,7 @@ class SendCoinScreen extends StatefulWidget {
       explorerUrl = "",
       sendTokenUsd = "",
       accAddress = "",
+      pageName= "",
       sendTokenType = "";
   int sendTokenDecimals;
 
@@ -55,6 +58,7 @@ class SendCoinScreen extends StatefulWidget {
     required this.sendTokenType,
     required this.sendTokenUsd,
     required this.sendTokenDecimals,
+    required this.pageName,
     required this.accAddress,
   });
 
@@ -196,7 +200,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       "decimals":sendTokenDecimals
     };
 
-    print(json.encode(data));
+    // print(json.encode(data));
 
     await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);
 
@@ -220,9 +224,21 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         tokenUsd = double.parse(sendTokenQuantity.text) * double.parse(widget.sendTokenUsd);
         networkUsd = double.parse(sendTransactionFee) * double.parse(widget.sendTokenUsd);
 
+        var tokenPrice = DBTokenProvider.dbTokenProvider.tokenList.where((element) {
+          return "${element.networkId}" == sendTokenNetworkId && element.type == "";
+        }).first.price;
 
-        totalSendValue = double.parse(sendTokenQuantity.text) + double.parse(sendTransactionFee);
-        totalUsd = tokenUsd + networkUsd;
+        if(sendTokenAddress != "") {
+          totalSendValue = double.parse(sendTokenQuantity.text);
+          totalUsd = tokenUsd + double.parse(sendTransactionFee) * tokenPrice;
+
+        }else{
+          totalSendValue = double.parse(sendTokenQuantity.text) + double.parse(sendTransactionFee);
+          totalUsd = tokenUsd + networkUsd;
+        }
+
+
+
 
       });
 
@@ -252,6 +268,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
           borderRadius: BorderRadius.circular(20.0),
         ),
         builder: (context) {
+          List<AccountTokenList> tokenBalance = DBTokenProvider.dbTokenProvider.tokenList.where((element) {
+            return "${element.networkId}" == sendTokenNetworkId && element.type == "";
+          }).toList();
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 // print("object $sendTransactionFee");
@@ -409,7 +428,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
                                     Expanded(
                                       child: Text(
-                                        '${sendTokenQuantity.text}   $sendTokenSymbol',
+                                        '${sendTokenQuantity.text} $sendTokenSymbol',
                                         style: MyStyle.tx18BWhite.copyWith(
                                             fontSize: 14
                                         ),
@@ -466,8 +485,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                   ),
 
                                   Text(
-                                      isTxfees == 0 ? "0" :
-                                    "${ApiHandler.calculateLength3(sendTransactionFee)} $networkSymbol",
+                                    "${ApiHandler.calculateLength3(sendTransactionFee)} $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(2)})",
                                       style: MyStyle.tx18RWhite.copyWith(
                                           fontSize: 14
                                       )
@@ -491,24 +509,15 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                   ),
 
                                   Text(
-                                      widget.sendTokenNetworkId == "9" ? double.parse("${double.parse(sendTokenQuantity.text)}").toStringAsFixed(4) : '${totalSendValue.toStringAsFixed(4)} ${networkSymbol}',
+                                      '\$ ${totalUsd.toStringAsFixed(2)} USD',
                                       style: MyStyle.tx18RWhite.copyWith(
                                           fontSize: 14
                                       )
                                   ),
-
                                 ],
                               ),
 
-                              Align(
-                                alignment: Alignment.bottomRight,
-                                child: Text(
-                                    widget.sendTokenNetworkId == "9" ? "${double.parse("${double.parse(sendTokenQuantity.text)*double.parse(widget.sendTokenUsd)}").toStringAsFixed(4)} USD" : '(${totalUsd.toStringAsFixed(2)} USD)',
-                                    style: MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 14
-                                    )
-                                ),
-                              ),
+
                             ],
                           ),
                         ),
@@ -575,24 +584,30 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
                       isLoading == true
                           ?
-                      const Center(
-                        child: CircularProgressIndicator(color: MyColor.greenColor),
-                      )
+                      Helper.dialogCall.showLoader()
                           :
-                      checkBox == false
+                      checkBox == false || (sendTokenAddress == "" && totalSendValue > double.parse(sendTokenBalance))
+                          || double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)
                           ?
                       Center(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width-180,
-                          height: 45,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: MyColor.greenColor.withOpacity(0.23)
-                          ),
-                          child: const Center(
-                            child: Text(
-                               "Confirm send",
-                                style: MyStyle.tx18RWhite
+                        child: InkWell(
+                          onTap: () {
+                            if((sendTokenAddress == "" && totalSendValue > double.parse(sendTokenBalance)) || double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)){
+                              Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
+                            }
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width-180,
+                            height: 45,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                color: MyColor.greenColor.withOpacity(0.23)
+                            ),
+                            child: const Center(
+                              child: Text(
+                                 "Confirm send",
+                                  style: MyStyle.tx18RWhite
+                              ),
                             ),
                           ),
                         ),
@@ -600,6 +615,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                           :
                       InkWell(
                         onTap: () async {
+                          setState((){
+                            isLoading = true;
+                          });
                           await confirmSend();
                           setState((){});
                         },
@@ -640,11 +658,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
   confirmSend() async {
 
-    setState((){
-      isLoading = true;
-    });
-
-
     var data = {
       "network_id": sendTokenNetworkId,
       "privateKey": selectedAccountPrivateAddress,
@@ -676,16 +689,29 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       setState((){
         isLoading = false;
 
-        sendGasPrice = "";
-        sendGas = "";
-        sendNonce = "";
-        sendTransactionFee = "";
 
-        // fromAddressController.clear();
-        toController.clear();
-        sendTokenQuantity.clear();
 
-        Navigator.pop(context);
+        if(widget.pageName =="coinDetails"){
+          Navigator.pop(context);
+          sendGasPrice = "";
+          sendGas = "";
+          sendNonce = "";
+          sendTransactionFee = "0.0";
+
+          // fromAddressController.clear();
+          toController.clear();
+          sendTokenQuantity.text = "0.0";
+          Navigator.pop(context);
+
+        }else {
+          Navigator.pop(context);
+          sendGasPrice = "";
+          sendGas = "";
+          sendNonce = "";
+          sendTransactionFee = "0.0";
+          toController.clear();
+          sendTokenQuantity.text = "0.0";
+        }
         showSendProcessingPage(context);
 
       });
@@ -736,9 +762,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     var getGasPrice = await _web3client!.getGasPrice();
 
 
-    var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}")) / BigInt.from(10).pow(18);
+    var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}") + 100) / BigInt.from(10).pow(18);
 
-    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value * 2);
+    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value);
 
     if(tokenBalance > 0){
       setState((){
@@ -830,7 +856,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
           }else{
             FocusScope.of(context).unfocus();
-            confirmBottomSheet(context);
+            getNetworkFees();
           }
         },
         child: Container(

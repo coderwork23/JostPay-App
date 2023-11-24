@@ -137,7 +137,7 @@ class _BuyScreenState extends State<BuyScreen> {
                   ),
                   onChanged: (value){
                     if(double.parse(value) < selectedCoin!.minBuyAmount){
-                      usdError = "Amount more then ${selectedCoin!.minBuyAmount}";
+                      usdError = "Min. ${selectedCoin!.minBuyAmount}";
                     }else{
                       usdError = "";
                     }

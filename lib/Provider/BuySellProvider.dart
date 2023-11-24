@@ -345,7 +345,7 @@ class BuySellProvider with ChangeNotifier{
   dynamic getSellValidation;
   List<dynamic> sellRateList = [];
   List<String> sellBankList = [];
-  double minSellAmount =0;
+  int minSellAmount =0;
 
   validateSellOrder(params,accountId,context,symbol)async{
     sellValidOrder = true;
@@ -385,7 +385,7 @@ class BuySellProvider with ChangeNotifier{
                 return "${element["symbol"]}" == "$symbol";
               }).toList();
 
-              minSellAmount = double.parse(myNewList[0]["minSellAmount"].toString());
+              minSellAmount = int.parse(myNewList[0]["minSellAmount"].toString());
               notifyListeners();
 
             }
