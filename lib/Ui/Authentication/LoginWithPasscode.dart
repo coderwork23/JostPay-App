@@ -226,24 +226,26 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     }
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString("loginTime", "${DateTime.now().add(const Duration(minutes: 5))}");
+    sharedPreferences.setString("loginTime", "${DateTime.now().add(const Duration(minutes: 1))}");
 
-    if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){
+    if(Utils.pageType == "NewPage" && Utils.wcUrlVal == "" ){
       Navigator.pop(context);
-      print("object gooing in if");
-    }
-    else {
-      // print("object gooing in else");
-      dashProvider.changeBottomIndex(0);
-      // ignore: use_build_context_synchronously
-      await Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const DashboardScreen()
-        ),
-            (route) => true,
-      );
-
+    }else{
+      if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){
+        Navigator.pop(context);
+      }
+      else {
+        // print("object gooing in else");
+        dashProvider.changeBottomIndex(0);
+        // ignore: use_build_context_synchronously
+        await Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const DashboardScreen()
+          ),
+              (route) => true,
+        );
+      }
     }
 
     setState((){

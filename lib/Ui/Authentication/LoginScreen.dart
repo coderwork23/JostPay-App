@@ -224,21 +224,22 @@ class _LoginScreenState extends State<LoginScreen> {
     if(Utils.pageType == "NewPage" && Utils.wcUrlVal == "" ){
       Navigator.pop(context);
     }else{
-    if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){
-      Navigator.pop(context);
+      if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){
+        Navigator.pop(context);
+      }
+      else {
+        // print("object gooing in else");
+        dashProvider.changeBottomIndex(0);
+        // ignore: use_build_context_synchronously
+        await Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const DashboardScreen()
+          ),
+              (route) => true,
+        );
+      }
     }
-    else {
-      // print("object gooing in else");
-      dashProvider.changeBottomIndex(0);
-      // ignore: use_build_context_synchronously
-      await Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const DashboardScreen()
-        ),
-            (route) => true,
-      );
-    }}
     // ignore: use_build_context_synchronously
 
 
