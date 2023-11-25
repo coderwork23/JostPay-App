@@ -1092,7 +1092,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
             // usd amount
             Text(
-              "= ${(double.parse(sendTokenQuantity.text.isNotEmpty ?sendTokenQuantity.text : "0") * double.parse(sendTokenUsd)).toStringAsFixed(2)}",
+              "= ${(double.parse(sendTokenQuantity.text.isNotEmpty ?sendTokenQuantity.text : "0") * double.parse(sendTokenUsd)).toStringAsFixed(2)} \$",
               style:MyStyle.tx18RWhite.copyWith(
                   fontSize: 14,
                   color: MyColor.grey01Color
