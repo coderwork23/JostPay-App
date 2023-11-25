@@ -59,23 +59,6 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
 
     SharedPreferences sharedPre = await SharedPreferences.getInstance();
     selectedAccountId = sharedPre.getString('accountId') ?? "";
-    var email = sharedPre.getString("email")??"";
-    setState(() {
-      if(selectedCoin!.symbol != "" && buySellProvider.sellRateList.isNotEmpty){
-        if (selectedCoin!.type == "TRC20") {
-          sendTokenSymbol = "USDTTRC20";
-        }
-        else if (selectedCoin!.type == "BEP20") {
-          sendTokenSymbol = "USDTBEP20";
-        }
-        else if (selectedCoin!.symbol == "BNB") {
-          sendTokenSymbol = "BNBBEP20";
-        }
-      }
-
-      emailController.text = email;
-
-    });
 
     await DbNetwork.dbNetwork.getNetwork();
 
@@ -225,7 +208,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
       "from": selectedAccountAddress,
       "to": selectedCoin!.networkId == 9 ? "TF2JHvbiHbLyUyP3GyfnEzvRCD3P66u6VZ" : selectedAccountAddress,
       "token_id": selectedCoin!.token_id,
-      "value": type == "max" ? (double.parse(sendTokenBalance) * 0.98) : priceController.text,
+      "value": type == "max" ? (double.parse(sendTokenBalance) * 0.50) : priceController.text,
       "gasPrice": "",
       "gas":"",
       "nonce": 0,
@@ -253,21 +236,14 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
         sendTransactionFee = "${body['transactionFee']}";
 
         if(type == "max") {
+
           if (selectedCoin!.address != "") {
-            priceController.text = ApiHandler.calculateLength3(
-                "${double.parse(sendTokenBalance)}");
-            // totalUsd = tokenUsd + double.parse(sendTransactionFee) * tokenPrice;
-            usdAmount =
-                double.parse(priceController.text) * double.parse(sendTokenUsd);
+            priceController.text = "${double.parse(sendTokenBalance)}";
           } else {
-            priceController.text = ApiHandler.calculateLength3(
-                "${double.parse(sendTokenBalance) -
-                    double.parse(sendTransactionFee)}");
-            // totalUsd = tokenUsd + networkUsd;
-            usdAmount =
-                double.parse(priceController.text) * double.parse(sendTokenUsd);
+            priceController.text = "${double.parse(sendTokenBalance) - double.parse(sendTransactionFee)}";
           }
 
+          usdAmount = double.parse(priceController.text) * double.parse(sendTokenUsd);
           if (usdAmount < buySellProvider.minSellAmount) {
             usdError = "Min. ${buySellProvider.minSellAmount}";
           } else {
@@ -280,7 +256,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
         }).toList();
 
         if(double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)){
-          Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
+          Helper.dialogCall.showToast(context, "Insufficient balance to cover fees, reduce withdraw amount");
         }
 
         setState(() {});
@@ -295,7 +271,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
     }
     else{
       // ignore: use_build_context_synchronously
-      Helper.dialogCall.showToast(context, "Insufficient Balance");
+      Helper.dialogCall.showToast(context, "Insufficient balance to cover fees, reduce withdraw amount");
 
     }
     setState(() {
@@ -398,20 +374,11 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                             fontSize: 16
                         ),
                         items: DBTokenProvider.dbTokenProvider.tokenList.map((AccountTokenList category) {
-                         var type = "";
-                          if (category.type == "TRC20") {
-                            type = "USDTTRC20";
-                          }
-                          else if (category.type == "BEP20") {
-                            type = "USDTBEP20";
-                          }else{
-                            type = "";
-                          }
 
                           return DropdownMenuItem(
                               value: category,
                               child: Text(
-                                "${category.name} ${type == ""? "" : "($type)"}",
+                                "${category.name} ${category.type == ""? "" : "(${category.type})"}",
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),

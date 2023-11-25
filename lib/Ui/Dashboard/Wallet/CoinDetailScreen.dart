@@ -299,7 +299,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 ),
 
                 Text(
-                  tokenBalance == "0" ? "0 $tokenSymbol" : "${double.parse(ApiHandler.calculateLength(tokenBalance))} $tokenSymbol",
+                  tokenBalance == "0" ? "0 $tokenSymbol" : "${double.parse(ApiHandler.calculateLength3(tokenBalance))} $tokenSymbol",
                   style: MyStyle.tx22RWhite.copyWith(
                     fontSize: 14,
                   ),

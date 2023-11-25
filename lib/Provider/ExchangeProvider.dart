@@ -198,7 +198,7 @@ class ExchangeProvider with ChangeNotifier{
   double amount = 0;
 
   bool createExLoading = false,createExSuccess = false;
-  createExchange(url,body)async{
+  createExchange(url,body,context)async{
 
     createExSuccess = false;
     createExLoading = true;
@@ -207,7 +207,7 @@ class ExchangeProvider with ChangeNotifier{
     await ApiHandler.postExchange(url,body).then((responseData) async {
 
       var value = json.decode(responseData.body);
-      // print("object url ---> $url");
+      print("object url ---> $value");
       if(responseData.statusCode == 200) {
         payinAddress = value["payinAddress"];
         payoutAddress = value["payoutAddress"];
@@ -223,6 +223,7 @@ class ExchangeProvider with ChangeNotifier{
         notifyListeners();
       }
       else{
+        Helper.dialogCall.showToast(context, "${value['message']}");
         createExLoading = false;
         createExSuccess = false;
         notifyListeners();

@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
@@ -175,7 +174,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
   double totalUsd = 0.0;
   double totalSendValue = 0.0;
 
-  bool isGetQuote = false;
 
   getNetworkFees() async {
 
@@ -209,7 +207,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       var body = transectionProvider.networkData;
 
       setState(() {
-        isGetQuote = true;
         isLoading = false;
 
         sendGasPrice = "${body['gasPrice']}";
@@ -436,7 +433,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                     ),
 
                                     Text(
-                                      double.parse("${double.parse(sendTokenQuantity.text)*double.parse(sendTokenUsd)}").toStringAsFixed(2),
+                                      double.parse("${double.parse(sendTokenQuantity.text)*double.parse(sendTokenUsd)}").toStringAsFixed(3),
                                         style: MyStyle.tx18RWhite.copyWith(
                                             fontSize: 14
                                         )
@@ -473,22 +470,28 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                             children: [
 
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+
                                 children: [
 
-                                  Expanded(
-                                    child: Text(
-                                      "Network Fee",
-                                      style:MyStyle.tx18BWhite.copyWith(
-                                          fontSize: 14
-                                      )
-                                    ),
-                                  ),
-
                                   Text(
-                                    "${ApiHandler.calculateLength3(sendTransactionFee)} $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(2)})",
-                                      style: MyStyle.tx18RWhite.copyWith(
-                                          fontSize: 14
-                                      )
+                                    "Network Fee",
+                                    style:MyStyle.tx18BWhite.copyWith(
+                                        fontSize: 14
+                                    )
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Flexible(
+                                    child: Align(
+                                      alignment: Alignment.topRight,
+                                      child: Text(
+                                        "$sendTransactionFee $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(3)})",
+                                          textAlign: TextAlign.end,
+                                          style: MyStyle.tx18RWhite.copyWith(
+                                              fontSize: 14
+                                          )
+                                      ),
+                                    ),
                                   ),
 
                                 ],
@@ -509,7 +512,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                   ),
 
                                   Text(
-                                      '\$ ${totalUsd.toStringAsFixed(2)} USD',
+                                      '\$ ${totalUsd.toStringAsFixed(3)} USD',
                                       style: MyStyle.tx18RWhite.copyWith(
                                           fontSize: 14
                                       )
@@ -738,47 +741,72 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
   }
 
-  Web3Client? _web3client;
+
+  String networkFees = "0";
   getWeb3NetWorkFees()async{
 
     setState((){
       isLoading = true;
     });
 
-    _web3client = Web3Client(
-      networkList[0].url,
-      http.Client(),
-    );
+    var data = {
 
-    setState((){
-      isLoading = true;
-    });
+      "network_id": sendTokenNetworkId,
+      "privateKey": selectedAccountPrivateAddress,
+      "from": selectedAccountAddress,
+      "to": toController.text,
+      "token_id": sendTokenId,
+      "value": (double.parse(sendTokenBalance) * 0.50),
+      "gasPrice": "",
+      "gas":"",
+      "nonce": 0,
+      "isCustomeRPC": false,
+      "network_url":networkList.first.url,
+      "tokenAddress":sendTokenAddress,
+      "decimals":sendTokenDecimals
+    };
 
-    var estimateGas = await _web3client!.estimateGas(
-        sender:EthereumAddress.fromHex(fromAddressController.text),
-        to: EthereumAddress.fromHex(toController.text),
-        value: EtherAmount.inWei(BigInt.from(double.parse(sendTokenBalance)))
-    );
-    var getGasPrice = await _web3client!.getGasPrice();
+    // print(json.encode(data));
 
+    await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);
 
-    var value = BigInt.from(double.parse("$estimateGas") *  double.parse("${getGasPrice.getInWei}") + 100) / BigInt.from(10).pow(18);
+    if( transectionProvider.isSuccess == true){
 
-    double tokenBalance = double.parse(double.parse(sendTokenBalance).toStringAsFixed(4)) - (value);
+      var body = transectionProvider.networkData;
 
-    if(tokenBalance > 0){
+      setState(() {
+        isLoading = false;
+        networkFees = "${body['transactionFee']}";
+
+        print("networkFees ${double.parse(networkFees).toStringAsFixed(5)}");
+        print(networkFees);
+
+        if (sendTokenAddress != "") {
+          sendTokenQuantity.text = "${double.parse(sendTokenBalance)}";
+          // totalUsd = tokenUsd + double.parse(sendTransactionFee) * tokenPrice;
+
+        } else {
+          sendTokenQuantity.text = "${(double.parse(sendTokenBalance) - double.parse(networkFees))}";
+        }
+
+        setState(() {
+
+        });
+      });
+
+      // ignore: use_build_context_synchronously
+      // confirmBottomSheet(context);
+    }
+    else{
+
+      var data = DbNetwork.dbNetwork.networkList.where((element) => "${element.id}" == sendTokenNetworkId).toList();
+
+      // ignore: use_build_context_synchronously
+      Helper.dialogCall.showToast(context, "Insufficient ${data[0].symbol} balance please deposit some ${data[0].symbol}");
       setState((){
-        sendTokenQuantity = TextEditingController(text: tokenBalance.toStringAsFixed(5));
         isLoading = false;
       });
-    }else{
-      // ignore: use_build_context_synchronously
-      Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
     }
-
-    setState((){
-      isLoading = false;
-    });
 
   }
 
@@ -965,9 +993,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         title: Text(
           widget.sendTokenType != ""
               ?
-          "Sent ${widget.sendTokenSymbol}(${widget.sendTokenType})"
+          "Send ${widget.sendTokenSymbol}(${widget.sendTokenType})"
           :
-          "Sent ${widget.sendTokenSymbol}",
+          "Send ${widget.sendTokenSymbol}",
         ),
       ),
 
@@ -977,7 +1005,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-
 
            // to address
             Padding(
@@ -1056,16 +1083,47 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
             ),
             const SizedBox(height: 15),
 
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(
-                "Amount",
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 16
+
+
+            //Amount text or Available Balance
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    "Amount",
+                    style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: Text(
+
+                      sendTokenBalance == "0"
+                          ?
+                      "Available: 0.0 $sendTokenSymbol"
+                          :
+                      widget.sendTokenType != ""
+                          ?
+                      "Available: ${double.parse(sendTokenBalance)} $sendTokenSymbol (${widget.sendTokenType})"
+                          :
+                      "Available: ${double.parse(sendTokenBalance)} $sendTokenSymbol",
+                      style:MyStyle.tx18RWhite.copyWith(
+                          fontSize: 14,
+                          color: MyColor.grey01Color
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
+
 
             // Amount
             TextFormField(
@@ -1084,41 +1142,8 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                 contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
                 suffixIcon: InkWell(
                   onTap: () {
-                    if(networkList[0].isEVM == 1 && sendTokenAddress == ""){
-
-                      if(toController.text != "") {
-                        setState((){
-                          FocusScope.of(context).unfocus();
-                          // maxButtonCall = true;
-                        });
-                        // addressValidator();
-                        getWeb3NetWorkFees();
-                      }
-                      else{
-                        setState(() {
-                          isLoading = false;
-                        });
-                      }
-
-                    }
-                    else {
-
-                      // print(sendTokenAddress);
-                      if(sendTokenAddress == "") {
-                        double tokenBalance = (double.parse(sendTokenBalance) * 96) / 100;
-
-                        //print(tokenBalance.toStringAsFixed(3));
-                        setState(() {
-                          sendTokenQuantity = TextEditingController(
-                              text: tokenBalance.toStringAsFixed(6)
-                          );
-                        });
-                      }else{
-                        // print("object");
-                        setState(() {
-                          sendTokenQuantity.text = sendTokenBalance;
-                        });
-                      }
+                    if(toController.text.isNotEmpty){
+                      getWeb3NetWorkFees();
                     }
                   },
                   child: SizedBox(
@@ -1140,23 +1165,15 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
             const SizedBox(height: 8),
 
 
-            //Available Balance
+            // usd amount
             Text(
-
-                sendTokenBalance == "0"
-                    ?
-              "Available: 0.0 $sendTokenSymbol"
-                    :
-                widget.sendTokenType != ""
-                    ?
-                "Available: ${ApiHandler.calculateLength3("${double.parse(sendTokenBalance) }")} $sendTokenSymbol (${widget.sendTokenType})"
-                    :
-              "Available: ${ApiHandler.calculateLength3("${double.parse(sendTokenBalance) }")} $sendTokenSymbol",
+              "= ${(double.parse(sendTokenQuantity.text.isNotEmpty ?sendTokenQuantity.text : "0") * double.parse(sendTokenUsd)).toStringAsFixed(2)}",
               style:MyStyle.tx18RWhite.copyWith(
                   fontSize: 14,
                   color: MyColor.grey01Color
               ),
             ),
+
             // const SizedBox(height: 30),
           ],
         ),

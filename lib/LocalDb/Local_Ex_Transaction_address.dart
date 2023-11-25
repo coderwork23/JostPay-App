@@ -54,6 +54,8 @@ class DbExTransaction{
   }
 
   updateExTransaction(ExTransactionModel newToken,tokenId,) async{
+
+
     // print("ExTransactionModel ${newToken.toJson()}");
     final db= await database;
 

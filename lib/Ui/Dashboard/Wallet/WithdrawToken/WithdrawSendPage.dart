@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
@@ -162,7 +164,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
       }else{
         FocusScope.of(context).unfocus();
-        confirmBottomSheet(context);
+        getNetworkFees();
       }
 
     }else{
@@ -259,9 +261,21 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
         tokenUsd = double.parse(sendTokenQuantity.text) * double.parse(widget.sendTokenUsd);
         networkUsd = double.parse(sendTransactionFee) * double.parse(widget.sendTokenUsd);
 
+        var tokenPrice = DBTokenProvider.dbTokenProvider.tokenList.where((element) {
+          return "${element.networkId}" == sendTokenNetworkId && element.type == "";
+        }).first.price;
 
-        totalSendValue = double.parse(sendTokenQuantity.text) + double.parse(sendTransactionFee);
-        totalUsd = tokenUsd + networkUsd;
+        if(sendTokenAddress != "") {
+          totalSendValue = double.parse(sendTokenQuantity.text);
+          totalUsd = tokenUsd + double.parse(sendTransactionFee) * tokenPrice;
+
+        }else{
+          totalSendValue = double.parse(sendTokenQuantity.text) + double.parse(sendTransactionFee);
+          totalUsd = tokenUsd + networkUsd;
+        }
+
+
+
 
       });
 
@@ -273,7 +287,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
       var data = DbNetwork.dbNetwork.networkList.where((element) => "${element.id}" == sendTokenNetworkId).toList();
 
       // ignore: use_build_context_synchronously
-      Helper.dialogCall.showToast(context, "Insufficient ${data[0].symbol} balance please deposit some ${data[0].symbol}");
+      Helper.dialogCall.showToast(context, "Insufficient balance to cover fees, reduce withdraw amount");
       setState((){
         isLoading = false;
       });
@@ -284,7 +298,6 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
   confirmBottomSheet(BuildContext context) {
 
     showModalBottomSheet(
-        isDismissible: true,
         isScrollControlled:true,
         backgroundColor: MyColor.backgroundColor,
         context: context,
@@ -292,6 +305,9 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
           borderRadius: BorderRadius.circular(20.0),
         ),
         builder: (context) {
+          List<AccountTokenList> tokenBalance = DBTokenProvider.dbTokenProvider.tokenList.where((element) {
+            return "${element.networkId}" == sendTokenNetworkId && element.type == "";
+          }).toList();
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 // print("object $sendTransactionFee");
@@ -449,7 +465,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
                                     Expanded(
                                       child: Text(
-                                        '${sendTokenQuantity.text}   $sendTokenSymbol',
+                                        '${sendTokenQuantity.text} $sendTokenSymbol',
                                         style: MyStyle.tx18BWhite.copyWith(
                                             fontSize: 14
                                         ),
@@ -457,7 +473,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                                     ),
 
                                     Text(
-                                        double.parse("${double.parse(sendTokenQuantity.text)*double.parse(sendTokenUsd)}").toStringAsFixed(2),
+                                        double.parse("${double.parse(sendTokenQuantity.text)*double.parse(sendTokenUsd)}").toStringAsFixed(3),
                                         style: MyStyle.tx18RWhite.copyWith(
                                             fontSize: 14
                                         )
@@ -496,21 +512,24 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                               Row(
                                 children: [
 
-                                  Expanded(
-                                    child: Text(
-                                        "Network Fee",
-                                        style:MyStyle.tx18BWhite.copyWith(
-                                            fontSize: 14
-                                        )
-                                    ),
-                                  ),
-
                                   Text(
-                                      isTxfees == 0 ? "0" :
-                                      "${ApiHandler.calculateLength3(sendTransactionFee)} $networkSymbol",
-                                      style: MyStyle.tx18RWhite.copyWith(
+                                      "Network Fee",
+                                      style:MyStyle.tx18BWhite.copyWith(
                                           fontSize: 14
                                       )
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Flexible(
+                                    child: Align(
+                                      alignment: Alignment.topRight,
+                                      child: Text(
+                                          "$sendTransactionFee $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(3)})",
+                                          textAlign: TextAlign.end,
+                                          style: MyStyle.tx18RWhite.copyWith(
+                                              fontSize: 14
+                                          )
+                                      ),
+                                    ),
                                   ),
 
                                 ],
@@ -531,24 +550,15 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                                   ),
 
                                   Text(
-                                      widget.sendTokenNetworkId == "9" ? double.parse("${double.parse(sendTokenQuantity.text)}").toStringAsFixed(4) : '${totalSendValue.toStringAsFixed(4)} ${networkSymbol}',
+                                      '\$ ${totalUsd.toStringAsFixed(3)} USD',
                                       style: MyStyle.tx18RWhite.copyWith(
                                           fontSize: 14
                                       )
                                   ),
-
                                 ],
                               ),
 
-                              Align(
-                                alignment: Alignment.bottomRight,
-                                child: Text(
-                                    widget.sendTokenNetworkId == "9" ? "${double.parse("${double.parse(sendTokenQuantity.text)*double.parse(widget.sendTokenUsd)}").toStringAsFixed(4)} USD" : '(${totalUsd.toStringAsFixed(2)} USD)',
-                                    style: MyStyle.tx18RWhite.copyWith(
-                                        fontSize: 14
-                                    )
-                                ),
-                              ),
+
                             ],
                           ),
                         ),
@@ -615,24 +625,30 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
                       isLoading == true
                           ?
-                      const Center(
-                        child: CircularProgressIndicator(color: MyColor.greenColor),
-                      )
+                      Helper.dialogCall.showLoader()
                           :
-                      checkBox == false
+                      checkBox == false || (sendTokenAddress == "" && totalSendValue > double.parse(sendTokenBalance))
+                          || double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)
                           ?
                       Center(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width-180,
-                          height: 45,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: MyColor.greenColor.withOpacity(0.23)
-                          ),
-                          child: const Center(
-                            child: Text(
-                                "Confirm send",
-                                style: MyStyle.tx18RWhite
+                        child: InkWell(
+                          onTap: () {
+                            if((sendTokenAddress == "" && totalSendValue > double.parse(sendTokenBalance)) || double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)){
+                              Helper.dialogCall.showToast(context, "Insufficient balance to cover fees, reduce withdraw amount");
+                            }
+                          },
+                          child: Container(
+                            width: MediaQuery.of(context).size.width-180,
+                            height: 45,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                color: MyColor.greenColor.withOpacity(0.23)
+                            ),
+                            child: const Center(
+                              child: Text(
+                                  "Confirm send",
+                                  style: MyStyle.tx18RWhite
+                              ),
                             ),
                           ),
                         ),
@@ -640,6 +656,9 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                           :
                       InkWell(
                         onTap: () async {
+                          setState((){
+                            isLoading = true;
+                          });
                           await confirmSend();
                           setState((){});
                         },
@@ -859,7 +878,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
           ),
         ),
         title: Text(
-          "Sent ${widget.sendTokenSymbol}",
+          "Send ${widget.sendTokenSymbol}",
         ),
       ),
 
@@ -960,16 +979,41 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
             ),
             const SizedBox(height: 15),
 
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(
-                "Amount",
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 16
+            //Amount text or Available Balance
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    "Amount",
+                    style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 16
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 8),
+
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: Text(
+
+                      sendTokenBalance == "0"
+                          ?
+                      "Available: 0.0 $sendTokenSymbol"
+                          :
+                      "Available: ${double.parse(sendTokenBalance)} $sendTokenSymbol",
+                      style:MyStyle.tx18RWhite.copyWith(
+                          fontSize: 14,
+                          color: MyColor.grey01Color
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
+
 
             // Amount
             TextFormField(
@@ -1046,19 +1090,15 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
             ),
             const SizedBox(height: 8),
 
-
-            //Available Balance
+            // usd amount
             Text(
-              sendTokenBalance == "0"
-                  ?
-              "Available: 0.0 $sendTokenSymbol"
-                  :
-              "Available: ${ApiHandler.calculateLength3("${double.parse(sendTokenBalance) }")} $sendTokenSymbol",
+              "= ${(double.parse(sendTokenQuantity.text.isNotEmpty ?sendTokenQuantity.text : "0") * double.parse(sendTokenUsd)).toStringAsFixed(2)}",
               style:MyStyle.tx18RWhite.copyWith(
                   fontSize: 14,
                   color: MyColor.grey01Color
               ),
             ),
+
             // const SizedBox(height: 30),
           ],
         ),

@@ -87,20 +87,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
 
     SharedPreferences sharedPre = await SharedPreferences.getInstance();
     selectedAccountId = sharedPre.getString('accountId') ?? "";
-    var email = sharedPre.getString("email")??"";
-    setState(() {
-      if(widget.sendTokenSymbol != "" && buySellProvider.sellRateList.isNotEmpty){
-        if (widget.sendTonkenType == "TRC20") {
-          sendTokenSymbol = "USDTTRC20";
-        }
-        else if (widget.sendTonkenType == "BEP20") {
-          sendTokenSymbol = "USDTBEP20";
-        }
-        else if (widget.sendTokenSymbol == "BNB") {
-          sendTokenSymbol = "BNBBEP20";
-        }
-      }
-    });
+
 
     await DbNetwork.dbNetwork.getNetwork();
 
@@ -127,10 +114,6 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
         sendTokenSymbol
     );
 
-
-    setState(() {
-      emailController.text = email;
-    });
 
     // print(buySellProvider.getSellValidation);
 
@@ -234,6 +217,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
     super.initState();
     dashboardProvider = Provider.of<DashboardProvider>(context,listen: false);
     buySellProvider = Provider.of<BuySellProvider>(context,listen: false);
+    buySellProvider.sellValidOrder = true;
     transectionProvider = Provider.of<TransectionProvider>(context, listen: false);
     buySellProvider.accessToken = "";
 
@@ -262,6 +246,8 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
     });
 
+    print("sendTokenBalance  ${sendTokenBalance}");
+
     var data = {
 
       "network_id": sendTokenNetworkId,
@@ -269,7 +255,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       "from": selectedAccountAddress,
       "to": sendTokenNetworkId == "9" ? "TF2JHvbiHbLyUyP3GyfnEzvRCD3P66u6VZ" : selectedAccountAddress,
       "token_id": sendTokenId,
-      "value": type == "max" ? (double.parse(sendTokenBalance) * 0.98) : priceController.text,
+      "value": type == "max" ? ((double.parse(sendTokenBalance) * 0.50).toStringAsFixed(3)) : priceController.text,
       "gasPrice": "",
       "gas":"",
       "nonce": 0,
@@ -279,8 +265,8 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       "decimals":sendTokenDecimals
     };
 
-    // print(json.encode(data));
-
+    print(json.encode(data));
+    //
     // ignore: use_build_context_synchronously
     await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);
 
@@ -298,15 +284,12 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
 
         if(type == "max") {
           if (sendTokenAddress != "") {
-            priceController.text = ApiHandler.calculateLength3(
-                "${double.parse(sendTokenBalance)}");
+            priceController.text = "${double.parse(sendTokenBalance)}";
             // totalUsd = tokenUsd + double.parse(sendTransactionFee) * tokenPrice;
-            usdAmount =
-                double.parse(priceController.text) * double.parse(sendTokenUsd);
+            usdAmount = double.parse(priceController.text) * double.parse(sendTokenUsd);
           } else {
-            priceController.text = ApiHandler.calculateLength3(
-                "${double.parse(sendTokenBalance) -
-                    double.parse(sendTransactionFee)}");
+            priceController.text =
+                "${double.parse(sendTokenBalance) - double.parse(sendTransactionFee)}";
             // totalUsd = tokenUsd + networkUsd;
             usdAmount =
                 double.parse(priceController.text) * double.parse(sendTokenUsd);
@@ -324,7 +307,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
         }).toList();
 
         if(double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)){
-          Helper.dialogCall.showToast(context, "Insufficient ${networkList[0].symbol} balance please deposit some ${networkList[0].symbol}");
+          Helper.dialogCall.showToast(context, "Insufficient balance to cover fees, reduce withdraw amount");
         }
 
         setState(() {});
@@ -339,7 +322,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
     }
     else{
       // ignore: use_build_context_synchronously
-      Helper.dialogCall.showToast(context, "Insufficient Balance");
+      Helper.dialogCall.showToast(context, "Insufficient balance to cover fees, reduce withdraw amount");
 
     }
     setState(() {

@@ -1,16 +1,11 @@
-import 'dart:convert';
-
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:provider/provider.dart';
-
-import 'ExchangeTransactionStatus.dart';
 
 class ExchangeAddressScreen extends StatefulWidget {
   final String sendAmount;
@@ -45,46 +40,12 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
 
     await exchangeProvider.createExchange(
         "/v1/transactions/fixed-rate/${Utils.apiKey}",
-        data
+        data,context
     );
 
-
-    if (!exchangeProvider.createExLoading && exchangeProvider.createExSuccess) {
-      getTrxStatus();
-
-    } else {
-
-      // print("else print ---> ");
-      // ignore: use_build_context_synchronously
-      Helper.dialogCall.showToast(context, "Something is wrong please try again.");
-
-    }
   }
 
 
-  getTrxStatus()async{
-    await exchangeProvider.transactionStatus(
-        "/v1/transactions/${exchangeProvider.trxId}/${Utils.apiKey}",
-        selectedAccountId
-    );
-
-    if(exchangeProvider.getTrxStatus) {
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  ExchangeTransactionStatus(
-                    statusId: exchangeProvider.trxId,
-                  )
-          )
-      );
-
-    }else{
-      // ignore: use_build_context_synchronously
-      Helper.dialogCall.showToast(context, "Unable to get transaction please try again.");
-    }
-  }
 
   addressVerification(context) async {
     var params = {
@@ -146,7 +107,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
         ),
       )
           :
-      exchangeProvider.createExLoading || exchangeProvider.statusLoading
+      exchangeProvider.createExLoading
           ?
       SizedBox(
         height: 50,
@@ -157,8 +118,6 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
         onTap: () {
           if(exchangeProvider.isAddressVerify){
             createExchange();
-          } else if(exchangeProvider.createExSuccess && !exchangeProvider.getTrxStatus){
-            getTrxStatus();
           }
         },
         child: Container(
@@ -168,11 +127,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: addressController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
           child:Text(
-          exchangeProvider.createExSuccess && !exchangeProvider.getTrxStatus
-              ?
-          "Get Transaction status"
-              :
-          "Start Exchange",
+            "Start Exchange",
             style: MyStyle.tx18BWhite.copyWith(
               color:  addressController.text.isEmpty ? MyColor.mainWhiteColor.withOpacity(0.4) : MyColor.mainWhiteColor,
             ),
@@ -270,7 +225,7 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
                                 width: 80,
                                 child: Center(
                                   child: Text(
-                                    "Past",
+                                    "Paste",
                                     style: MyStyle.tx18RWhite.copyWith(
                                         fontSize: 16,
                                         color: MyColor.greenColor

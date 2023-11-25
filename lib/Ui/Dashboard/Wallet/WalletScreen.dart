@@ -800,11 +800,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                          ?
                                      "--"
                                          :
-                                     list.balance == "0"
-                                         ?
-                                     "${double.parse(list.balance).toStringAsFixed(2)} ${list.symbol}"
-                                         :
-                                     "${ApiHandler.calculateLength3(list.balance)} ${list.symbol}",
+                                     "${list.balance} ${list.symbol}",
 
                                      style: MyStyle.tx22RWhite.copyWith(
                                        fontSize: 15,

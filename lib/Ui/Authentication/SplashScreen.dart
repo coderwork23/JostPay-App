@@ -1,5 +1,4 @@
-import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
@@ -31,11 +30,15 @@ class _SplashScreenState extends State<SplashScreen> {
   bool isLoading = false;
 
   getDeviceId() async {
+    sharedPreferences = await SharedPreferences.getInstance();
 
-    final deviceInfoPlugin = DeviceInfoPlugin();
+    // final deviceInfoPlugin = DeviceInfoPlugin();
+    var uuid = const Uuid();
+    deviceId = uuid.v1();
 
+    // print("deviceId---> $deviceId");
 
-    if(Platform.isAndroid){
+    /*if(Platform.isAndroid){
       final  deviceInfo = await deviceInfoPlugin.androidInfo;
       deviceId = deviceInfo.id;
       // print("deviceId $deviceId");
@@ -43,14 +46,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
      final deviceInfo = await deviceInfoPlugin.iosInfo;
      deviceId = deviceInfo.identifierForVendor!;
+    }*/
+
+    if(sharedPreferences.getString("deviceId") == null || sharedPreferences.getString("deviceId") == "") {
+      setState(() {
+        sharedPreferences.setString('deviceId', deviceId);
+      });
     }
-
-    sharedPreferences = await SharedPreferences.getInstance();
-
-    setState(() {
-      sharedPreferences.setString('deviceId', deviceId);
-    });
-
     getNetwork();
   }
 

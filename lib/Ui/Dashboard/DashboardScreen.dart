@@ -139,18 +139,23 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
 
-    if (state == AppLifecycleState.resumed) {
+
+    // print("pageType ----> ${Utils.pageType}");
+    if (state == AppLifecycleState.paused) {
       var date = sharedPreferences.getString("loginTime") ?? "";
+
       DateTime expireDate = DateTime.parse(date);
 
+      // print("expireDate $expireDate");
       if(date != "") {
         if (!expireDate.isAfter(DateTime.now())) {
-          Utils.pageType = "NewPage";
+          setState(() {
+            Utils.pageType = "NewPage";
+          });
 
           getAccount();
 
-          if (Utils.wcUrlVal == "" && Utils.pageType == "NewPage" &&
-              Utils.pageType1 != "walletConnect") {
+          if (Utils.wcUrlVal == "" && Utils.pageType == "NewPage" && Utils.pageType1 != "walletConnect") {
             SharedPreferences sharedPreferences = await SharedPreferences
                 .getInstance();
             var passwordType = sharedPreferences.getBool('passwordType') ??
@@ -158,24 +163,25 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
             if (passwordType) {
               // ignore: use_build_context_synchronously
-              Navigator.pushAndRemoveUntil(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => const LoginWithPassCode()
                 ),
-                    (route) => false,
+                    // (route) => false,
               );
             } else {
               // ignore: use_build_context_synchronously
-              Navigator.pushAndRemoveUntil(
+              Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => const LoginScreen()
                 ),
-                    (route) => false,
+                    // (route) => false,
               );
             }
-          } else {
+          }
+          else {
             if (Platform.isAndroid) {
               if (Utils.wcUrlVal != "") {
                 if (Utils.wcUrlVal

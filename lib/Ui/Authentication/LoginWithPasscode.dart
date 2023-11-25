@@ -1,9 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:local_auth_ios/types/auth_messages_ios.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
@@ -19,6 +19,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:pin_code_fields/pin_code_fields.dart' as pin;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class LoginWithPassCode extends StatefulWidget {
   const LoginWithPassCode({super.key});
@@ -180,6 +181,8 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
       "password":"$password",
     };
 
+    print("login ${json.encode(data)}");
+
     await accountProvider.loginAccount(data,'/deviceLogin');
     if(accountProvider.isSuccess == true){
 
@@ -223,11 +226,11 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     }
 
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString("loginTime", "${DateTime.now().add(const Duration(minutes: 1))}");
+    sharedPreferences.setString("loginTime", "${DateTime.now().add(const Duration(minutes: 5))}");
 
     if(Utils.pageType == "NewPage" && Utils.wcUrlVal != "" ){
       Navigator.pop(context);
-      // print("object gooing in if");
+      print("object gooing in if");
     }
     else {
       // print("object gooing in else");
@@ -365,22 +368,14 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     String? deviceId = "";
     sharedPreferences = await SharedPreferences.getInstance();
 
-    final deviceInfoPlugin = DeviceInfoPlugin();
+    var uuid = const Uuid();
+    deviceId = uuid.v1();
 
-
-    if(Platform.isAndroid){
-      final  deviceInfo = await deviceInfoPlugin.androidInfo;
-      deviceId = deviceInfo.id;
-    }else{
-
-      final deviceInfo = await deviceInfoPlugin.iosInfo;
-      deviceId = deviceInfo.identifierForVendor!;
+    if(sharedPreferences.getString("deviceId") == null || sharedPreferences.getString("deviceId") == "") {
+      setState(() {
+        sharedPreferences.setString('deviceId', deviceId!);
+      });
     }
-
-    setState(() {
-      sharedPreferences.setString('deviceId', deviceId!);
-    });
-
     // ignore: use_build_context_synchronously
     Navigator.pop(context);
 

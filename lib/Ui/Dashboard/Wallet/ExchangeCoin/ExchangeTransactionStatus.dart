@@ -180,7 +180,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
 
                             Expanded(
                               child: Text(
-                                  sendNetwork!.name,
+                                  "${sendNetwork!.name.split(" ").first} (${sendNetwork!.ticker.toUpperCase()})",
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),
@@ -188,6 +188,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                             ),
 
                             Text(
+                                DbExTransaction.dbExTransaction.getTrxStatusData!.expectedSendAmount == 0 ? "~0 ${sendNetwork!.ticker}" :
                               "~${ApiHandler.calculateLength3("${DbExTransaction.dbExTransaction.getTrxStatusData!.expectedSendAmount}")} "
                                   "${sendNetwork!.ticker}",
                               style: MyStyle.tx18RWhite.copyWith(
@@ -290,7 +291,7 @@ class _ExchangeTransactionStatusState extends State<ExchangeTransactionStatus> {
                         // transaction id
                         InkWell(
                           onTap: () {
-                            FlutterClipboard.copy(DbExTransaction.dbExTransaction.getTrxStatusData!.payinAddress).then((value) {
+                            FlutterClipboard.copy(DbExTransaction.dbExTransaction.getTrxStatusData!.id).then((value) {
                               Helper.dialogCall.showToast(context, "Transaction ID Copied");
                             });
                           },

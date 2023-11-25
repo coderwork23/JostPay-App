@@ -40,7 +40,7 @@ class ExTransactionModel {
     validUntil: DateTime.parse(json["validUntil"]),
     id: json["id"],
     updatedAt: DateTime.parse(json["updatedAt"]),
-    expectedSendAmount: json["expectedSendAmount"]?.toDouble(),
+    expectedSendAmount: json["expectedSendAmount"] == null ? json['amountSend']?.toDouble() : json["expectedSendAmount"]?.toDouble(),
     expectedReceiveAmount: json["expectedReceiveAmount"]?.toDouble(),
     createdAt: DateTime.parse(json["createdAt"]),
     isPartner: json["isPartner"].toString(),

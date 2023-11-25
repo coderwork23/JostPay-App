@@ -356,7 +356,7 @@ class BuySellProvider with ChangeNotifier{
     await ApiHandler.getInstantApi(params).then((responseData) async {
       try {
         var value = json.decode(responseData.body);
-        print("validateSellOrder----> $value");
+        // print("validateSellOrder----> $value");
 
         if (responseData.statusCode == 200 && value["info"] != null) {
           sellValidOrder = false;
