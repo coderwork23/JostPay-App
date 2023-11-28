@@ -353,39 +353,41 @@ class _BuyHistoryState extends State<BuyHistory> {
 
                         Visibility(
                           visible: list.details.payin_Address != "",
-                          child: InkWell(
-                            onTap: () {
-                              FlutterClipboard.copy(list.details.payin_Address).then((value) {
-                                Helper.dialogCall.showToast(context, "Invoice No Copied");
-                              });
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Payin Address: ",
-                                  style: MyStyle.tx18RWhite.copyWith(
-                                      fontSize: 16
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                Expanded(
-                                  child: Text(
-                                    list.details.payin_Address,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: InkWell(
+                              onTap: () {
+                                FlutterClipboard.copy(list.details.payin_Address).then((value) {
+                                  Helper.dialogCall.showToast(context, "Invoice No Copied");
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Payin Address: ",
                                     style: MyStyle.tx18RWhite.copyWith(
                                         fontSize: 16
                                     ),
                                   ),
-                                ),
-                                const Icon(
-                                  Icons.copy,
-                                  size: 20,
-                                  color: MyColor.whiteColor,
-                                ),
-                              ],
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: Text(
+                                      list.details.payin_Address,
+                                      style: MyStyle.tx18RWhite.copyWith(
+                                          fontSize: 16
+                                      ),
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.copy,
+                                    size: 20,
+                                    color: MyColor.whiteColor,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
 
                         // date
                         Row(
@@ -432,6 +434,7 @@ class _BuyHistoryState extends State<BuyHistory> {
                         ),
                         const SizedBox(height: 8),
 
+                        // Amount:
                         Row(
                           children: [
                             Text(
@@ -445,6 +448,30 @@ class _BuyHistoryState extends State<BuyHistory> {
                             Expanded(
                               child: Text(
                                 "$amount $type",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),// Amo
+                        const SizedBox(height: 8),
+
+                        //Account
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Receive Ac: ",
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+
+                            Expanded(
+                              child: Text(
+                                "${list.details.currencyAccount} $type",
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),

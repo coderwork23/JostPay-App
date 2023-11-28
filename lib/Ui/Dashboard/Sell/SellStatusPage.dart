@@ -9,17 +9,16 @@ import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SellStatusPage extends StatefulWidget {
-  final String invoiceNo,tokenName;
+  final String invoiceNo,tokenName,pageName;
   const SellStatusPage({
     super.key,
     required this.invoiceNo,
-    required this.tokenName
+    required this.tokenName,
+    required this.pageName
   });
 
   @override
@@ -107,7 +106,9 @@ class _SellStatusPageState extends State<SellStatusPage> {
     var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      bottomNavigationBar: isLoading || DbSellHistory.dbSellHistory.getTrxStatusData == null
+      bottomNavigationBar: isLoading
+          || DbSellHistory.dbSellHistory.getTrxStatusData == null
+          || widget.pageName == "history"
           ?
       const SizedBox()
           :
@@ -326,7 +327,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
                           children: [
 
                             Text(
-                              "Invoice url: ",
+                              "Invoice: ",
                               style: MyStyle.tx18RWhite.copyWith(
                                   fontSize: 16
                               ),
@@ -342,7 +343,7 @@ class _SellStatusPageState extends State<SellStatusPage> {
                                   );
                                 },
                                 child: Text(
-                                  DbSellHistory.dbSellHistory.getTrxStatusData!.invoiceUrl,
+                                  DbSellHistory.dbSellHistory.getTrxStatusData!.invoiceUrl.split("/").last,
                                   textAlign: TextAlign.end,
                                   style: MyStyle.tx18RWhite.copyWith(
                                       fontSize: 15,
@@ -361,150 +362,92 @@ class _SellStatusPageState extends State<SellStatusPage> {
                   ),
                   const SizedBox(height: 15),
 
-                  // warning message
-                  Visibility(
-                    visible: DbSellHistory.dbSellHistory.getTrxStatusData!.orderStatus == "Pending",
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        "Note: Your order has been submitted. Your transaction invoice no. is"
-                            " ${DbSellHistory.dbSellHistory.getTrxStatusData!.invoice} "
-                            " To complete this transaction, please send exactly"
-                            " ${DbSellHistory.dbSellHistory.getTrxStatusData!.payinAmount} To",
-                        textAlign: TextAlign.center,
-                        style:MyStyle.tx18RWhite.copyWith(
-                            fontSize: 12,
-                            color: MyColor.dotBoarderColor
+                  // bank details
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                    decoration: BoxDecoration(
+                        color: MyColor.darkGrey01Color,
+                        borderRadius: BorderRadius.circular(10)
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 10),
+
+                        //Bank:
+                        Row(
+                          children: [
+
+                            Expanded(
+                              child: Text(
+                                "Bank: ",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ),
+                            Text(
+                              DbSellHistory.dbSellHistory.getTrxStatusData!.bank,
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                            ),
+
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 10),
+
+                        //Account No:
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                "Account No: ",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ),
+                            Text(
+                              DbSellHistory.dbSellHistory.getTrxStatusData!.accountNo,
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                            ),
+
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Account Name
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                "Account Name: ",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 16
+                                ),
+                              ),
+                            ),
+                            Text(
+                              DbSellHistory.dbSellHistory.getTrxStatusData!.accountName,
+                              textAlign: TextAlign.end,
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 16
+                              ),
+                            ),
+
+
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 15),
 
-                  Visibility(
-                    visible: DbSellHistory.dbSellHistory.getTrxStatusData!.payinUrl == "",
-                      child: Column(
-                        children: [
-                          // qr and token name
-                          Container(
-                            width: width * 0.8,
-                            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 22),
-                            decoration: BoxDecoration(
-                                color: MyColor.darkGrey01Color,
-                                borderRadius: BorderRadius.circular(12)
-                            ),
-                            child: Column(
-                              children: [
-
-                                Container(
-                                  height: height * 0.26,
-                                  width: width * 0.55,
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                      color: MyColor.mainWhiteColor,
-                                      borderRadius: BorderRadius.circular(10)
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: QrImageView(
-                                      data: DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address,
-                                      eyeStyle: const QrEyeStyle(
-                                          color: MyColor.backgroundColor,
-                                          eyeShape: QrEyeShape.square
-                                      ),
-                                      dataModuleStyle: const QrDataModuleStyle(
-                                          color: MyColor.backgroundColor,
-                                          dataModuleShape:  QrDataModuleShape.square
-                                      ),
-                                      //embeddedImage: AssetImage('assets/icons/logo.png'),
-                                      version: QrVersions.auto,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 15),
-
-                                Text(
-                                  DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address,
-                                  textAlign: TextAlign.center,
-                                  style: MyStyle.tx18RWhite.copyWith(
-                                      fontSize: 16
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-
-                          // copy and shared
-                          SizedBox(
-                            width: width * 0.8,
-                            child: Row(
-                              children: [
-
-                                InkWell(
-                                  onTap: () {
-                                    Share.share(DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address);
-                                  },
-                                  child: Container(
-                                    height: 55,
-                                    width: 60,
-                                    padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: MyColor.darkGrey01Color,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Image.asset(
-                                      "assets/images/dashboard/share.png",
-                                      fit: BoxFit.contain,
-                                      color: MyColor.whiteColor,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 15),
-
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      FlutterClipboard.copy(DbSellHistory.dbSellHistory.getTrxStatusData!.payin_address).then((value) {
-                                        Helper.dialogCall.showToast(context, "Copied");
-                                      });
-                                    },
-                                    child: Container(
-                                      height: 55,
-                                      alignment: Alignment.center,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                                      decoration: BoxDecoration(
-                                        color: MyColor.darkGrey01Color,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child:  Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.copy,
-                                            color: MyColor.whiteColor,
-                                          ),
-                                          const SizedBox(width: 15),
-
-                                          Text(
-                                            "Copy address",
-                                            textAlign: TextAlign.center,
-                                            style: MyStyle.tx18RWhite.copyWith(
-                                                fontSize: 16
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                        ],
-                      )
-                  ),
 
                 ],
               ),

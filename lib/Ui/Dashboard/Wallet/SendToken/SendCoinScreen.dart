@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
@@ -425,7 +426,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
                                     Expanded(
                                       child: Text(
-                                        '${sendTokenQuantity.text} $sendTokenSymbol',
+                                        '${ApiHandler.showFiveBalance(sendTokenQuantity.text)} $sendTokenSymbol',
                                         style: MyStyle.tx18BWhite.copyWith(
                                             fontSize: 14
                                         ),
@@ -485,7 +486,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                                     child: Align(
                                       alignment: Alignment.topRight,
                                       child: Text(
-                                        "$sendTransactionFee $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(3)})",
+                                        "${ApiHandler.showFiveBalance(sendTransactionFee)} $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(3)})",
                                           textAlign: TextAlign.end,
                                           style: MyStyle.tx18RWhite.copyWith(
                                               fontSize: 14
@@ -1110,9 +1111,9 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
                           :
                       widget.sendTokenType != ""
                           ?
-                      "Available: ${double.parse(sendTokenBalance)} $sendTokenSymbol (${widget.sendTokenType})"
+                      "Available: ${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol (${widget.sendTokenType})"
                           :
-                      "Available: ${double.parse(sendTokenBalance)} $sendTokenSymbol",
+                      "Available: ${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol",
                       style:MyStyle.tx18RWhite.copyWith(
                           fontSize: 14,
                           color: MyColor.grey01Color

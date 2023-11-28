@@ -465,7 +465,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
                                     Expanded(
                                       child: Text(
-                                        '${sendTokenQuantity.text} $sendTokenSymbol',
+                                        '${ApiHandler.showFiveBalance(sendTokenQuantity.text)} $sendTokenSymbol',
                                         style: MyStyle.tx18BWhite.copyWith(
                                             fontSize: 14
                                         ),
@@ -523,7 +523,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                                     child: Align(
                                       alignment: Alignment.topRight,
                                       child: Text(
-                                          "$sendTransactionFee $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(3)})",
+                                          "${ApiHandler.showFiveBalance(sendTransactionFee)} $networkSymbol (~\$ ${(double.parse(sendTransactionFee) * tokenBalance[0].price).toStringAsFixed(3)})",
                                           textAlign: TextAlign.end,
                                           style: MyStyle.tx18RWhite.copyWith(
                                               fontSize: 14
@@ -922,60 +922,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
               onChanged: (value) {
                 setState(() {});
               },
-              decoration: MyStyle.textInputDecoration2.copyWith(
-                  suffixIcon: SizedBox(
-                    width: 90,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            FlutterClipboard.paste().then((value){
-                              toController.text = value;
-                            });
-                          },
-                          child: Center(
-                            child: Text(
-                              "Paste",
-                              textAlign: TextAlign.center,
-                              style: MyStyle.tx18BWhite.copyWith(
-                                  fontSize: 14,
-                                  color: MyColor.greenColor
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: () async {
-                            final value = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const QrScannerPage()
-                                )
-                            );
-
-                            if(value != null ){
-                              setState(() {
-                                toController.text = value;
-                              });
-                            }
-
-
-                          },
-                          child: Image.asset(
-                            "assets/images/dashboard/scan.png",
-                            height: 25,
-                            width: 25,
-                            color: MyColor.greenColor,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-
-                      ],
-                    ),
-                  )
-              ),
+              decoration: MyStyle.textInputDecoration2,
             ),
             const SizedBox(height: 15),
 
@@ -1002,7 +949,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                           ?
                       "Available: 0.0 $sendTokenSymbol"
                           :
-                      "Available: ${double.parse(sendTokenBalance)} $sendTokenSymbol",
+                      "Available: ${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol",
                       style:MyStyle.tx18RWhite.copyWith(
                           fontSize: 14,
                           color: MyColor.grey01Color

@@ -41,6 +41,8 @@ dependencies:
 #  device_info_plus: ^9.1.0
   mobile_device_identifier: ^0.0.2
 
+  grouped_list: ^5.1.2
+
   #load svg image
   flutter_svg: ^2.0.9
 

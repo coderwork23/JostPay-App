@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellStatusPage.dart';
@@ -50,6 +52,8 @@ class _SellValidationPageState extends State<SellValidationPage> {
 
     var sendData = widget.sendData;
 
+    print(json.encode(widget.params));
+
     // ignore: use_build_context_synchronously
     await buySellProvider.sellOrder(
         widget.params,
@@ -59,50 +63,9 @@ class _SellValidationPageState extends State<SellValidationPage> {
         widget.sendData == null ? {} : sendData,
         widget.coinName
     );
-
-    /*if(buySellProvider.sellSuccess){
-      if(widget.sendData == null) {
-        notifyOrder();
-      }
-      // ignore: use_build_context_synchronously
-
-    }*/
   }
 
 
-  notifyOrder()async{
-
-    var params = {
-      "action":"notify_payment_made",
-      "email":widget.params['email'],
-      "invoice":buySellProvider.sellResponce['invoice'],
-      "auth":"p1~\$*)Ze(@"
-    };
-
-    await buySellProvider.notifyOrder(
-        params,
-        context,
-        "sell"
-    );
-
-    if(buySellProvider.placeNotifyOrder) {
-
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context,"refresh");
-      // ignore: use_build_context_synchronously
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                WithdrawSuccessful(
-                  invoice: buySellProvider.sellResponce['invoice'],
-                  tokenName: widget.coinName,
-                ),
-          )
-      );
-
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,10 +95,10 @@ class _SellValidationPageState extends State<SellValidationPage> {
                     height: 24,
                     width: 24,
                     decoration: BoxDecoration(
-                        color: acceptTerms ? MyColor.greenColor : Colors.transparent,
+                        color: acceptTerms ? MyColor.greenColor : MyColor.colorsBack1,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            width: 1.5,
+                            width: 0.5,
                             color: acceptTerms ?  MyColor.greenColor : MyColor.whiteColor.withOpacity(0.4)
                         )
                     ),
@@ -153,23 +116,10 @@ class _SellValidationPageState extends State<SellValidationPage> {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text:"Accept ",
-                            style: MyStyle.tx18RWhite.copyWith(
-                                fontSize: 16,
-                            ),
-                          ),
-                          TextSpan(
-                            text:"Terms & Condition",
-                            style: MyStyle.tx18BWhite.copyWith(
-                                fontSize: 16,
-                                color: MyColor.greenColor
-                            ),
-                          ),
-                        ]
+                    child: Text(
+                      "I accept the terms and condition",
+                      style: MyStyle.tx18RWhite.copyWith(
+                        fontSize: 14,
                       ),
                     ),
                   )
@@ -178,7 +128,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
             ),
             const SizedBox(height: 10),
 
-            buySellProvider.sellOderLoading
+           /* buySellProvider.sellOderLoading
                 ?
             const SizedBox(
                 height:52,
@@ -188,7 +138,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
                     )
                 )
             )
-                :
+                :*/
             InkWell(
               onTap: () {
                 if(acceptTerms) {
@@ -249,46 +199,126 @@ class _SellValidationPageState extends State<SellValidationPage> {
                 itemCount: buySellProvider.getSellValidation['info'].split("\n").length,
                 itemBuilder: (context, index) {
                   var list = buySellProvider.getSellValidation['info'].split("\n")[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(
-                     index < buySellProvider.getSellValidation['info'].split("\n").length-1
-                          ?
-                      list
-                          :
-                      "You Get : ${list.toString().split(":").last.trim()}",
-                      style: MyStyle.tx18RWhite.copyWith(
-                        fontSize: 15
+                  return  Visibility(
+                    visible: index != 0 && index != 1 && index != 2 && index < buySellProvider.getSellValidation['info'].split("\n").length-1,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "${list.toString().split(":").first.substring(0,1)}"
+                                  "${list.toString().split(":").first.substring(
+                                  1,list.toString().split(":").first.length-1
+                              ).toLowerCase()}",
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 12
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                            decoration: BoxDecoration(
+                                color: MyColor.colorsBack1,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Text(
+                              list.toString().split(":").last,
+                              style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 13
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
                 },
               ),
 
-              Text(
-                "Coin : ${widget.coinName}",
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 15
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(
+                  "Coin",
+                  style: MyStyle.tx18RWhite.copyWith(
+                      fontSize: 12
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
 
-              Text(
-                "Transaction type : Sell",
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 15
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                decoration: BoxDecoration(
+                    color: MyColor.colorsBack1,
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                child: Text(
+                  widget.coinName,
+                  style: MyStyle.tx18RWhite.copyWith(
+                      fontSize: 13
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(
+                  "Transaction type",
+                  style: MyStyle.tx18RWhite.copyWith(
+                      fontSize: 12
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+                decoration: BoxDecoration(
+                  color: MyColor.colorsBack1,
+                  borderRadius: BorderRadius.circular(10)
+                ),
+                child: Text(
+                  "Sell",
+                  style: MyStyle.tx18RWhite.copyWith(
+                      fontSize: 13
+                  ),
                 ),
               ),
               const SizedBox(height: 15),
 
-              Text(
-                "Note: Please confirm your sell order and make sure all details"
-                    " provided are correct before you proceed",
-                style: MyStyle.tx18RWhite.copyWith(
-                    fontSize: 13,
-                    color: MyColor.grey01Color
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Note: ",
+                      style: MyStyle.tx18RWhite.copyWith(
+                        color: MyColor.redColor,
+                        fontSize: 16,
+                      )
+                    ),
+
+                    TextSpan(
+                      text:"Please confirm your sell order and make sure all details"
+                          " provided are correct before you proceed",
+                      style: MyStyle.tx18RWhite.copyWith(
+                          fontSize: 13,
+                          color: MyColor.grey01Color
+                      ),
+                    )
+                  ],
                 ),
-              ),
+
+              )
+
 
             ],
           ),

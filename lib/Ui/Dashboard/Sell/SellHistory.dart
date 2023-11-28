@@ -101,6 +101,7 @@ class _SellHistoryState extends State<SellHistory> {
                       builder: (context) => SellStatusPage(
                         invoiceNo: list.invoice,
                         tokenName: list.tokenName,
+                        pageName: "history",
                       ),
                     )
                 );

@@ -462,7 +462,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                                     ?
                                 "$sendTokenBalance $sendTokenSymbol"
                                     :
-                                "${ApiHandler.calculateLength3(sendTokenBalance)} $sendTokenSymbol",
+                                "${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol",
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 15
                                 ),
@@ -724,7 +724,9 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                         ?
                     InkWell(
                       onTap: () {
-                        if(usdAmount < buySellProvider.minSellAmount || double.parse(sendTokenBalance) <=  double.parse(priceController.text)){
+
+
+                        if(usdAmount < buySellProvider.minSellAmount || double.parse(sendTokenBalance) <  double.parse(priceController.text)){
                           Helper.dialogCall.showToast(context, "Insufficient balance");
                         }else{
                           Helper.dialogCall.showToast(context, "Please provider all details");

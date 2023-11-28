@@ -42,6 +42,9 @@ class DbSellHistory{
               'payout_amount TEXT,'
               'payout_address TEXT,'
               'payin_url TEXT,'
+              'bank TEXT,'
+              'accountNo TEXT,'
+              'accountName TEXT,'
               'accountId TEXT'
               ')');
         },
@@ -62,7 +65,7 @@ class DbSellHistory{
     return res;
   }
 
-  updateStatus(SellHistoryModel newToken,id) async{
+    updateStatus(SellHistoryModel newToken,id) async{
     final db= await database;
     Map<String, dynamic> data = {
       "invoice": newToken.invoiceNo,
@@ -99,7 +102,10 @@ class DbSellHistory{
       return SellHistoryModel.fromJson(
         c,
         accountId,
-        c['tokenName']
+        c['tokenName'],
+        c["accountName"],
+        c['accountNo'],
+        c['bank']
       );
     }).toList();
     sellHistoryList = list;
@@ -117,7 +123,10 @@ class DbSellHistory{
       getTrxStatusData = SellHistoryModel.fromJson(
           res[0],
           accountId,
-          res[0]['tokenName']
+          res[0]['tokenName'],
+          res[0]["accountName"],
+          res[0]['accountNo'],
+          res[0]['bank']
       );
     }
     return getTrxStatusData;

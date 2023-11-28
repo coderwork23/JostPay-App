@@ -237,9 +237,13 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
 
         if(type == "max") {
 
+          print("----> ${selectedCoin!.address}");
+
           if (selectedCoin!.address != "") {
             priceController.text = "${double.parse(sendTokenBalance)}";
           } else {
+            // print("----> ${selectedCoin!.address}");
+
             priceController.text = "${double.parse(sendTokenBalance) - double.parse(sendTransactionFee)}";
           }
 
@@ -391,6 +395,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                             selectedCoin = null;
                             usdError = "";
                             priceController.clear();
+                            usdAmount = 0;
                             selectedCoin = value;
                             sendTokenBalance= value!.balance;
                             sendTokenUsd ="${value.price}";
@@ -490,7 +495,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                         onChanged: (value){
                           // print(buySellProvider.minSellAmount);
                           if(value.isNotEmpty) {
-                            usdAmount = double.parse(value) * double.parse(sendTokenUsd);
+                            usdAmount = (double.parse(value) * double.parse(double.parse(sendTokenUsd).toStringAsFixed(2)));
                             if (usdAmount < buySellProvider.minSellAmount) {
                               usdError = "Min. ${buySellProvider.minSellAmount}";
                             } else {
@@ -553,7 +558,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Text(
-                          "Amount in USD ~ ${usdAmount.toStringAsFixed(2)}",
+                          "Amount in USD ~ ${usdAmount.toStringAsFixed(3)}",
                           style: MyStyle.tx18BWhite.copyWith(
                               fontSize: 13,
                               color: MyColor.grey01Color

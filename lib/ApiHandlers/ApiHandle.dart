@@ -97,6 +97,26 @@ class ApiHandler {
   }
 
 
+  static String showFiveBalance(String value){
+
+    String firstValue = value.split(".").first;
+    String newValue = "";
+    if(value.contains(".")){
+
+      if(value.split(".").last.length > 5){
+        newValue = "$firstValue.${value.split(".").last.substring(0,5)}";
+      }else{
+        newValue = value;
+      }
+    }else{
+      newValue = value;
+    }
+
+    return newValue;
+
+  }
+
+
 
   // this method use for call instantexchangers.net api's
   // use-in: BuySellProvider

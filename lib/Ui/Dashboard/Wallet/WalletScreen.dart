@@ -58,8 +58,10 @@ class _WalletScreenState extends State<WalletScreen> {
       },
     ).whenComplete(() async {
       getToken();
-      // await DBTokenProvider.dbTokenProvider.getAccountToken(selectedAccountId);
+      socket!.destroy();
+      socket!.dispose();
       setState(() {});
+      getSocketData();
     });
   }
 
@@ -84,7 +86,12 @@ class _WalletScreenState extends State<WalletScreen> {
             child: const SendTokenList()
         );
       },
-    );
+    ).whenComplete(() {
+      socket!.destroy();
+      socket!.dispose();
+      setState(() {});
+      getSocketData();
+    });
   }
 
   showReceiveTokenList(BuildContext context){
@@ -108,7 +115,12 @@ class _WalletScreenState extends State<WalletScreen> {
             child: const ReceiveTokenList()
         );
       },
-    );
+    ).whenComplete(() {
+      socket!.destroy();
+      socket!.dispose();
+      setState(() {});
+      getSocketData();
+    });
   }
 
   showWithdrawTokenList(BuildContext context){
@@ -132,7 +144,12 @@ class _WalletScreenState extends State<WalletScreen> {
             child: const WithDrawTokenList()
         );
       },
-    );
+    ).whenComplete(() {
+      socket!.destroy();
+      socket!.dispose();
+      setState(() {});
+      getSocketData();
+    });
   }
 
   late String deviceId;
@@ -260,13 +277,18 @@ class _WalletScreenState extends State<WalletScreen> {
 
   // socket for get updated balance
   getSocketData() async {
-    // print("Connecting socket");
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    deviceId = sharedPreferences.getString('deviceId')!;
+    // print("deviceId ----> $deviceId");
     socket = IO.io('http://${Utils.url}/', <String, dynamic>{
       "secure": true,
       "path":"/api/socket.io",
       "rejectUnauthorized": false,
       "transports":["websocket", "polling"],
       "upgrade": false,
+      "query": {
+        "deviceId": deviceId
+      }
     });
 
     socket!.connect();
@@ -389,9 +411,15 @@ class _WalletScreenState extends State<WalletScreen> {
   doNothing(){}
 
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
+    socket!.disconnect();
+    socket!.destroy();
+    socket!.dispose();
+    super.dispose();
+  }
 
-    final dashProvider = Provider.of<DashboardProvider>(context);
+  @override
+  Widget build(BuildContext context) {
 
     accountProvider = Provider.of<AccountProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
@@ -800,7 +828,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                          ?
                                      "--"
                                          :
-                                     "${list.balance} ${list.symbol}",
+                                     "${ApiHandler.showFiveBalance(list.balance)} ${list.symbol}",
 
                                      style: MyStyle.tx22RWhite.copyWith(
                                        fontSize: 15,

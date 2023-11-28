@@ -437,12 +437,12 @@ class BuySellProvider with ChangeNotifier{
 
         if(trxIndex == -1) {
           await DbSellHistory.dbSellHistory.createSellHistory(
-              SellHistoryModel.fromJson(value,accountId,coinName)
+              SellHistoryModel.fromJson(value,accountId,coinName,params['bank'],params['account_no'],params['account_name'])
           );
         }
         else{
           await DbSellHistory.dbSellHistory.updateSellHistory(
-              SellHistoryModel.fromJson(value,accountId,coinName),
+              SellHistoryModel.fromJson(value,accountId,coinName,params['bank'],params['account_no'],params['account_name']),
               value["invoice"],
               accountId
           );
@@ -474,7 +474,6 @@ class BuySellProvider with ChangeNotifier{
                   sellInvoice: value["invoice"],
                   sellResponce:sellResponce,
                   params: params,
-
                 ),
               )
           );
@@ -489,6 +488,7 @@ class BuySellProvider with ChangeNotifier{
                 builder: (context) => SellStatusPage(
                   invoiceNo: sellResponce['invoice'],
                   tokenName: coinName,
+                  pageName: "",
                 ),
               )
           );
@@ -521,7 +521,7 @@ class BuySellProvider with ChangeNotifier{
       if (responseData.statusCode == 200) {
         await DbSellHistory.dbSellHistory.getSellHistory(accountId);
         await DbSellHistory.dbSellHistory.updateStatus(
-            SellHistoryModel.fromJson(value, accountId, name),
+            SellHistoryModel.fromJson(value, accountId, name,"","",""),
             accountId
         );
 

@@ -77,8 +77,9 @@ class _WithdrawSuccessfulState extends State<WithdrawSuccessful> {
                       MaterialPageRoute(
                         builder: (context) =>
                             SellStatusPage(
-                                invoiceNo: widget.invoice,
-                                tokenName: widget.tokenName
+                              invoiceNo: widget.invoice,
+                              tokenName: widget.tokenName,
+                              pageName: "",
                             ),
                       )
                   );

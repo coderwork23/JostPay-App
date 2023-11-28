@@ -13,6 +13,9 @@ class SellHistoryModel {
   String payin_address;
   String payinUrl;
   String tokenName;
+  String bank;
+  String accountNo;
+  String accountName;
 
   SellHistoryModel({
     required this.amountPayableNgn,
@@ -29,10 +32,13 @@ class SellHistoryModel {
     required this.payin_address,
     required this.payinUrl,
     required this.tokenName,
+    required this.bank,
+    required this.accountNo,
+    required this.accountName,
   });
 
-  factory SellHistoryModel.fromJson(Map<String, dynamic> json,acId,name) {
-    // print("model id $acId");
+  factory SellHistoryModel.fromJson(Map<String, dynamic> json,acId,name,bankName,acNo,acName) {
+    print("model id $acName");
     return SellHistoryModel(
       amountPayableNgn: json["amount_payable_ngn"]??0,
       invoice: json["invoice"]??"",
@@ -48,6 +54,9 @@ class SellHistoryModel {
       payoutAddress:json["payout_address"]??"",
       payinUrl: json["payin_url"]??"",
       tokenName: name??"",
+      accountName: acName,
+      accountNo: acNo,
+      bank: bankName
     );
   }
 
@@ -66,5 +75,8 @@ class SellHistoryModel {
     "payin_url": payinUrl,
     "accountId": accountId,
     "tokenName": tokenName,
+    "accountNo": accountNo,
+    "bank": bank,
+    "accountName": accountName,
   };
 }

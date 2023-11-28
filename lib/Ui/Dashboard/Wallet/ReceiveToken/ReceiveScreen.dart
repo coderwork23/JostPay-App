@@ -235,7 +235,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Text(
-              "Send only ${widget.tokenName} (${widget.tokenSymbol} ${widget.tokenType}) to this address. "
+              "Send only ${widget.tokenName} (${widget.tokenType != "" ? "" : widget.tokenSymbol} ${widget.tokenType}) to this address. "
                   "Sending any other coins may result in permanent loss of you token.",
               textAlign: TextAlign.center,
               style:MyStyle.tx18RWhite.copyWith(
