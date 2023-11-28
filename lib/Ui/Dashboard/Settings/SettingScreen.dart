@@ -278,7 +278,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   const SizedBox(width: 10),
 
                   Text(
-                    "1.0.0",
+                    "4.4.0",
                     style:MyStyle.tx18RWhite.copyWith(
                         fontSize: 18,
                         color: MyColor.grey01Color
