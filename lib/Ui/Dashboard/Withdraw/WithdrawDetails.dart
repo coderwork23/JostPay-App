@@ -185,7 +185,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
   String sendGas = "";
   String? sendNonce = "";
   String sendTransactionFee = "0";
-  bool feesLoading = false;
+  bool feesLoading = false,isMax = false;
 
   getNetworkFees(String type) async {
     setState(() {
@@ -232,9 +232,9 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
         sendNonce = "${body['nonce']}";
         sendTransactionFee = "${body['transactionFee']}";
 
-        if(type == "max") {
+        if(type == "max" || isMax) {
 
-          print("----> ${selectedCoin!.address}");
+          // print("----> ${selectedCoin!.address}");
 
           if (selectedCoin!.address != "") {
             priceController.text = "${double.parse(sendTokenBalance)}";
@@ -462,7 +462,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                                   sendTokenBalance == "0" ?
                                   "0 $sendTokenSymbol"
                                       :
-                                  "${ApiHandler.calculateLength3(sendTokenBalance)} $sendTokenSymbol",
+                                  "${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol",
                                   style: MyStyle.tx18RWhite.copyWith(
                                       fontSize: 15
                                   ),
@@ -492,6 +492,9 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                         onChanged: (value){
                           // print(buySellProvider.minSellAmount);
                           if(value.isNotEmpty) {
+                            if(isMax){
+                              isMax = false;
+                            }
                             usdAmount = (double.parse(value) * double.parse(double.parse(sendTokenUsd).toStringAsFixed(2)));
                             if (usdAmount < buySellProvider.minSellAmount) {
                               usdError = "Min. ${buySellProvider.minSellAmount}";
@@ -511,6 +514,9 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                                   children: [
                                     InkWell(
                                       onTap: () {
+                                        setState(() {
+                                          isMax = true;
+                                        });
                                         getNetworkFees("max");
                                       },
                                       child: Text(
@@ -720,12 +726,14 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                           || sellBank == null || emailError.isNotEmpty
                           || usdAmount < buySellProvider.minSellAmount
                           || phoneNoController.text.isEmpty
-                          || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
+                          || double.parse(sendTokenBalance) <  double.parse(priceController.text)
                           || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                           ?
                       InkWell(
                         onTap: () {
-                          if(usdAmount < buySellProvider.minSellAmount || double.parse(sendTokenBalance) <=  double.parse(priceController.text)){
+                          print(usdAmount < buySellProvider.minSellAmount);
+
+                          if(usdAmount < buySellProvider.minSellAmount || double.parse(sendTokenBalance) <  double.parse(priceController.text)){
                             Helper.dialogCall.showToast(context, "Insufficient balance");
                           }else{
                             Helper.dialogCall.showToast(context, "Please provider all details");
@@ -740,7 +748,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                           priceController.text.isEmpty || sellBank == null
                               ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
                               || usdAmount < buySellProvider.minSellAmount
-                              || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
+                              || double.parse(sendTokenBalance) <  double.parse(priceController.text)
                               || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                               ?
                           MyStyle.invalidDecoration

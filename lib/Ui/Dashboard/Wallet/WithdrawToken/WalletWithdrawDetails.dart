@@ -231,7 +231,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
   String sendGas = "";
   String? sendNonce = "";
   String sendTransactionFee = "0";
-  bool feesLoading = false;
+  bool feesLoading = false,isMax = false;
 
   getNetworkFees(String type) async {
     setState(() {
@@ -244,7 +244,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
     });
 
-    print("sendTokenBalance  $sendTokenBalance");
+    // print("sendTokenBalance  $sendTokenBalance");
 
     var data = {
 
@@ -263,7 +263,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       "decimals":sendTokenDecimals
     };
 
-    print(json.encode(data));
+    // print(json.encode(data));
     //
     // ignore: use_build_context_synchronously
     await transectionProvider.getNetworkFees(data,'/getNetrowkFees',context);
@@ -280,7 +280,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
         sendNonce = "${body['nonce']}";
         sendTransactionFee = "${body['transactionFee']}";
 
-        if(type == "max") {
+        if(type == "max" || isMax) {
           if (sendTokenAddress != "") {
             priceController.text = "${double.parse(sendTokenBalance)}";
             // totalUsd = tokenUsd + double.parse(sendTransactionFee) * tokenPrice;
@@ -489,6 +489,9 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                       ),
                       onChanged: (value){
                         if(value.isNotEmpty) {
+                          if(isMax){
+                            isMax = false;
+                          }
                           usdAmount = double.parse(value) * double.parse(sendTokenUsd);
                           if (usdAmount < buySellProvider.minSellAmount) {
                             usdError = "Min. ${buySellProvider.minSellAmount}";
@@ -508,6 +511,9 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                                 children: [
                                   InkWell(
                                     onTap: () {
+                                      setState(() {
+                                        isMax = true;
+                                      });
                                       getNetworkFees("max");
                                     },
                                     child: Text(
@@ -714,11 +720,14 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                     Helper.dialogCall.showLoader()
                         :
                      priceController.text.isEmpty
-                        || sellBank == null || emailError.isNotEmpty
-                        || usdAmount < buySellProvider.minSellAmount
-                        || phoneNoController.text.isEmpty
-                         || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
-                         || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
+                         || sellBank == null
+                         || emailError.isNotEmpty
+                         || usdAmount < buySellProvider.minSellAmount
+                         || phoneNoController.text.isEmpty
+                         || double.parse(sendTokenBalance) <  double.parse(priceController.text)
+                         || acNameController.text.isEmpty
+                         || bankNoController.text.isEmpty
+                         || emailController.text.isEmpty
                         ?
                     InkWell(
                       onTap: () {
@@ -735,9 +744,10 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration:
                          priceController.text.isEmpty || sellBank == null
-                            ||  phoneNoController.text.isEmpty ||emailError.isNotEmpty
+                            ||  phoneNoController.text.isEmpty ||
+                             emailError.isNotEmpty
                             || usdAmount < buySellProvider.minSellAmount
-                             || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
+                             || double.parse(sendTokenBalance) <  double.parse(priceController.text)
                              || acNameController.text.isEmpty || bankNoController.text.isEmpty || emailController.text.isEmpty
                             ?
                         MyStyle.invalidDecoration
@@ -750,7 +760,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                                 color:   priceController.text.isEmpty || sellBank == null
                                     || phoneNoController.text.isEmpty
                                     || usdAmount < buySellProvider.minSellAmount
-                                    || double.parse(sendTokenBalance) <=  double.parse(priceController.text)
+                                    || double.parse(sendTokenBalance) <  double.parse(priceController.text)
                                     || acNameController.text.isEmpty || bankNoController.text.isEmpty
                                     || emailController.text.isEmpty
                                     ?

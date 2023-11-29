@@ -126,7 +126,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
             ),
             const SizedBox(height: 10),
 
-           /* buySellProvider.sellOderLoading
+            buySellProvider.sellOderLoading
                 ?
             const SizedBox(
                 height:52,
@@ -136,7 +136,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
                     )
                 )
             )
-                :*/
+                :
             InkWell(
               onTap: () {
                 if(acceptTerms) {

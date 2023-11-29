@@ -882,16 +882,9 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
 
       body: isLoading == true
           ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
-              )
-          )
-      )
+      Helper.dialogCall.showLoader()
           :
-      SingleChildScrollView(
+      Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
