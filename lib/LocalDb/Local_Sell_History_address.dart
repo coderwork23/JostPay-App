@@ -1,7 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:jost_pay_wallet/Models/AccountAddress.dart';
-import 'package:jost_pay_wallet/Models/ExTransactionModel.dart';
 import 'package:jost_pay_wallet/Models/SellHistoryModel.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -92,13 +89,10 @@ class DbSellHistory{
   List<SellHistoryModel> sellHistoryList = [];
   getSellHistory(String accountId) async {
 
-    // print("accountId ------> $accountId");
     final db = await database;
     final res = await db!.rawQuery("SELECT * FROM SellHistory Where accountId = '$accountId' ORDER BY time DESC");
 
-    // print("object--- $res");
     List<SellHistoryModel> list = res.map((c) {
-      // print(c);
       return SellHistoryModel.fromJson(
         c,
         accountId,

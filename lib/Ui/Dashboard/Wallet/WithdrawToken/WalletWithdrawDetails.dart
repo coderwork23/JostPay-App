@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
@@ -19,7 +18,6 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web3dart/web3dart.dart';
 
 
 // ignore: must_be_immutable
@@ -246,7 +244,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
       selectedAccountPrivateAddress = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
     });
 
-    print("sendTokenBalance  ${sendTokenBalance}");
+    print("sendTokenBalance  $sendTokenBalance");
 
     var data = {
 
@@ -724,8 +722,6 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
                         ?
                     InkWell(
                       onTap: () {
-
-
                         if(usdAmount < buySellProvider.minSellAmount || double.parse(sendTokenBalance) <  double.parse(priceController.text)){
                           Helper.dialogCall.showToast(context, "Insufficient balance");
                         }else{

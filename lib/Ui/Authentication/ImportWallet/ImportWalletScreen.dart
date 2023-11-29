@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,13 +5,10 @@ import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
-import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
-import 'package:custom_pin_screen/custom_pin_screen.dart';
-import 'package:pin_code_fields/pin_code_fields.dart' as pin;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../LocalDb/Local_Account_address.dart';
@@ -175,7 +171,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
     // ignore: use_build_context_synchronously
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => DashboardScreen()
+      MaterialPageRoute(builder: (context) => const DashboardScreen()
       ),(route) => false,
     );
 

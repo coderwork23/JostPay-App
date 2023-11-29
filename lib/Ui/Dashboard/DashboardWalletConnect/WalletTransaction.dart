@@ -211,7 +211,7 @@ class _WalletTransactionState extends State<WalletTransaction> {
                 ),
               ),
             ),
-            Spacer(),
+            const Spacer(),
             Row(
               children: [
                 Expanded(

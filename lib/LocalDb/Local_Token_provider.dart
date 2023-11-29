@@ -86,7 +86,7 @@ class DBTokenProvider{
   }
 
 
-  updateTokenByTID(AccountTokenList newToken,token_id,id) async{
+  updateTokenByTID(AccountTokenList newToken,tokenId,id) async{
     final db= await database;
     Map<String, dynamic> data = {
       "id": newToken.id,
@@ -106,7 +106,7 @@ class DBTokenProvider{
       "accountId": newToken.accountId,
     };
 
-    final res = await db!.update('Token', data, where: "token_id = ? AND accountId = ? ",whereArgs: [token_id,id]);
+    final res = await db!.update('Token', data, where: "token_id = ? AND accountId = ? ",whereArgs: [tokenId,id]);
     getAccountToken(id);
     return res;
   }
@@ -185,14 +185,14 @@ class DBTokenProvider{
   }
 
 
-  updateTokenPrice(double live_price,double gain_loss,int id) async {
+  updateTokenPrice(double livePrice,double gainLoss,int id) async {
 
     // print("$live_price,$gain_loss,$symbol");
 
     List<AccountTokenList> list;
 
     final db = await database;
-    final res = await db!.rawUpdate("UPDATE Token SET price = $live_price, percent_change_24h = $gain_loss WHERE market_id = '$id'");
+    final res = await db!.rawUpdate("UPDATE Token SET price = $livePrice, percent_change_24h = $gainLoss WHERE market_id = '$id'");
 
     //getAccountToken(address,btcAddress,solAddress,dotAddress);
 

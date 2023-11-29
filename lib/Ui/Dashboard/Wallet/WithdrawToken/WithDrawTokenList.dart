@@ -125,11 +125,11 @@ class _WithDrawTokenListState extends State<WithDrawTokenList> {
         // coin list
         Expanded(
           child : ListView.builder(
-            itemCount: DBTokenProvider.dbTokenProvider.tokenList.length,
+            itemCount: DBTokenProvider.dbTokenProvider.tokenList.where((element) => element.type != "TRC20").length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
 
-              var list = DBTokenProvider.dbTokenProvider.tokenList[index];
+              var list = DBTokenProvider.dbTokenProvider.tokenList.where((element) => element.type != "TRC20").toList()[index];
 
               return InkWell(
                 onTap: () async {

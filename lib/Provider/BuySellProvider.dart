@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
@@ -379,7 +378,7 @@ class BuySellProvider with ChangeNotifier{
                 sellRateList.add(data);
             });
 
-            var myNewList;
+            List myNewList;
             if (symbol != ""){
               myNewList = sellRateList.where((element) {
                 return "${element["symbol"]}" == "$symbol";

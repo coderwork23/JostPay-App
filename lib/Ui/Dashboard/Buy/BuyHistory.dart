@@ -87,6 +87,7 @@ class _BuyHistoryState extends State<BuyHistory> {
     var width = MediaQuery.of(context).size.width;
     buySellProvider = Provider.of<BuySellProvider>(context,listen: true);
 
+
     return Scaffold(
       appBar: AppBar(
         leading:  InkWell(
@@ -471,7 +472,7 @@ class _BuyHistoryState extends State<BuyHistory> {
 
                             Expanded(
                               child: Text(
-                                "${list.details.currencyAccount} $type",
+                                list.details.currencyAccount,
                                 style: MyStyle.tx18RWhite.copyWith(
                                     fontSize: 16
                                 ),

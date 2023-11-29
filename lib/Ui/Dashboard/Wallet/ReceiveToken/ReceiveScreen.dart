@@ -1,7 +1,6 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
-import 'package:jost_pay_wallet/Models/AccountTokenModel.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
@@ -99,7 +98,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
               children: [
 
                 Text(
-                  "${widget.tokenName}",
+                  widget.tokenName,
                   textAlign: TextAlign.center,
                   style:MyStyle.tx18BWhite.copyWith(
                       fontSize: 18,

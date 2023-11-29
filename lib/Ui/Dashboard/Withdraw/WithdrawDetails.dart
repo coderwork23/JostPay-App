@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
@@ -18,7 +16,6 @@ import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web3dart/web3dart.dart';
 
 
 // ignore: must_be_immutable
@@ -377,7 +374,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                         style: MyStyle.tx18RWhite.copyWith(
                             fontSize: 16
                         ),
-                        items: DBTokenProvider.dbTokenProvider.tokenList.map((AccountTokenList category) {
+                        items: DBTokenProvider.dbTokenProvider.tokenList.where((element) => element.type != "TRC20").map((AccountTokenList category) {
 
                           return DropdownMenuItem(
                               value: category,

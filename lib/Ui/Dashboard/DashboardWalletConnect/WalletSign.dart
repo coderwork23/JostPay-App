@@ -1,13 +1,10 @@
 import 'package:eth_sig_util/eth_sig_util.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Walletv2_provider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
-import 'package:provider/provider.dart';
-import 'package:wallet_connect_dart_v2/sign/sign-client/session/models.dart';
 import 'package:wallet_connect_dart_v2/wallet_connect_dart_v2.dart';
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
@@ -23,7 +20,7 @@ class WalletSign extends StatefulWidget {
   final SignClient signClient;
   final WCEthereumSignMessage message;
 
-  WalletSign({
+  const WalletSign({
     Key? key,
     required this.id,
     required this.topic,

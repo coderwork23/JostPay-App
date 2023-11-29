@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
 import 'package:jost_pay_wallet/Models/ExTransactionModel.dart';
 import 'package:jost_pay_wallet/Models/ExchangeTokenModel.dart';
+import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/ExchangeCoin/ExchangeTransactionStatus.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
 
@@ -217,6 +219,18 @@ class ExchangeProvider with ChangeNotifier{
         trxId = value["id"];
         amount = value["amount"];
         // print("object ---> $value");
+
+
+        Navigator.pop(context,"refresh");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) {
+                  return ExchangeTransactionStatus(statusId: trxId);
+                }
+            )
+        );
+
         createExLoading = false;
         createExSuccess = true;
         // print("createExSuccess $createExSuccess");
@@ -248,7 +262,7 @@ class ExchangeProvider with ChangeNotifier{
 
         await DbExTransaction.dbExTransaction.getExTransaction();
 
-        var trxIndex = DbExTransaction.dbExTransaction.exTransactionList.indexWhere((element) => "${element.id}" == "${value['id']}");
+        var trxIndex = DbExTransaction.dbExTransaction.exTransactionList.indexWhere((element) => element.id == "${value['id']}");
 
         if(trxIndex == -1) {
           // print("object 1");

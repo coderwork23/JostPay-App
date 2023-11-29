@@ -19,7 +19,7 @@ class SessionRequest extends StatefulWidget {
   final void Function(SessionNamespaces,List<String>) onApprove;
   final void Function() onReject;
 
-  SessionRequest({
+  const SessionRequest({
     Key? key,
     required this.account1,
     required this.proposal,
@@ -236,8 +236,7 @@ class _SessionRequestState extends State<SessionRequest> {
                     Expanded(
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          primary: Colors.white,
-                          backgroundColor: MyColor.greenColor,
+                          foregroundColor: Colors.white, backgroundColor: MyColor.greenColor,
                         ),
                         onPressed: () {
                           final SessionNamespaces params = {};
@@ -282,8 +281,7 @@ class _SessionRequestState extends State<SessionRequest> {
                     Expanded(
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          primary: Colors.white,
-                          backgroundColor: MyColor.redColor,
+                          foregroundColor: Colors.white, backgroundColor: MyColor.redColor,
                         ),
                         onPressed: widget.onReject,
                         child: Text(
@@ -313,7 +311,7 @@ class NamespaceView extends StatefulWidget {
   final ProposalRequiredNamespace namespace;
 
   const NamespaceView({
-    key,
+    super.key,
     required this.type,
     required this.accountAddress,
     required this.namespace,
@@ -367,7 +365,7 @@ class _NamespaceViewState extends State<NamespaceView> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                   child: Text(
                     "Methods",
                     style:  MyStyle.tx18RWhite.copyWith(
@@ -385,7 +383,7 @@ class _NamespaceViewState extends State<NamespaceView> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                   child: Text(
                     "Events",
                     style:  MyStyle.tx18RWhite.copyWith(

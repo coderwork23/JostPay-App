@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Models/LoginModel.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
@@ -452,7 +451,7 @@ class _BuyPreviewPageState extends State<BuyPreviewPage> {
 
                       Expanded(
                         child: Text(
-                            "${widget.receivingAddress}",
+                            widget.receivingAddress,
                           style: MyStyle.tx18RWhite.copyWith(
                               fontSize: 16
                           ),

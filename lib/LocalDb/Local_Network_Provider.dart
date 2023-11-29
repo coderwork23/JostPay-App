@@ -48,22 +48,15 @@ class DbNetwork{
     );
   }
 
-
-
   createNetwork(NetworkList networkLists) async{
     final db= await database;
     final res = await db!.insert("Network",networkLists.toJson());
-    // print("createNetwork");
     return res;
   }
-
 
   updateNetwork(NetworkList networkLists,id) async{
     final db= await database;
       final res = await db!.update("Network",networkLists.toJson(),where: "id = ? ",whereArgs: [id]);
-      // print("updateNetwork");
-
-      // print("res update network $res");
       return res;
   }
 
@@ -76,25 +69,6 @@ class DbNetwork{
       return NetworkList.fromJson(c);
     }).toList();
     networkList = list;
-
-
   }
 
-
-  List<NetworkList> networkListBySymbol = [];
-  getNetworkBySymbol(String symbol) async {
-    final db = await database;
-    final res = await db!.rawQuery('SELECT * FROM Network where symbol = "$symbol"');
-
-    List<NetworkList> list = res.map((c) {
-      return NetworkList.fromJson(c);
-    }).toList();
-    networkListBySymbol = list;
-  }
-
-  deleteAllNetwork() async {
-    final db = await database;
-    final res = await db!.rawQuery("DELETE FROM Network");
-    return res;
-  }
 }

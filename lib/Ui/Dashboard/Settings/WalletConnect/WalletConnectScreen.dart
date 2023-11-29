@@ -219,7 +219,7 @@ class _WalletConnectScreenState extends State<WalletConnectScreen> with WidgetsB
                         )
                     );
                   },
-                  trailing: Container(
+                  trailing: SizedBox(
                     height: 50,
                     width: 50,
                     child: InkWell(

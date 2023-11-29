@@ -96,7 +96,7 @@ class _BuyPaymentInstructionsState extends State<BuyPaymentInstructions> {
           children: [
             ListView.builder(
               shrinkWrap: true,
-              padding: EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               physics: const NeverScrollableScrollPhysics(),
               itemCount: 1,
               itemBuilder: (context, index) {
@@ -105,9 +105,9 @@ class _BuyPaymentInstructionsState extends State<BuyPaymentInstructions> {
                 var data  = {
                   "info": "Take NOTE ${listItem[0].split(',').last.split(":").last}",
                   "notice":"${listItem[1]},${listItem[2]},${listItem[3]}",
-                  "invoice":"${listItem[5]}",
-                  "bankInfo":"${listItem[6]}",
-                  "bankInfo1":"${listItem[7]}",
+                  "invoice":listItem[5],
+                  "bankInfo":listItem[6],
+                  "bankInfo1":listItem[7],
                   "bankName":listItem[9],
                   "bankNo":listItem[10],
                   "webConnect":listItem[11].split(",").first,

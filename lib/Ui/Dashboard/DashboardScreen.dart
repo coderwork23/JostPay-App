@@ -11,16 +11,13 @@ import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Provider/InternetProvider.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/LoginScreen.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/LoginWithPasscode.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Buy/BuyScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/BuySellPage.dart';
-import 'package:jost_pay_wallet/Ui/Dashboard/Sell/SellScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Settings/SettingScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Settings/WalletConnect/walletv2_models/ethereum/wc_ethereum_sign_message.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Settings/WalletConnect/widgets/eip155_data_1.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Support/SupportScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WalletScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Withdraw/WithdrawDetails.dart';
-import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
@@ -676,9 +673,9 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     String date = DateFormat('MMM dd, hh:mm a').format(DateTime.now());
 
     await DBWalletConnectV2.dbWalletConnectV2.createSignt(
-        "$date",
-        "$value",
-        "$type",
+        date,
+        value,
+        type,
         "$session"
     );
 
@@ -721,8 +718,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
-                    backgroundColor: MyColor.blueColor,
+                    foregroundColor: Colors.white, backgroundColor: MyColor.blueColor,
                   ),
                   onPressed: () {
                     setState(() {

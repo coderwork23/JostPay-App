@@ -8,7 +8,6 @@ import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
-import 'package:jost_pay_wallet/Values/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -176,7 +175,7 @@ class _AddAssetsScreenState extends State<AddAssetsScreen> {
       // ignore: use_build_context_synchronously
       Navigator.pop(context,"refresh");
       await DBTokenProvider.dbTokenProvider.deleteToken(DBTokenProvider.dbTokenProvider.tokenList[index].id.toString());
-      await  DBTokenProvider.dbTokenProvider.tokenList.removeAt(index);
+      DBTokenProvider.dbTokenProvider.tokenList.removeAt(index);
 
     }else{
       // ignore: use_build_context_synchronously

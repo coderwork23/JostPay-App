@@ -6,7 +6,7 @@ import '../../../../Values/MyStyle.dart';
 class signTransactions2 extends StatefulWidget {
   final String publicKey;
 
-  signTransactions2( {Key? key,required this.publicKey}) : super(key: key);
+  const signTransactions2( {Key? key,required this.publicKey}) : super(key: key);
 
   @override
   _signTransactions2State createState() => _signTransactions2State();

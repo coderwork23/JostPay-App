@@ -346,7 +346,7 @@ class _LoginScreenState extends State<LoginScreen> {
   deleteAllAccountApi() async {
 
     var data = {
-      "device_id":"$deviceId"
+      "device_id":deviceId
     };
 
     await accountProvider.forgotPassword(data,'/forgotPassword');

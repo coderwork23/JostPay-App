@@ -9,7 +9,6 @@ import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Models/NetworkModel.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
-import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/AddAssetsScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/ReceiveToken/ReceiveTokenList.dart';
@@ -363,7 +362,6 @@ class _WalletScreenState extends State<WalletScreen> {
 
       if (DBTokenProvider.dbTokenProvider.tokenList[i].balance == "" ||
           DBTokenProvider.dbTokenProvider.tokenList[i].balance == "0" ||
-          DBTokenProvider.dbTokenProvider.tokenList[i].balance == null ||
           DBTokenProvider.dbTokenProvider.tokenList[i].price == 0.0
       ) {
         valueUsd += 0;

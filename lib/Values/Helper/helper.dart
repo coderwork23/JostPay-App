@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jost_pay_wallet/Values/MyColor.dart';
-import 'package:jost_pay_wallet/Values/MyColor.dart';
 
 class Helper {
   static final Helper dialogCall = Helper._();

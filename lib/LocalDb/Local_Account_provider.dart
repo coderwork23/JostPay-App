@@ -73,26 +73,6 @@ class DBAccountProvider {
   }
 
 
-  updateAccount(int id,String seedPharse,String privateAddress,String btcPrivateKey,String solPrivateKey,String dotPrivateKey) async {
 
-    final db = await database;
-    final res = await db!.rawQuery("UPDATE Account SET mnemonic = '$seedPharse',privateKey = '$privateAddress',btcPrivateKey = '$btcPrivateKey',solPrivateKey = '$solPrivateKey', dotPrivateKey = '$dotPrivateKey' WHERE id = '$id'");
-
-    final res2 = await db.rawQuery("SELECT * FROM Account");
-    //print(res2);
-    return res;
-
-  }
-
-  updateAccountName(int id,String name) async {
-
-    final db = await database;
-    final res = await db!.rawQuery("UPDATE Account SET name = '$name' WHERE id = '$id'");
-
-    final res2 = await db.rawQuery("SELECT * FROM Account");
-    //print(res2);
-    return res;
-
-  }
 
 }

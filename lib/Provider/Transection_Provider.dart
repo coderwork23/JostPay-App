@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
 import 'package:jost_pay_wallet/Models/TransectionModel.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
@@ -81,6 +82,8 @@ class TransectionProvider with ChangeNotifier{
 
 
   List<TransectionList> transectionList = [];
+  
+
   getTransection(data,url) async {
     isLoading = true;
     notifyListeners();
@@ -101,9 +104,16 @@ class TransectionProvider with ChangeNotifier{
         list  = client.map<TransectionList>((json) => TransectionList.fromJson(json)).toList();
 
         transectionList.addAll(list);
+        List<TransectionList> tempValue = [];
+        tempValue.addAll(transectionList.reversed.toList());
+        transectionList.clear();
+        transectionList.addAll(tempValue);
+        tempValue.clear();
+
 
         isSuccess = true;
         isLoading = false;
+
         notifyListeners();
       }
       else {

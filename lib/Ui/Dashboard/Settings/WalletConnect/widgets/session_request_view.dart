@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
@@ -167,8 +166,7 @@ class _SessionRequestViewState extends State<SessionRequestView> {
                     height: 40.0,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        primary: Colors.white,
-                        backgroundColor: MyColor.blueColor,
+                        foregroundColor: Colors.white, backgroundColor: MyColor.blueColor,
                       ),
                       onPressed: () {
                         final SessionNamespaces params = {};
@@ -176,8 +174,8 @@ class _SessionRequestViewState extends State<SessionRequestView> {
                             in widget.proposal.requiredNamespaces.entries) {
                           final List<String> accounts = [];
 
-                          accounts.add("eip155:$chinId:"+widget.account1);
-                          print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"+accounts.toString());
+                          accounts.add("eip155:$chinId:${widget.account1}");
+                          print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~$accounts");
                           params[entry.key] = SessionNamespace(
                             accounts: accounts,
                             methods: entry.value.methods,
@@ -204,8 +202,7 @@ class _SessionRequestViewState extends State<SessionRequestView> {
                     height: 40.0,
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        primary: Colors.white,
-                        backgroundColor: Colors.red.shade300,
+                        foregroundColor: Colors.white, backgroundColor: Colors.red.shade300,
                       ),
                       onPressed: widget.onReject,
                       child: const Text(
@@ -232,8 +229,7 @@ class NamespaceView extends StatefulWidget {
   final String accountAddress;
   final ProposalRequiredNamespace namespace;
 
-  const NamespaceView({
-    key,
+  const NamespaceView({super.key,
      required this.type,
      required this.accountAddress,
      required this.namespace,
@@ -282,7 +278,7 @@ class _NamespaceViewState extends State<NamespaceView> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                          padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                           child: Text(
                             'Methods',
                             style:  MyStyle.tx18RWhite.copyWith(
@@ -299,7 +295,7 @@ class _NamespaceViewState extends State<NamespaceView> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                          padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                           child: Text(
                             'Events',
                             style:  MyStyle.tx18RWhite.copyWith(
@@ -320,7 +316,7 @@ class _NamespaceViewState extends State<NamespaceView> {
                   ))
               .toList(),
           Padding(
-            padding: EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               "Selected Account",
               style:  MyStyle.tx18RWhite.copyWith(
