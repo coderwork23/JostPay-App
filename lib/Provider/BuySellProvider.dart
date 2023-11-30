@@ -428,7 +428,7 @@ class BuySellProvider with ChangeNotifier{
     await ApiHandler.getInstantApi(params).then((responseData) async {
       var value = json.decode(responseData.body);
 
-      //print("object id ---> $value");
+      // print("object id ---> $value");
       if (responseData.statusCode == 200 && value['error'] == null) {
         await DbSellHistory.dbSellHistory.getSellHistory(accountId);
         sellResponce = value;
@@ -476,7 +476,8 @@ class BuySellProvider with ChangeNotifier{
                 ),
               )
           );
-        }else{
+        }
+        else{
           // ignore: use_build_context_synchronously
           Navigator.pop(context,"refresh");
 

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -146,6 +148,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
       networkSymbol = networkList[0].symbol;
       isTxfees = networkList[0].isTxfees;
       toController = TextEditingController(text: widget.sellResponce['payin_address']);
+      // print("payin_amount ${widget.sellResponce['payin_amount']}");
       sendTokenQuantity.text = widget.sellResponce['payin_amount'].toString().split(" ").first;
     });
 
@@ -710,7 +713,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
       "from": selectedAccountAddress,
       "to": toController.text,
       "token_id": sendTokenId,
-      "value": sendTokenQuantity.text,
+      "value": sendTokenNetworkId != "9" ? sendTokenQuantity.text : double.parse(sendTokenQuantity.text).toStringAsFixed(3),
       "gasPrice": sendGasPrice,
       "gas": sendGas,
       "nonce": sendNonce,
@@ -726,7 +729,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
     if( transectionProvider.isSend == true){
 
       // ignore: use_build_context_synchronously
-      Navigator.pop(context,"refresh");
+      // Navigator.pop(context,"refresh");
 
       // ignore: use_build_context_synchronously
       Helper.dialogCall.showToast(context, "Send Token Successfully Done");
@@ -737,11 +740,11 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
         sendGasPrice = "";
         sendGas = "";
         sendNonce = "";
-        sendTransactionFee = "";
+        sendTransactionFee = "0";
 
         // fromAddressController.clear();
         toController.clear();
-        sendTokenQuantity.clear();
+        sendTokenQuantity.text = "0";
 
         notifyOrder(context);
 

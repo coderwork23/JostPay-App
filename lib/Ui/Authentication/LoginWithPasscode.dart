@@ -181,7 +181,7 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
       "password":"$password",
     };
 
-    print("login ${json.encode(data)}");
+    // print("login ${json.encode(data)}");
 
     await accountProvider.loginAccount(data,'/deviceLogin');
     if(accountProvider.isSuccess == true){
@@ -228,8 +228,8 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString("loginTime", "${DateTime.now().add(const Duration(minutes: 1))}");
 
-    print(Utils.pageType);
-    print(Utils.wcUrlVal == "");
+    // print(Utils.pageType);
+    // print(Utils.wcUrlVal == "");
     if(Utils.pageType == "NewPage" && Utils.wcUrlVal == "" ){
       Navigator.pop(context);
       Navigator.pop(context);

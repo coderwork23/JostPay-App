@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
@@ -665,7 +667,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       "from": selectedAccountAddress,
       "to": toController.text,
       "token_id": sendTokenId,
-      "value": sendTokenQuantity.text,
+      "value": sendTokenNetworkId == "9"  ? double.parse(sendTokenQuantity.text).toStringAsFixed(6): sendTokenQuantity.text,
       "gasPrice": sendGasPrice,
       "gas": sendGas,
       "nonce": sendNonce,
@@ -776,8 +778,8 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         isLoading = false;
         networkFees = "${body['transactionFee']}";
 
-        print("networkFees ${double.parse(networkFees).toStringAsFixed(5)}");
-        print(networkFees);
+        // print("networkFees ${double.parse(networkFees).toStringAsFixed(5)}");
+        // print(networkFees);
 
         if (sendTokenAddress != "") {
           sendTokenQuantity.text = "${double.parse(sendTokenBalance)}";

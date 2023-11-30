@@ -613,8 +613,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 GroupedListView(
                   shrinkWrap: true,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  order: GroupedListOrder.DESC,
                   elements: transectionProvider.transectionList,
+                  groupComparator: (value1, value2) => value2.compareTo(value1),
                   groupBy: (element) => element.timeStamp == "undefined"
                       ?
                   DateTime.now().toString().substring(0,10)
@@ -676,6 +676,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
                             Expanded(
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
@@ -745,6 +746,13 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                       ),
                                     ],
                                   ),
+                                  // const SizedBox(height: 2),
+                                  // Text(
+                                  //     DateFormat('dd MM yyyyy hh:mma').format(DateTime.fromMillisecondsSinceEpoch(int.parse(element.timeStamp) * 1000)),
+                                  //   style: MyStyle.tx18BWhite.copyWith(
+                                  //     fontSize: 15
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),

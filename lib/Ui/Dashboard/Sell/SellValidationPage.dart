@@ -50,7 +50,7 @@ class _SellValidationPageState extends State<SellValidationPage> {
 
     var sendData = widget.sendData;
 
-    print(json.encode(widget.params));
+    // print(json.encode(widget.params));
 
     // ignore: use_build_context_synchronously
     await buySellProvider.sellOrder(

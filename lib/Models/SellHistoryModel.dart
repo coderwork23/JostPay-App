@@ -38,7 +38,7 @@ class SellHistoryModel {
   });
 
   factory SellHistoryModel.fromJson(Map<String, dynamic> json,acId,name,bankName,acNo,acName) {
-    print("model id $acName");
+    // print("model id $acName");
     return SellHistoryModel(
       amountPayableNgn: json["amount_payable_ngn"]??0,
       invoice: json["invoice"]??"",

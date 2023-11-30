@@ -209,7 +209,7 @@ class ExchangeProvider with ChangeNotifier{
     await ApiHandler.postExchange(url,body).then((responseData) async {
 
       var value = json.decode(responseData.body);
-      print("object url ---> $value");
+      // print("object url ---> $value");
       if(responseData.statusCode == 200) {
         payinAddress = value["payinAddress"];
         payoutAddress = value["payoutAddress"];

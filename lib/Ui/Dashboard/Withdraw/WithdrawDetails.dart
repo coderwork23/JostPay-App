@@ -731,7 +731,7 @@ class _WithdrawDetailsState extends State<WithdrawDetails> {
                           ?
                       InkWell(
                         onTap: () {
-                          print(usdAmount < buySellProvider.minSellAmount);
+                          // print(usdAmount < buySellProvider.minSellAmount);
 
                           if(usdAmount < buySellProvider.minSellAmount || double.parse(sendTokenBalance) <  double.parse(priceController.text)){
                             Helper.dialogCall.showToast(context, "Insufficient balance");

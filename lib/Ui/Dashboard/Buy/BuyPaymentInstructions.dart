@@ -113,7 +113,7 @@ class _BuyPaymentInstructionsState extends State<BuyPaymentInstructions> {
                   "webConnect":listItem[11].split(",").first,
                 };
 
-                print(listItem);
+                // print(listItem);
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
