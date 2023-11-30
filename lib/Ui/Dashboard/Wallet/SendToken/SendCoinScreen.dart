@@ -667,7 +667,7 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
       "from": selectedAccountAddress,
       "to": toController.text,
       "token_id": sendTokenId,
-      "value": sendTokenNetworkId == "9"  ? double.parse(sendTokenQuantity.text).toStringAsFixed(6): sendTokenQuantity.text,
+      "value": sendTokenNetworkId == "9"  ? double.parse(sendTokenQuantity.text).toStringAsFixed(5): sendTokenQuantity.text,
       "gasPrice": sendGasPrice,
       "gas": sendGas,
       "nonce": sendNonce,

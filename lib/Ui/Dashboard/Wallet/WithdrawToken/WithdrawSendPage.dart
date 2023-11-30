@@ -713,7 +713,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
       "from": selectedAccountAddress,
       "to": toController.text,
       "token_id": sendTokenId,
-      "value": sendTokenNetworkId != "9" ? sendTokenQuantity.text : double.parse(sendTokenQuantity.text).toStringAsFixed(3),
+      "value": sendTokenNetworkId != "9" ? sendTokenQuantity.text : double.parse(sendTokenQuantity.text).toStringAsFixed(5),
       "gasPrice": sendGasPrice,
       "gas": sendGas,
       "nonce": sendNonce,
