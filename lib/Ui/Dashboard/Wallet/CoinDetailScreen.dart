@@ -681,7 +681,14 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                                     children: [
                                       // coin name text
                                       Expanded(
-                                        child: Text(
+                                        child:
+
+                                        Text(
+
+                                        element.txType != ""
+                                            ?
+                                          element.txType
+                                            :
                                           element.from.toLowerCase() == widget.selectedAccountAddress.toLowerCase()
                                               ?
                                           "Transfer" : "Deposit",
