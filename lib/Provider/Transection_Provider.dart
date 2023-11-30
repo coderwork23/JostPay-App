@@ -104,12 +104,6 @@ class TransectionProvider with ChangeNotifier{
         list  = client.map<TransectionList>((json) => TransectionList.fromJson(json)).toList();
 
         transectionList.addAll(list);
-        List<TransectionList> tempValue = [];
-        tempValue.addAll(transectionList.reversed.toList());
-        transectionList.clear();
-        transectionList.addAll(tempValue);
-        tempValue.clear();
-
 
         isSuccess = true;
         isLoading = false;

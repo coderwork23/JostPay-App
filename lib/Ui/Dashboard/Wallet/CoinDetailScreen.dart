@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:declarative_refresh_indicator/declarative_refresh_indicator.dart';
 import 'package:flutter/material.dart';
@@ -559,7 +561,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     ),
 
                     TextSpan(
-                      text: "Check explore",
+                      text: "Check explorer",
                       style: MyStyle.tx18BWhite.copyWith(
                         color: MyColor.greenColor,
                         fontSize: 14
@@ -611,21 +613,23 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 GroupedListView(
                   shrinkWrap: true,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
+                  order: GroupedListOrder.DESC,
                   elements: transectionProvider.transectionList,
-
                   groupBy: (element) => element.timeStamp == "undefined"
                       ?
-                  DateFormat('dd MMM yyyy').format(DateTime.now())
+                  DateTime.now().toString().substring(0,10)
                       :
-                  DateFormat('dd MMM yyyy').format(
-                      DateTime.fromMillisecondsSinceEpoch(int.parse(element.timeStamp) * 1000)
-                  ),
+                  DateTime.fromMillisecondsSinceEpoch(int.parse(element.timeStamp) * 1000).toString().substring(0,10),
 
-                  groupSeparatorBuilder: (value) {
+                  groupHeaderBuilder: (value) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 15.0),
                       child: Text(
-                        value,
+                        DateFormat("dd MMM yyyy").format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                            int.parse(value.timeStamp) * 1000
+                          )
+                        ),
                         style:MyStyle.tx18RWhite.copyWith(
                             fontSize: 14,
                             color: MyColor.grey01Color
@@ -633,7 +637,9 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                       ),
                     );
                   },
-                  itemBuilder: (context, dynamic element) {
+                  itemBuilder: (context,  element) {
+                    // print(DateTime.fromMillisecondsSinceEpoch(int.parse(element.timeStamp)));
+
                     return InkWell(
                       onTap: () {
                         launchUrl(

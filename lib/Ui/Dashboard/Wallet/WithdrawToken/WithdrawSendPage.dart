@@ -631,7 +631,8 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                       Center(
                         child: InkWell(
                           onTap: () {
-                            if((sendTokenAddress == "" && totalSendValue > double.parse(sendTokenBalance)) || double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)){
+                            if((sendTokenAddress == "" && totalSendValue > double.parse(sendTokenBalance))
+                                || double.parse(tokenBalance[0].balance) < double.parse(sendTransactionFee)){
                               Helper.dialogCall.showToast(context, "Insufficient balance to cover fees, reduce withdraw amount");
                             }
                           },
@@ -654,6 +655,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
                           :
                       InkWell(
                         onTap: () async {
+                          // print("check confirmSend ");
                           setState((){
                             isLoading = true;
                           });
