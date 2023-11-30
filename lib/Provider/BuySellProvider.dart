@@ -551,7 +551,6 @@ class BuySellProvider with ChangeNotifier{
       if (responseData.statusCode == 200 && value['info'] != null) {
         if(pageName == "") {
           Navigator.pop(context);
-          Navigator.pop(context);
         }
         placeNotifyOrder = true;
         notifyLoading = false;

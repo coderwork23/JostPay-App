@@ -729,7 +729,7 @@ class _WithdrawSendPageState extends State<WithdrawSendPage> {
     if( transectionProvider.isSend == true){
 
       // ignore: use_build_context_synchronously
-      // Navigator.pop(context,"refresh");
+      Navigator.pop(context,"refresh");
 
       // ignore: use_build_context_synchronously
       Helper.dialogCall.showToast(context, "Send Token Successfully Done");
