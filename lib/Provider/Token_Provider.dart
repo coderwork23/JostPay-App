@@ -245,7 +245,7 @@ class TokenProvider with ChangeNotifier {
       await ApiHandler.post(data,url).then((responseData){
 
         var value = json.decode(responseData.body);
-        // print(value);
+        // print("get balance ---> $value");
 
         if(responseData.statusCode == 200 && value["status"] == true) {
           tokenBalance = value;

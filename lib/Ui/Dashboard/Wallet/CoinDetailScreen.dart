@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:jost_pay_wallet/ApiHandlers/ApiHandle.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Network_Provider.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
 import 'package:jost_pay_wallet/Models/ExchangeTokenModel.dart';
@@ -18,6 +19,7 @@ import 'package:jost_pay_wallet/Ui/Dashboard/Wallet/WithdrawToken/WalletWithdraw
 import 'package:jost_pay_wallet/Values/MyColor.dart';
 import 'package:jost_pay_wallet/Values/MyStyle.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'ExchangeCoin/ExchangeScreen.dart';
 import 'ReceiveToken/ReceiveScreen.dart';
@@ -132,15 +134,24 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   // get token updated balance form api
   getCustomTokenBalance() async {
 
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var selectedAccountId = sharedPreferences.getString('accountId') ?? "";
+    await DbAccountAddress.dbAccountAddress.getPublicKey(selectedAccountId,9);
+    var trxPrivateKey = DbAccountAddress.dbAccountAddress.selectAccountPrivateAddress;
+
+
     var data = {
       "tokenAddress":widget.tokenAddress,
       "address":widget.selectedAccountAddress,
       "network_id":tokenNatewokrkId,
+      "trxPrivateKey":trxPrivateKey,
       "isCustomeRPC": false,
       "network_url":networkList.first.url,
       "network_name":networkList.first.name,
     };
 
+
+    // print("object ${jsonEncode(data)}");
 
     await tokenProvider.getTokenBalance(data,'/getTokenBalance');
     var body = tokenProvider.tokenBalance;
@@ -148,7 +159,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
 
       var getPrice = await DBTokenProvider.dbTokenProvider.getTokenUsdPrice(tokenId);
       setState((){
-
         tokenBalance = "${body['data']['balance']}";
         tokenUsd = "${double.parse(tokenBalance) * getPrice[0]['price']}";
       });
@@ -540,8 +550,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
             },
             child: Container(
               width: width,
-              padding: EdgeInsets.symmetric(vertical: 12),
-              margin: EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 15),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
@@ -612,22 +622,30 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     :
                 GroupedListView(
                   shrinkWrap: true,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   elements: transectionProvider.transectionList,
                   groupComparator: (value1, value2) => value2.compareTo(value1),
-                  groupBy: (element) => element.timeStamp == "undefined"
+                  groupBy: (element) {
+                    // print(element.timeStamp);
+                    return element.timeStamp == "undefined"
                       ?
                   DateTime.now().toString().substring(0,10)
                       :
-                  DateTime.fromMillisecondsSinceEpoch(int.parse(element.timeStamp) * 1000).toString().substring(0,10),
+                  DateTime.fromMillisecondsSinceEpoch(int.parse(element.timeStamp) * 1000).toString().substring(0,10);
+                  },
 
                   groupHeaderBuilder: (value) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 15.0),
                       child: Text(
+                        value.timeStamp == "undefined"
+                            ?
+                        DateFormat("dd MMM yyyy").format(DateTime.now())
+                            :
                         DateFormat("dd MMM yyyy").format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                            int.parse(value.timeStamp) * 1000
+                            DateTime.fromMillisecondsSinceEpoch(
+                                int.parse( value.timeStamp) * 1000
                           )
                         ),
                         style:MyStyle.tx18RWhite.copyWith(

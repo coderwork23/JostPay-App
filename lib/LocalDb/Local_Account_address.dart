@@ -77,9 +77,11 @@ class DbAccountAddress{
 
     final db = await database;
     final res = await db!.rawQuery("SELECT publicAddress,privateAddress FROM AccountAddress Where accountId = '$accountId' AND networkId = '$networkId'");
-    selectAccountPublicAddress = "${res[0]["publicAddress"]}";
-    selectAccountPrivateAddress = "${res[0]["privateAddress"]}";
 
+    if(res.isNotEmpty) {
+      selectAccountPublicAddress = "${res[0]["publicAddress"]}";
+      selectAccountPrivateAddress = "${res[0]["privateAddress"]}";
+    }
   }
 
   String selectPrivateAdd = "";
