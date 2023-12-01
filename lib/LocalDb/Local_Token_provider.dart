@@ -201,6 +201,7 @@ class DBTokenProvider{
 
   updateTokenBalance(String balance,String id) async {
 
+    // print("db balance $balance");
     final db = await database;
     final res = await db!.rawUpdate("UPDATE Token SET balance = $balance WHERE id = '$id'");
 

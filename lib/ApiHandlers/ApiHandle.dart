@@ -99,12 +99,12 @@ class ApiHandler {
 
   static String showFiveBalance(String value){
 
-    String firstValue = value.split(".").first;
+    String getValue = double.parse(value).toStringAsFixed(7);
+    String firstValue = getValue.split(".").first;
     String newValue = "";
     if(value.contains(".")){
-
-      if(value.split(".").last.length > 5){
-        newValue = "$firstValue.${value.split(".").last.substring(0,5)}";
+      if(getValue.split(".").last.length > 5){
+        newValue = "$firstValue.${getValue.split(".").last.substring(0,5)}";
       }else{
         newValue = value;
       }
@@ -112,6 +112,8 @@ class ApiHandler {
       newValue = value;
     }
 
+    // print(value);
+    // print(newValue);
     return newValue;
 
   }

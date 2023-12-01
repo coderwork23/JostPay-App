@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:declarative_refresh_indicator/declarative_refresh_indicator.dart';
 import 'package:flutter/material.dart';
@@ -295,7 +296,6 @@ class _WalletScreenState extends State<WalletScreen> {
     socket!.onConnect((_) {
 
       socket!.on("getTokenBalance", (response) async {
-        // print(json.encode(response));
         if(mounted) {
           if (response["status"] == true) {
               if (response["data"]["balance"] != "null") {
