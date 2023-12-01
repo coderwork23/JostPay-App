@@ -543,10 +543,22 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
           // Cannot find your transaction
           InkWell(
             onTap: () {
-              launchUrl(
-                Uri.parse(widget.explorerUrl),
-                mode: LaunchMode.externalApplication,
-              );
+              if(sendTokenType == "BEP20"){
+                launchUrl(
+                  Uri.parse("https://bscscan.com/token/${widget.tokenAddress}?a=${widget.selectedAccountAddress}"),
+                  mode: LaunchMode.externalApplication,
+                );
+              }else if(sendTokenType ==  "TRC20") {
+                launchUrl(
+                  Uri.parse("https://tronscan.org/#/address/${widget.selectedAccountAddress}"),
+                  mode: LaunchMode.externalApplication,
+                );
+              }else {
+                launchUrl(
+                  Uri.parse(widget.explorerUrl),
+                  mode: LaunchMode.externalApplication,
+                );
+              }
             },
             child: Container(
               width: width,
@@ -627,7 +639,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                   elements: transectionProvider.transectionList,
                   groupComparator: (value1, value2) => value2.compareTo(value1),
                   groupBy: (element) {
-                    // print(element.timeStamp);
                     return element.timeStamp == "undefined"
                       ?
                   DateTime.now().toString().substring(0,10)
@@ -656,7 +667,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     );
                   },
                   itemBuilder: (context,  element) {
-                    // print(DateTime.fromMillisecondsSinceEpoch(int.parse(element.timeStamp)));
 
                     return InkWell(
                       onTap: () {

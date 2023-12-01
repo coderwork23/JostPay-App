@@ -1,6 +1,10 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:jost_pay_wallet/LocalDb/Local_Account_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Walletv2_provider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Ui/Authentication/WelcomeScreen.dart';
 import 'package:jost_pay_wallet/Ui/Dashboard/DashboardScreen.dart';
@@ -352,8 +356,12 @@ class _LoginScreenState extends State<LoginScreen> {
     await accountProvider.forgotPassword(data,'/forgotPassword');
 
     if(accountProvider.isPassword == true){
-      DBAccountProvider.dbAccountProvider.deleteAllAccount();
+      await DBAccountProvider.dbAccountProvider.deleteAllAccount();
       await DbAccountAddress.dbAccountAddress.deleteAllAccountAddress();
+      await DbExTransaction.dbExTransaction.deleteAllExTransaction();
+      await DbSellHistory.dbSellHistory.deleteAllSellHistory();
+      await DBTokenProvider.dbTokenProvider.deleteAllToken();
+      await DBWalletConnectV2.dbWalletConnectV2.deleteAllWallet();
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('isLogin', 'false');
       sharedPreferences.clear();

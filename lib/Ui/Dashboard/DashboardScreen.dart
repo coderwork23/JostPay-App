@@ -806,172 +806,186 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     _internetProvider = Provider.of<InternetProvider>(context, listen: true);
     final dashProvider = Provider.of<DashboardProvider>(context,listen: true);
 
-    return  Scaffold(
-    key: _scaffoldKey,
-      extendBody: true,
-      bottomNavigationBar: Container(
-        height: 60,
-        alignment: Alignment.bottomCenter,
-        padding: const EdgeInsets.only(top: 10),
-        decoration: BoxDecoration(
-          color:  MyColor.backgroundColor,
-          border: Border.all(
-            color: MyColor.boarderColor
-          ),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(14),
-            topRight: Radius.circular(14),
-          ),
-        ),
-        child: Row(
-          children: [
+    print("${_internetProvider.isOnline}");
 
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  dashProvider.changeBottomIndex(0);
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Image.asset(
-                      "assets/images/dashboard/wallet.png",
-                      height: 20,
-                      width: 20,
-                      fit: BoxFit.contain,
-                      color: dashProvider.currentIndex == 0 ? MyColor.greenColor : MyColor.textGreyColor,
-                    ),
-                    Text(
-                      "Wallet",
-                      style: MyStyle.tx18RWhite.copyWith(
-                        fontSize: 13,
-                        color: dashProvider.currentIndex == 0 ? MyColor.greenColor : MyColor.textGreyColor,
-                      ),
-                    )
-                  ],
+    return  Scaffold(
+        key: _scaffoldKey,
+        extendBody: true,
+        bottomNavigationBar: IntrinsicHeight(
+          child: Container(
+              alignment: Alignment.bottomCenter,
+              padding: const EdgeInsets.only(top: 10),
+              decoration: BoxDecoration(
+                color:  MyColor.backgroundColor,
+                border: Border.all(
+                  color: MyColor.boarderColor
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(14),
+                  topRight: Radius.circular(14),
                 ),
               ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  dashProvider.changeBottomIndex(1);
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Image.asset(
-                      "assets/images/dashboard/card.png",
-                      height: 26,
-                      width: 26,
-                      fit: BoxFit.contain,
-                      color: dashProvider.currentIndex == 1 ? MyColor.greenColor : MyColor.textGreyColor,
-                    ),
-                    Text(
-                      "Buy/Sell",
-                      style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 13,
-                        color: dashProvider.currentIndex == 1 ? MyColor.greenColor : MyColor.textGreyColor,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            dashProvider.changeBottomIndex(0);
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Image.asset(
+                                "assets/images/dashboard/wallet.png",
+                                height: 20,
+                                width: 20,
+                                fit: BoxFit.contain,
+                                color: dashProvider.currentIndex == 0 ? MyColor.greenColor : MyColor.textGreyColor,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Wallet",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 13,
+                                  color: dashProvider.currentIndex == 0 ? MyColor.greenColor : MyColor.textGreyColor,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  dashProvider.changeBottomIndex(2);
-                  dashProvider.changeDefaultCoin("");
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Image.asset(
-                      "assets/images/dashboard/card.png",
-                      height: 26,
-                      width: 26,
-                      fit: BoxFit.contain,
-                          color: dashProvider.currentIndex == 2 ? MyColor.greenColor : MyColor.textGreyColor,
-                    ),
-                    Text(
-                      "Withdraw",
-                      style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 13,
-                          color: dashProvider.currentIndex == 2 ? MyColor.greenColor : MyColor.textGreyColor,
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            dashProvider.changeBottomIndex(1);
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Image.asset(
+                                "assets/images/dashboard/card.png",
+                                height: 26,
+                                width: 26,
+                                fit: BoxFit.contain,
+                                color: dashProvider.currentIndex == 1 ? MyColor.greenColor : MyColor.textGreyColor,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Buy/Sell",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 13,
+                                  color: dashProvider.currentIndex == 1 ? MyColor.greenColor : MyColor.textGreyColor,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  dashProvider.changeBottomIndex(3);
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Image.asset(
-                      "assets/images/dashboard/support.png",
-                      height: 22,
-                      width: 22 ,
-                      fit: BoxFit.contain,
-                          color: dashProvider.currentIndex == 3 ? MyColor.greenColor : MyColor.textGreyColor,
-                    ),
-                    Text(
-                      "Support",
-                      style: MyStyle.tx18RWhite.copyWith(
-                          fontSize: 13,
-                          color: dashProvider.currentIndex == 3 ? MyColor.greenColor : MyColor.textGreyColor,
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            dashProvider.changeBottomIndex(2);
+                            dashProvider.changeDefaultCoin("");
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Image.asset(
+                                "assets/images/dashboard/card.png",
+                                height: 26,
+                                width: 26,
+                                fit: BoxFit.contain,
+                                    color: dashProvider.currentIndex == 2 ? MyColor.greenColor : MyColor.textGreyColor,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Withdraw",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 13,
+                                    color: dashProvider.currentIndex == 2 ? MyColor.greenColor : MyColor.textGreyColor,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: InkWell(
-                onTap: () {
-                  dashProvider.changeBottomIndex(4);
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Image.asset(
-                      "assets/images/dashboard/setting.png",
-                      height: 22,
-                      width: 22,
-                      fit: BoxFit.contain,
-                          color: dashProvider.currentIndex == 4 ? MyColor.greenColor : MyColor.textGreyColor,
-                    ),
-                    Text(
-                      "Setting",
-                      style: MyStyle.tx18RWhite.copyWith(
-                        fontSize: 13,
-                          color: dashProvider.currentIndex == 4 ? MyColor.greenColor : MyColor.textGreyColor,
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            dashProvider.changeBottomIndex(3);
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Image.asset(
+                                "assets/images/dashboard/support.png",
+                                height: 22,
+                                width: 22 ,
+                                fit: BoxFit.contain,
+                                    color: dashProvider.currentIndex == 3 ? MyColor.greenColor : MyColor.textGreyColor,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Support",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                    fontSize: 13,
+                                    color: dashProvider.currentIndex == 3 ? MyColor.greenColor : MyColor.textGreyColor,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
-                    )
-                  ],
-                ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            dashProvider.changeBottomIndex(4);
+                          },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Image.asset(
+                                "assets/images/dashboard/setting.png",
+                                height: 22,
+                                width: 22,
+                                fit: BoxFit.contain,
+                                    color: dashProvider.currentIndex == 4 ? MyColor.greenColor : MyColor.textGreyColor,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Setting",
+                                style: MyStyle.tx18RWhite.copyWith(
+                                  fontSize: 13,
+                                    color: dashProvider.currentIndex == 4 ? MyColor.greenColor : MyColor.textGreyColor,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                ],
               ),
-            ),
-          ],
+          ),
         ),
-      ),
-      body: WillPopScope(
+        body: WillPopScope(
         onWillPop: (){
           return _onWillPop();
         },
         child: Stack(
           children:[
+            body[dashProvider.currentIndex],
+
             _internetProvider.isOnline == false
                 ?
             Positioned(
-              bottom: 95,
               left: 0,
               right: 0,
+              bottom: 0,
               child: Container(
                 height: 38,
                 margin: const EdgeInsets.only(bottom: 10),
@@ -991,7 +1005,6 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                 :
             const SizedBox(),
 
-            body[dashProvider.currentIndex]
           ],
         ),
       )

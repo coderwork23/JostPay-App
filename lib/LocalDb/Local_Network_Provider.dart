@@ -71,4 +71,5 @@ class DbNetwork{
     networkList = list;
   }
 
+
 }

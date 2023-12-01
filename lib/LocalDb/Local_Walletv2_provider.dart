@@ -82,4 +82,10 @@ class DBWalletConnectV2{
   }
 
 
+  Future<int?> deleteAllWallet() async {
+    final db = await database;
+    final res = await db?.rawDelete('DELETE FROM walletConnect');
+    return res;
+  }
+
 }

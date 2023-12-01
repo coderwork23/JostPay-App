@@ -1,5 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:jost_pay_wallet/LocalDb/Local_Ex_Transaction_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Sell_History_address.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Token_provider.dart';
+import 'package:jost_pay_wallet/LocalDb/Local_Walletv2_provider.dart';
 import 'package:jost_pay_wallet/Provider/DashboardProvider.dart';
 import 'package:jost_pay_wallet/Values/Helper/helper.dart';
 import 'package:jost_pay_wallet/Values/utils.dart';
@@ -166,10 +170,12 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     deviceId = sharedPreferences.getString('deviceId')!;
     String? password = sharedPreferences.getString('passcode');
+
     setState(() {
       passwordController.text = password!;
     });
 
+    // ignore: use_build_context_synchronously
     Helper.dialogCall.showAlertDialog(context);
     setState((){
       isLoading = true;
@@ -190,7 +196,9 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
 
     }
     else{
+      // ignore: use_build_context_synchronously
       Helper.dialogCall.showToast(context, "Incorrect Password !!");
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
       setState((){
         isLoading = false;
@@ -281,11 +289,15 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
         setState(() {
           isLoading = false;
         });
+        // ignore: use_build_context_synchronously
         Helper.dialogCall.showToast(context, "Incorrect Password!!");
+        // ignore: use_build_context_synchronously
         Navigator.pop(context);
       }
     }catch(e){
+      // ignore: use_build_context_synchronously
       Helper.dialogCall.showToast(context, "Incorrect Password!!");
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
 
       setState(() {
@@ -358,8 +370,12 @@ class _LoginWithPassCodeState extends State<LoginWithPassCode> {
     await accountProvider.forgotPassword(data,'/forgotPassword');
 
     if(accountProvider.isPassword == true){
-      DBAccountProvider.dbAccountProvider.deleteAllAccount();
+      await DBAccountProvider.dbAccountProvider.deleteAllAccount();
       await DbAccountAddress.dbAccountAddress.deleteAllAccountAddress();
+      await DbExTransaction.dbExTransaction.deleteAllExTransaction();
+      await DbSellHistory.dbSellHistory.deleteAllSellHistory();
+      await DBTokenProvider.dbTokenProvider.deleteAllToken();
+      await DBWalletConnectV2.dbWalletConnectV2.deleteAllWallet();
       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('isLogin', 'false');
       sharedPreferences.clear();

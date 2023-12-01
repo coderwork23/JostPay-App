@@ -95,5 +95,9 @@ class DbExTransaction{
     return getTrxStatusData;
   }
 
-
+  Future<int?> deleteAllExTransaction() async {
+    final db = await database;
+    final res = await db?.rawDelete('DELETE FROM ExTransaction');
+    return res;
+  }
 }
