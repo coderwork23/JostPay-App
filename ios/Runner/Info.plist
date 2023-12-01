@@ -16,6 +16,10 @@
 	<string>JostPay Wallet</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>NSCameraUsageDescription</key>
+    <string>This app needs camera access to scan QR codes</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>for security reason app is authenticating using face id</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
