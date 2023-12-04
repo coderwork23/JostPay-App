@@ -160,7 +160,7 @@ class _CreatePasswordState extends State<CreatePassword> {
           height: 45,
           margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
           padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: nameController.text.isEmpty || passController.text.isEmpty || rePassController.text.isEmpty
+          decoration:  passController.text.isEmpty || rePassController.text.isEmpty
               ?
           MyStyle.invalidDecoration
               :
@@ -168,7 +168,7 @@ class _CreatePasswordState extends State<CreatePassword> {
           child: Text(
               "Continue",
               style: MyStyle.tx18BWhite.copyWith(
-                color: nameController.text.isEmpty || passController.text.isEmpty || rePassController.text.isEmpty
+                color:  passController.text.isEmpty || rePassController.text.isEmpty
                     ?
                 MyColor.mainWhiteColor.withOpacity(0.4)
                     :
@@ -179,6 +179,7 @@ class _CreatePasswordState extends State<CreatePassword> {
       ),
 
 
+      // boost brief juice post song gasp check hub husband sword patrol vicious
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
@@ -221,25 +222,28 @@ class _CreatePasswordState extends State<CreatePassword> {
 
                 const SizedBox(height: 22),
 
-                TextFormField(
-                  controller: nameController,
-                  validator: (value) {
-                    if(value!.isEmpty){
-                      return "Please enter wallet name";
-                    }else{
-                      return null;
-                    }
-                  },
-                  cursorColor: MyColor.greenColor,
-                  style: MyStyle.tx18RWhite,
-                  decoration: MyStyle.textInputDecoration.copyWith(
-                      hintText: "Wallet Name",
-                      isDense: false,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 15
-                      ),
+                Visibility(
+                  visible: widget.isNew,
+                  child: TextFormField(
+                    controller: nameController,
+                    validator: (value) {
+                      if(value!.isEmpty){
+                        return "Please enter wallet name";
+                      }else{
+                        return null;
+                      }
+                    },
+                    cursorColor: MyColor.greenColor,
+                    style: MyStyle.tx18RWhite,
+                    decoration: MyStyle.textInputDecoration.copyWith(
+                        hintText: "Wallet Name",
+                        isDense: false,
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 15
+                        ),
 
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),

@@ -16,7 +16,7 @@ class ApiHandler {
                 '4fe0c4203533aa61c0fae455ac8d9d07cb237fbf5b8b1e92a783319c02fa5a8d'
           };
 
-      var baseUrl = Uri.http(Utils.url, '/api$url');
+      var baseUrl = Uri.https(Utils.url, '/api$url');
 
       http.Response response = await http.post(
           baseUrl,
@@ -29,7 +29,7 @@ class ApiHandler {
   }
   static Future<dynamic> get(url) async {
 
-      var baseUrl = Uri.http(Utils.url, '/api$url');
+      var baseUrl = Uri.https(Utils.url, '/api$url');
 
       setHeadersGet() => {
             'Content-type': 'application/json',

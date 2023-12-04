@@ -252,14 +252,15 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
   }
 
   newGetToken(String accountId) async {
-    // await DbAccountAddress.dbAccountAddress.getAccountAddress(accountId);
+    await DbAccountAddress.dbAccountAddress.getAccountAddress(accountId);
 
-    // for (int i = 0; i < DbAccountAddress.dbAccountAddress.allAccountAddress.length; i++) {
-      var data ={
-        "id":"1,2,74,328,825,1027,1839,1958"
-      };
-      await tokenProvider.getAccountToken(data, '/v1/cryptocurrency/quotes/latest', accountId);
-    // }
+    var data = {};
+
+    for (int j = 0; j < DbAccountAddress.dbAccountAddress.allAccountAddress.length; j++) {
+      data[DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicKeyName] = DbAccountAddress.dbAccountAddress.allAccountAddress[j].publicAddress;
+    }
+    await tokenProvider.getAccountToken(data, '/getAccountTokens', accountId);
+
 
     // ignore: use_build_context_synchronously
     Navigator.pop(context,"refresh");

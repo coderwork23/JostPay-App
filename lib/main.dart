@@ -122,6 +122,7 @@ class _MyAppState extends State<MyApp> {
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
           appBarTheme: const AppBarTheme(
+            backgroundColor: MyColor.backgroundColor,
             elevation: 0,
             titleTextStyle: MyStyle.tx18BWhite
           )

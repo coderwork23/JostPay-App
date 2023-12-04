@@ -280,7 +280,7 @@ class _WalletScreenState extends State<WalletScreen> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     deviceId = sharedPreferences.getString('deviceId')!;
     // print("deviceId ----> $deviceId");
-    socket = IO.io('http://${Utils.url}/', <String, dynamic>{
+    socket = IO.io('https://${Utils.url}/', <String, dynamic>{
       "secure": true,
       "path":"/api/socket.io",
       "rejectUnauthorized": false,
@@ -296,6 +296,7 @@ class _WalletScreenState extends State<WalletScreen> {
     socket!.onConnect((_) {
 
       socket!.on("getTokenBalance", (response) async {
+        // print("response ----> $response");
         if(mounted) {
           if (response["status"] == true) {
               if (response["data"]["balance"] != "null") {
@@ -333,7 +334,7 @@ class _WalletScreenState extends State<WalletScreen> {
         "network_url":networkList.isEmpty ? "" : networkList.first.url,
       };
 
-      // print("socket emit ==>  $data");
+      // print("socket emit ==>  ${jsonEncode(data)}");
       socket!.emit("getTokenBalance", jsonEncode(data));
     }
 
@@ -859,3 +860,6 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
 }
+
+
+// animal observe leader clock gym remain alarm limit gate erupt glow blind
