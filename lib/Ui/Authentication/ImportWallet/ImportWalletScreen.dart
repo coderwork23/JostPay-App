@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
@@ -282,83 +284,91 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
     return Scaffold(
-      bottomNavigationBar: isLoading == true
-          ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
+
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          isLoading == true
+              ?
+          const SizedBox(
+              height:52,
+              child: Center(
+                  child: CircularProgressIndicator(
+                    color: MyColor.greenColor,
+                  )
               )
           )
-      )
-          :
-      widget.isNew
-          ?
-      InkWell(
-        onTap: () {
-          if(phraseController.text.isNotEmpty && nameController.text.isNotEmpty) {
-            newImportAccount();
-          }else{
-            Helper.dialogCall.showToast(context, "Please provider all details");
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(15,0,15,15),
-          alignment: Alignment.center,
-          height: 45,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: phraseController.text.isNotEmpty && nameController.text.isNotEmpty
-              ?
-          MyStyle.buttonDecoration
               :
-          MyStyle.invalidDecoration,
+          widget.isNew
+              ?
+          InkWell(
+            onTap: () {
+              if(phraseController.text.isNotEmpty && nameController.text.isNotEmpty) {
+                newImportAccount();
+              }else{
+                Helper.dialogCall.showToast(context, "Please provider all details");
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(15,0,15,15),
+              alignment: Alignment.center,
+              height: 45,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: phraseController.text.isNotEmpty && nameController.text.isNotEmpty
+                  ?
+              MyStyle.buttonDecoration
+                  :
+              MyStyle.invalidDecoration,
 
-          child: Text(
-            "Import wallet",
-            style:  MyStyle.tx18BWhite.copyWith(
-                color: phraseController.text.isNotEmpty && nameController.text.isNotEmpty
-                    ?
-                MyColor.mainWhiteColor
-                    :
-                MyColor.mainWhiteColor.withOpacity(0.4)
+              child: Text(
+                "Import wallet",
+                style:  MyStyle.tx18BWhite.copyWith(
+                    color: phraseController.text.isNotEmpty && nameController.text.isNotEmpty
+                        ?
+                    MyColor.mainWhiteColor
+                        :
+                    MyColor.mainWhiteColor.withOpacity(0.4)
+                ),
+              ),
+            ),
+          )
+              :
+          InkWell(
+            onTap: () {
+              if(phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty) {
+                importAccount();
+              }else{
+                Helper.dialogCall.showToast(context, "Please provider all details");
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(15,0,15,15),
+              alignment: Alignment.center,
+              height: 45,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty
+                  ?
+              MyStyle.buttonDecoration
+                  :
+              MyStyle.invalidDecoration,
+
+              child: Text(
+                "Import wallet",
+                style:  MyStyle.tx18BWhite.copyWith(
+                    color: phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty
+                        ?
+                    MyColor.mainWhiteColor
+                        :
+                    MyColor.mainWhiteColor.withOpacity(0.4)
+                ),
+              ),
             ),
           ),
-        ),
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty) {
-            importAccount();
-          }else{
-            Helper.dialogCall.showToast(context, "Please provider all details");
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(15,0,15,15),
-          alignment: Alignment.center,
-          height: 45,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty
-              ?
-          MyStyle.buttonDecoration
-              :
-          MyStyle.invalidDecoration,
 
-          child: Text(
-            "Import wallet",
-            style:  MyStyle.tx18BWhite.copyWith(
-                color: phraseController.text.isNotEmpty && pinCodeController.text.isNotEmpty
-                    ?
-                MyColor.mainWhiteColor
-                    :
-                MyColor.mainWhiteColor.withOpacity(0.4)
-            ),
-          ),
-        ),
+
+          SizedBox(height: Platform.isIOS ? 15 : 5),
+        ],
       ),
-
       appBar: AppBar(
         centerTitle: true,
         leading: InkWell(
@@ -387,7 +397,7 @@ class _ImportWalletScreenState extends State<ImportWalletScreen> {
                 const SizedBox(height: 22),
 
                 Text(
-                  "Enter the 12 recovery phrase your wew given when you created your account",
+                  "Enter the 12 recovery phrase your wew given when you created your accounts",
                   style:MyStyle.tx22RWhite.copyWith(
                       fontSize: 18,
                       color: MyColor.grey01Color

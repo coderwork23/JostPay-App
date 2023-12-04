@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Provider/Account_Provider.dart';
 import 'package:jost_pay_wallet/Provider/Token_Provider.dart';
@@ -107,75 +109,82 @@ class _CreatePasswordState extends State<CreatePassword> {
 
     //rule garment lens cat engine observe weasel minimum furnace shoot light tube
     return Scaffold(
-      bottomNavigationBar: isLoading == true
-          ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          isLoading == true
+              ?
+          const SizedBox(
+              height:52,
+              child: Center(
+                  child: CircularProgressIndicator(
+                    color: MyColor.greenColor,
+                  )
               )
           )
-      )
-          :
-      widget.isNew
-          ?
-      InkWell(
-        onTap: () {
-          if(nameController.text.isNotEmpty) {
-            importAccount();
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: nameController.text.isEmpty
-              ?
-          MyStyle.invalidDecoration
               :
-          MyStyle.buttonDecoration,
-          child: Text(
-              "Continue",
-              style: MyStyle.tx18BWhite.copyWith(
-                  color: nameController.text.isEmpty
-                      ?
-                  MyColor.mainWhiteColor.withOpacity(0.4)
-                      :
-                  MyColor.mainWhiteColor
-              )
-          ),
-        ),
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(formKey.currentState!.validate()) {
-            importAccount();
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration:  passController.text.isEmpty || rePassController.text.isEmpty
+          widget.isNew
               ?
-          MyStyle.invalidDecoration
+          InkWell(
+            onTap: () {
+              if(nameController.text.isNotEmpty) {
+                importAccount();
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: nameController.text.isEmpty
+                  ?
+              MyStyle.invalidDecoration
+                  :
+              MyStyle.buttonDecoration,
+              child: Text(
+                  "Continue",
+                  style: MyStyle.tx18BWhite.copyWith(
+                      color: nameController.text.isEmpty
+                          ?
+                      MyColor.mainWhiteColor.withOpacity(0.4)
+                          :
+                      MyColor.mainWhiteColor
+                  )
+              ),
+            ),
+          )
               :
-          MyStyle.buttonDecoration,
-          child: Text(
-              "Continue",
-              style: MyStyle.tx18BWhite.copyWith(
-                color:  passController.text.isEmpty || rePassController.text.isEmpty
-                    ?
-                MyColor.mainWhiteColor.withOpacity(0.4)
-                    :
-                MyColor.mainWhiteColor
-              )
+          InkWell(
+            onTap: () {
+              if(formKey.currentState!.validate()) {
+                importAccount();
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration:  passController.text.isEmpty || rePassController.text.isEmpty
+                  ?
+              MyStyle.invalidDecoration
+                  :
+              MyStyle.buttonDecoration,
+              child: Text(
+                  "Continue",
+                  style: MyStyle.tx18BWhite.copyWith(
+                      color:  passController.text.isEmpty || rePassController.text.isEmpty
+                          ?
+                      MyColor.mainWhiteColor.withOpacity(0.4)
+                          :
+                      MyColor.mainWhiteColor
+                  )
+              ),
+            ),
           ),
-        ),
+
+          SizedBox(height: Platform.isIOS ? 15 : 5),
+        ],
       ),
       appBar: AppBar(
         centerTitle: true,

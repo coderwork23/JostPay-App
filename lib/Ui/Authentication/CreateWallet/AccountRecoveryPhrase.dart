@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -56,64 +57,70 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
     var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      bottomNavigationBar: InkWell(
-        onTap: () {
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () {
 
-          var seedPhase = widget.seedPhrase;
+              var seedPhase = widget.seedPhrase;
 
-          var random =  Random();
-          List randomFive = [];
-          for(int i=0;randomFive.length < 3 ;i++){
+              var random =  Random();
+              List randomFive = [];
+              for(int i=0;randomFive.length < 3 ;i++){
 
-            int index = random.nextInt(seedPhase.length);
-            String element = seedPhase[index];
+                int index = random.nextInt(seedPhase.length);
+                String element = seedPhase[index];
 
-            var test = {
-              "id": index+1,
-              "name": element
-            };
+                var test = {
+                  "id": index+1,
+                  "name": element
+                };
 
-            //print(test);
+                //print(test);
 
-            int a = randomFive.indexWhere((element) => element['id'] == test['id']);
-            //  print("Index = $a");
+                int a = randomFive.indexWhere((element) => element['id'] == test['id']);
+                //  print("Index = $a");
 
-            if(a != -1){
+                if(a != -1){
 
-              //print(randomFive.toString());
+                  //print(randomFive.toString());
 
-            }
-            else{
-              randomFive.add(test);
-            }
-          }
+                }
+                else{
+                  randomFive.add(test);
+                }
+              }
 
-          //print(randomFive);
+              //print(randomFive);
 
-          Navigator.pop(context);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => VerifyRecoveryPhrase(
-                    seedPhrase: widget.seedPhrase,
-                    selectedParse: randomFive,
-                    isNew:widget.isNew,
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => VerifyRecoveryPhrase(
+                        seedPhrase: widget.seedPhrase,
+                        selectedParse: randomFive,
+                        isNew:widget.isNew,
+                      )
                   )
-              )
-          );
+              );
 
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: MyStyle.buttonDecoration,
-          child:  const Text(
-            "Continue",
-            style: MyStyle.tx18BWhite
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: MyStyle.buttonDecoration,
+              child:  const Text(
+                "Continue",
+                style: MyStyle.tx18BWhite
+              ),
+            ),
           ),
-        ),
+          SizedBox(height: Platform.isIOS ? 15 : 5),
+        ],
       ),
       appBar: AppBar(
         centerTitle: true,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dotted_decoration/dotted_decoration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -298,54 +300,61 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
     return  Scaffold(
       // continue button
-      bottomNavigationBar: isLoading == true
-          ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          isLoading == true
+              ?
+          const SizedBox(
+              height:52,
+              child: Center(
+                  child: CircularProgressIndicator(
+                    color: MyColor.greenColor,
+                  )
               )
           )
-      )
-          :
-      InkWell(
-        onTap: () async {
-          if(firstId == firstSelectId && secondId == secondSelectId && thardId == thardSelectId){
-
-            SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-            sharedPreferences.setString('isLogin', 'true');
-
-            getAccount();
-
-          }
-          else{
-            Helper.dialogCall.showToast(context, "Confirm Seed Phrase Failed Try Again");
-          }
-
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration:firstId == firstSelectId && secondId == secondSelectId && thardId == thardSelectId
-              ?
-          MyStyle.buttonDecoration
               :
-          MyStyle.invalidDecoration,
-          child: Text(
-              "Continue",
-              style: MyStyle.tx18BWhite.copyWith(
-                color:firstId == firstSelectId && secondId == secondSelectId && thardId == thardSelectId
-                    ?
-                MyColor.mainWhiteColor
-                    :
-                MyColor.mainWhiteColor.withOpacity(0.4)
-              )
+          InkWell(
+            onTap: () async {
+              if(firstId == firstSelectId && secondId == secondSelectId && thardId == thardSelectId){
+
+                SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+                sharedPreferences.setString('isLogin', 'true');
+
+                getAccount();
+
+              }
+              else{
+                Helper.dialogCall.showToast(context, "Confirm Seed Phrase Failed Try Again");
+              }
+
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.only(left: 12,right: 12,bottom: 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration:firstId == firstSelectId && secondId == secondSelectId && thardId == thardSelectId
+                  ?
+              MyStyle.buttonDecoration
+                  :
+              MyStyle.invalidDecoration,
+              child: Text(
+                  "Continue",
+                  style: MyStyle.tx18BWhite.copyWith(
+                      color:firstId == firstSelectId && secondId == secondSelectId && thardId == thardSelectId
+                          ?
+                      MyColor.mainWhiteColor
+                          :
+                      MyColor.mainWhiteColor.withOpacity(0.4)
+                  )
+              ),
+            ),
           ),
-        ),
+
+          SizedBox(height: Platform.isIOS ? 15 : 5),
+        ],
       ),
       appBar: AppBar(
         centerTitle: true,

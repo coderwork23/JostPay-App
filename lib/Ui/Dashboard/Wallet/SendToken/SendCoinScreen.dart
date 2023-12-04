@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:clipboard/clipboard.dart';
@@ -1127,9 +1128,11 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
             // Amount
             TextFormField(
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
               controller: sendTokenQuantity,
+              textInputAction: TextInputAction.done,
               inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
               ],
               onChanged: (value) {

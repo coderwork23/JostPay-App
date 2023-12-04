@@ -992,7 +992,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                           ),
                         ],
                       ),
-                      SizedBox(height: Platform.isIOS ? 15 : 5),
+                      SizedBox(height: Platform.isIOS ? 20 : 5),
                     ],
                   ),
               ),
