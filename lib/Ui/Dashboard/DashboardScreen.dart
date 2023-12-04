@@ -61,7 +61,6 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   ];
 
   _onWillPop() {
-    print("object _onWillPop");
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -224,7 +223,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   List<PairingStruct> pairings = [];
   void _initialize() async {
     signClient = await SignClient.init(
-      projectId: "73801621aec60dfaa2197c7640c15858",
+      projectId: "e39caded6045de94e5f6fdf0ef79c8be",
       relayUrl: "wss://relay.walletconnect.com",
       metadata: const AppMetadata(
         name: 'JostPay Wallet',
