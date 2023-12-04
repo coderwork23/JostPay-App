@@ -860,6 +860,3 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
 }
-
-
-// animal observe leader clock gym remain alarm limit gate erupt glow blind
