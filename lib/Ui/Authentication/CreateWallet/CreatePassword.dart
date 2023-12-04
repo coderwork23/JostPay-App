@@ -177,9 +177,6 @@ class _CreatePasswordState extends State<CreatePassword> {
           ),
         ),
       ),
-
-
-      // boost brief juice post song gasp check hub husband sword patrol vicious
       appBar: AppBar(
         centerTitle: true,
         leading:  InkWell(
