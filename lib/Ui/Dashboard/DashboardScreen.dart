@@ -61,9 +61,11 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   ];
 
   _onWillPop() {
+    print("object _onWillPop");
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape:  RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         contentPadding: const EdgeInsets.fromLTRB(20,10,20,0),
         actionsPadding: const EdgeInsets.fromLTRB(20,5,20,0),
         backgroundColor: MyColor.darkGrey01Color,
