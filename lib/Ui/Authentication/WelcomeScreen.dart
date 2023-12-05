@@ -27,13 +27,35 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     var height = MediaQuery.of(context).size.height;
 
     return Scaffold(
+
       body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
+                Visibility(
+                  visible: widget.isNew,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: const SizedBox(
+                        height: 25,
+                        width: 25,
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: MyColor.mainWhiteColor,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Spacer(),
 
                 // app logo
                 Image.asset(
@@ -177,7 +199,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     style: MyStyle.tx18RWhite,
                   ),
                 ),
-                SizedBox(height: height * 0.15)
+                SizedBox(height: height * 0.15),
+                Spacer(),
+
               ],
             ),
           )

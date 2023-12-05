@@ -481,7 +481,7 @@ class _WalletWithdrawDetailsState extends State<WalletWithdrawDetails> {
 
                     // Withdraw amount
                     TextFormField(
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       controller: priceController,
                       cursorColor: MyColor.greenColor,
                       style: MyStyle.tx18RWhite.copyWith(

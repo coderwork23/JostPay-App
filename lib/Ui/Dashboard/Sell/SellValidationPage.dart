@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Provider/BuySellProvider.dart';
@@ -167,6 +168,8 @@ class _SellValidationPageState extends State<SellValidationPage> {
                 ),
               ),
             ),
+
+            SizedBox(height: Platform.isIOS ? 10 : 5),
           ],
         ),
       ),

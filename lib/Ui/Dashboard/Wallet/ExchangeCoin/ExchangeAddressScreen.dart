@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:jost_pay_wallet/Provider/ExchangeProvider.dart';
@@ -75,64 +77,73 @@ class _ExchangeAddressScreenState extends State<ExchangeAddressScreen> {
     exchangeProvider = Provider.of<ExchangeProvider>(context,listen: true);
 
     return Scaffold(
-      bottomNavigationBar: !exchangeProvider.isAddressVerify
-          ?
-      exchangeProvider.verifyAddressLoading
-          ?
-      SizedBox(
-        height: 50,
-        child: Helper.dialogCall.showLoader(),
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(addressController.text.isNotEmpty) {
-            addressVerification(context);
-          }else{
-            Helper.dialogCall.showToast(context, "Please enter receive address");
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: addressController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
-          child:Text(
-            "Verify address",
-            style: MyStyle.tx18BWhite.copyWith(
-              color:  addressController.text.isEmpty ? MyColor.mainWhiteColor.withOpacity(0.4) : MyColor.mainWhiteColor,
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+
+          !exchangeProvider.isAddressVerify
+              ?
+          exchangeProvider.verifyAddressLoading
+              ?
+          SizedBox(
+            height: 50,
+            child: Helper.dialogCall.showLoader(),
+          )
+              :
+          InkWell(
+            onTap: () {
+              if(addressController.text.isNotEmpty) {
+                addressVerification(context);
+              }else{
+                Helper.dialogCall.showToast(context, "Please enter receive address");
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: addressController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
+              child:Text(
+                "Verify address",
+                style: MyStyle.tx18BWhite.copyWith(
+                  color:  addressController.text.isEmpty ? MyColor.mainWhiteColor.withOpacity(0.4) : MyColor.mainWhiteColor,
+                ),
+              ),
+            ),
+          )
+              :
+          exchangeProvider.createExLoading
+              ?
+          SizedBox(
+            height: 50,
+            child: Helper.dialogCall.showLoader(),
+          )
+              :
+          InkWell(
+            onTap: () {
+              if(exchangeProvider.isAddressVerify){
+                createExchange();
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: addressController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
+              child:Text(
+                "Start Exchange",
+                style: MyStyle.tx18BWhite.copyWith(
+                  color:  addressController.text.isEmpty ? MyColor.mainWhiteColor.withOpacity(0.4) : MyColor.mainWhiteColor,
+                ),
+              ),
             ),
           ),
-        ),
-      )
-          :
-      exchangeProvider.createExLoading
-          ?
-      SizedBox(
-        height: 50,
-        child: Helper.dialogCall.showLoader(),
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(exchangeProvider.isAddressVerify){
-            createExchange();
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: addressController.text.isEmpty ? MyStyle.invalidDecoration : MyStyle.buttonDecoration,
-          child:Text(
-            "Start Exchange",
-            style: MyStyle.tx18BWhite.copyWith(
-              color:  addressController.text.isEmpty ? MyColor.mainWhiteColor.withOpacity(0.4) : MyColor.mainWhiteColor,
-            ),
-          ),
-        ),
+
+          SizedBox(height: Platform.isIOS ? 10 : 5),
+
+        ],
       ),
 
       appBar: AppBar(

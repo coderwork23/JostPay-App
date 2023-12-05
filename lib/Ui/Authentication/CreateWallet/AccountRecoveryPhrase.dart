@@ -119,7 +119,7 @@ class _AccountRecoveryPhraseState extends State<AccountRecoveryPhrase> {
               ),
             ),
           ),
-          SizedBox(height: Platform.isIOS ? 15 : 5),
+          SizedBox(height: Platform.isIOS ? 10 : 5),
         ],
       ),
       appBar: AppBar(

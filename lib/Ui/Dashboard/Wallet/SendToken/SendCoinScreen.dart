@@ -166,8 +166,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     selectedAccount();
   }
 
-
-
   String sendGasPrice = "";
   String sendGas = "";
   String? sendNonce = "";
@@ -742,7 +740,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
   }
 
-
   String networkFees = "0";
   getWeb3NetWorkFees()async{
 
@@ -811,7 +808,6 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
 
   }
 
-
   showSendProcessingPage(BuildContext context){
     showModalBottomSheet(
       isScrollControlled: true,
@@ -856,127 +852,138 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
     transectionProvider = Provider.of<TransectionProvider>(context, listen: true);
     tokenProvider = Provider.of<TokenProvider>(context, listen: true);
 
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
+
     // print(networkList[0].toJson());
     return Scaffold(
 
-      bottomNavigationBar:isLoading == true
-          ?
-      const SizedBox(
-          height:52,
-          child: Center(
-              child: CircularProgressIndicator(
-                color: MyColor.greenColor,
+      bottomNavigationBar:Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          isLoading == true
+              ?
+          const SizedBox(
+              height:52,
+              child: Center(
+                  child: CircularProgressIndicator(
+                    color: MyColor.greenColor,
+                  )
               )
           )
-      )
-          :
-      isTxfees == 0
-          ?
-      InkWell(
-        onTap: () {
-          if(sendTokenId == ""
-              || sendTokenQuantity.text.isEmpty
-              || double.parse(sendTokenQuantity.text) == 0.0
-              || toController.text.isEmpty
-              || double.parse(sendTokenQuantity.text) == 0
-              || double.parse(sendTokenQuantity.text) < 0.00
-              || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-          ){
-
-          }else{
-            FocusScope.of(context).unfocus();
-            getNetworkFees();
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: MyStyle.buttonDecoration.copyWith(
-              color: sendTokenId == ""
+              :
+          isTxfees == 0
+              ?
+          InkWell(
+            onTap: () {
+              if(sendTokenId == ""
                   || sendTokenQuantity.text.isEmpty
                   || double.parse(sendTokenQuantity.text) == 0.0
                   || toController.text.isEmpty
                   || double.parse(sendTokenQuantity.text) == 0
                   || double.parse(sendTokenQuantity.text) < 0.00
                   || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                  ?
-              MyColor.boarderColor
-                  :
-              MyColor.greenColor
-          ),
-          child:  Text(
-            "Next",
-            style: MyStyle.tx18BWhite.copyWith(
-                color: sendTokenId == ""
-                    || sendTokenQuantity.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0.0
-                    || toController.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0
-                    || double.parse(sendTokenQuantity.text) < 0.00
-                    || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                    ?
-                MyColor.mainWhiteColor.withOpacity(0.4)
-                    :
-                MyColor.mainWhiteColor
-            ),
-          ),
-        ),
-      )
-          :
-      InkWell(
-        onTap: () {
-          if(sendTokenId == ""
-              || sendTokenQuantity.text.isEmpty
-              || double.parse(sendTokenQuantity.text) == 0.0
-              || double.parse(sendTokenQuantity.text) == 0
-              || double.parse(sendTokenQuantity.text) < 0.00
-              || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                  || toController.text.isEmpty
-          ){
+              ){
 
-            // print("object");
-          }else{
-            FocusScope.of(context).unfocus();
-            getNetworkFees();
-          }
-        },
-        child: Container(
-          alignment: Alignment.center,
-          height: 45,
-          margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: MyStyle.buttonDecoration.copyWith(
-              color: sendTokenId == ""
+              }else{
+                FocusScope.of(context).unfocus();
+                getNetworkFees();
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: MyStyle.buttonDecoration.copyWith(
+                  color: sendTokenId == ""
+                      || sendTokenQuantity.text.isEmpty
+                      || double.parse(sendTokenQuantity.text) == 0.0
+                      || toController.text.isEmpty
+                      || double.parse(sendTokenQuantity.text) == 0
+                      || double.parse(sendTokenQuantity.text) < 0.00
+                      || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
+                      ?
+                  MyColor.boarderColor
+                      :
+                  MyColor.greenColor
+              ),
+              child:  Text(
+                "Next",
+                style: MyStyle.tx18BWhite.copyWith(
+                    color: sendTokenId == ""
+                        || sendTokenQuantity.text.isEmpty
+                        || double.parse(sendTokenQuantity.text) == 0.0
+                        || toController.text.isEmpty
+                        || double.parse(sendTokenQuantity.text) == 0
+                        || double.parse(sendTokenQuantity.text) < 0.00
+                        || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
+                        ?
+                    MyColor.mainWhiteColor.withOpacity(0.4)
+                        :
+                    MyColor.mainWhiteColor
+                ),
+              ),
+            ),
+          )
+              :
+          InkWell(
+            onTap: () {
+              if(sendTokenId == ""
                   || sendTokenQuantity.text.isEmpty
                   || double.parse(sendTokenQuantity.text) == 0.0
-                  || toController.text.isEmpty
                   || double.parse(sendTokenQuantity.text) == 0
                   || double.parse(sendTokenQuantity.text) < 0.00
                   || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                  ?
-              MyColor.boarderColor
-                  :
-               MyColor.greenColor
-          ),
-          child:  Text(
-            "Next",
-            style: MyStyle.tx18BWhite.copyWith(
-                color: sendTokenId == ""
-                    || sendTokenQuantity.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0.0
-                    || toController.text.isEmpty
-                    || double.parse(sendTokenQuantity.text) == 0
-                    || double.parse(sendTokenQuantity.text) < 0.00
-                    || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
-                    ?
-                MyColor.mainWhiteColor.withOpacity(0.4)
-                    :
-                MyColor.mainWhiteColor
+                  || toController.text.isEmpty
+              ){
+
+                // print("object");
+              }else{
+                FocusScope.of(context).unfocus();
+                getNetworkFees();
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              height: 45,
+              margin: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: MyStyle.buttonDecoration.copyWith(
+                  color: sendTokenId == ""
+                      || sendTokenQuantity.text.isEmpty
+                      || double.parse(sendTokenQuantity.text) == 0.0
+                      || toController.text.isEmpty
+                      || double.parse(sendTokenQuantity.text) == 0
+                      || double.parse(sendTokenQuantity.text) < 0.00
+                      || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
+                      ?
+                  MyColor.boarderColor
+                      :
+                  MyColor.greenColor
+              ),
+              child:  Text(
+                "Next",
+                style: MyStyle.tx18BWhite.copyWith(
+                    color: sendTokenId == ""
+                        || sendTokenQuantity.text.isEmpty
+                        || double.parse(sendTokenQuantity.text) == 0.0
+                        || toController.text.isEmpty
+                        || double.parse(sendTokenQuantity.text) == 0
+                        || double.parse(sendTokenQuantity.text) < 0.00
+                        || double.parse(sendTokenBalance) <  double.parse(sendTokenQuantity.text)
+                        ?
+                    MyColor.mainWhiteColor.withOpacity(0.4)
+                        :
+                    MyColor.mainWhiteColor
+                ),
+              ),
             ),
           ),
-        ),
+
+          SizedBox(height: Platform.isIOS ? 10 : 5),
+
+        ],
       ),
 
       appBar: AppBar(
@@ -1000,185 +1007,198 @@ class _SendCoinScreenState extends State<SendCoinScreen> {
         ),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-
-           // to address
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Text(
-                "Recipient Address",
-                style: MyStyle.tx18RWhite.copyWith(
-                  fontSize: 16
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-
-            TextFormField(
-              controller: toController,
-              cursorColor: MyColor.greenColor,
-              style: MyStyle.tx18RWhite,
-              onChanged: (value) {
-                setState(() {});
-              },
-              decoration: MyStyle.textInputDecoration2.copyWith(
-                suffixIcon: SizedBox(
-                  width: 90,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      InkWell(
-                          onTap: () {
-                            FlutterClipboard.paste().then((value){
-                                toController.text = value;
-                            });
-                          },
-                          child: Center(
-                            child: Text(
-                              "Paste",
-                              textAlign: TextAlign.center,
-                              style: MyStyle.tx18BWhite.copyWith(
-                                  fontSize: 14,
-                                  color: MyColor.greenColor
-                              ),
-                            ),
-                          ),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () async {
-                          final value = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const QrScannerPage()
-                              )
-                          );
-
-                          if(value != null ){
-                            setState(() {
-                              toController.text = value;
-                            });
-                          }
-
-
-                        },
-                        child: Image.asset(
-                          "assets/images/dashboard/scan.png",
-                          height: 25,
-                          width: 25,
-                          color: MyColor.greenColor,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                    ],
-                  ),
-                )
-              ),
-            ),
-            const SizedBox(height: 15),
-
-
-
-            //Amount text or Available Balance
-            Row(
+      body: SizedBox(
+        height: height,
+        width: width,
+        child: GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          onTap: () {
+            FocusScopeNode currentFocus = FocusScope.of(context);
+            if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+              FocusManager.instance.primaryFocus!.unfocus();
+            }
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 20),
+
+               // to address
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
-                    "Amount",
+                    "Recipient Address",
                     style: MyStyle.tx18RWhite.copyWith(
-                        fontSize: 16
+                      fontSize: 16
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
 
-                Flexible(
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Text(
 
-                      sendTokenBalance == "0"
-                          ?
-                      "Available: 0.0 $sendTokenSymbol"
-                          :
-                      widget.sendTokenType != ""
-                          ?
-                      "Available: ${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol (${widget.sendTokenType})"
-                          :
-                      "Available: ${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol",
-                      style:MyStyle.tx18RWhite.copyWith(
-                          fontSize: 14,
-                          color: MyColor.grey01Color
+                TextFormField(
+                  controller: toController,
+                  cursorColor: MyColor.greenColor,
+                  style: MyStyle.tx18RWhite,
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  decoration: MyStyle.textInputDecoration2.copyWith(
+                    suffixIcon: SizedBox(
+                      width: 90,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          InkWell(
+                              onTap: () {
+                                FlutterClipboard.paste().then((value){
+                                    toController.text = value;
+                                });
+                              },
+                              child: Center(
+                                child: Text(
+                                  "Paste",
+                                  textAlign: TextAlign.center,
+                                  style: MyStyle.tx18BWhite.copyWith(
+                                      fontSize: 14,
+                                      color: MyColor.greenColor
+                                  ),
+                                ),
+                              ),
+                          ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () async {
+                              final value = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const QrScannerPage()
+                                  )
+                              );
+
+                              if(value != null ){
+                                setState(() {
+                                  toController.text = value;
+                                });
+                              }
+
+
+                            },
+                            child: Image.asset(
+                              "assets/images/dashboard/scan.png",
+                              height: 25,
+                              width: 25,
+                              color: MyColor.greenColor,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                        ],
                       ),
-                    ),
+                    )
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
+                const SizedBox(height: 15),
 
 
-            // Amount
-            TextFormField(
-              keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
-              controller: sendTokenQuantity,
-              textInputAction: TextInputAction.done,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
-              ],
-              onChanged: (value) {
-                setState(() {});
-              },
-              cursorColor: MyColor.greenColor,
-              style: MyStyle.tx18RWhite,
-              decoration: MyStyle.textInputDecoration2.copyWith(
-                isDense: false,
-                contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
-                suffixIcon: InkWell(
-                  onTap: () {
-                    if(toController.text.isNotEmpty){
-                      getWeb3NetWorkFees();
-                    }
-                  },
-                  child: SizedBox(
-                    width: 60,
-                    child: Center(
+
+                //Amount text or Available Balance
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
-                        "Max",
-                        textAlign: TextAlign.center,
-                        style: MyStyle.tx18BWhite.copyWith(
-                          fontSize: 14,
-                          color: MyColor.greenColor
+                        "Amount",
+                        style: MyStyle.tx18RWhite.copyWith(
+                            fontSize: 16
                         ),
                       ),
                     ),
+                    const SizedBox(height: 8),
+
+                    Flexible(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Text(
+
+                          sendTokenBalance == "0"
+                              ?
+                          "Available: 0.0 $sendTokenSymbol"
+                              :
+                          widget.sendTokenType != ""
+                              ?
+                          "Available: ${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol (${widget.sendTokenType})"
+                              :
+                          "Available: ${ApiHandler.showFiveBalance(sendTokenBalance)} $sendTokenSymbol",
+                          style:MyStyle.tx18RWhite.copyWith(
+                              fontSize: 14,
+                              color: MyColor.grey01Color
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+
+                // Amount
+                TextFormField(
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  controller: sendTokenQuantity,
+                  textInputAction: TextInputAction.done,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  cursorColor: MyColor.greenColor,
+                  style: MyStyle.tx18RWhite,
+                  decoration: MyStyle.textInputDecoration2.copyWith(
+                    isDense: false,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
+                    suffixIcon: InkWell(
+                      onTap: () {
+                        if(toController.text.isNotEmpty){
+                          getWeb3NetWorkFees();
+                        }
+                      },
+                      child: SizedBox(
+                        width: 60,
+                        child: Center(
+                          child: Text(
+                            "Max",
+                            textAlign: TextAlign.center,
+                            style: MyStyle.tx18BWhite.copyWith(
+                              fontSize: 14,
+                              color: MyColor.greenColor
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
                   ),
-                )
-              ),
+                ),
+                const SizedBox(height: 8),
+
+
+                // usd amount
+                Text(
+                  "= ${(double.parse(sendTokenQuantity.text.isNotEmpty ?sendTokenQuantity.text : "0") * double.parse(sendTokenUsd)).toStringAsFixed(2)} \$",
+                  style:MyStyle.tx18RWhite.copyWith(
+                      fontSize: 14,
+                      color: MyColor.grey01Color
+                  ),
+                ),
+
+                // const SizedBox(height: 30),
+              ],
             ),
-            const SizedBox(height: 8),
-
-
-            // usd amount
-            Text(
-              "= ${(double.parse(sendTokenQuantity.text.isNotEmpty ?sendTokenQuantity.text : "0") * double.parse(sendTokenUsd)).toStringAsFixed(2)} \$",
-              style:MyStyle.tx18RWhite.copyWith(
-                  fontSize: 14,
-                  color: MyColor.grey01Color
-              ),
-            ),
-
-            // const SizedBox(height: 30),
-          ],
+          ),
         ),
       ),
 

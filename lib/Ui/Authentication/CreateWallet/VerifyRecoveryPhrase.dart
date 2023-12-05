@@ -353,7 +353,7 @@ class _VerifyRecoveryPhraseState extends State<VerifyRecoveryPhrase> {
             ),
           ),
 
-          SizedBox(height: Platform.isIOS ? 15 : 5),
+          SizedBox(height: Platform.isIOS ? 10 : 5),
         ],
       ),
       appBar: AppBar(
